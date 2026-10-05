@@ -7,6 +7,7 @@ import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ProductsNavigator } from './ProductsNavigator';
 import { TarajuScreen } from '../screens/taraju/TarajuScreen';
 import { PurchaseNavigator } from './PurchaseNavigator';
+import { MarketingScreen } from '../screens/marketing/MarketingScreen';
 import { colors } from '../theme';
 
 export type MainTabParamList = {
@@ -15,6 +16,7 @@ export type MainTabParamList = {
   Bills: undefined;
   Purchases: undefined;
   Taraju: undefined;
+  Marketing: undefined;
   Profile: undefined;
 };
 
@@ -98,6 +100,16 @@ export const MainTabNavigator: React.FC<{
           tabBarLabel: 'Wholesale',
           tabBarIcon: ({ color, focused }) => (
             <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🚚</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Marketing"
+        component={MarketingScreen}
+        options={{
+          tabBarLabel: 'Marketing',
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>📲</Text>
           ),
         }}
       />
