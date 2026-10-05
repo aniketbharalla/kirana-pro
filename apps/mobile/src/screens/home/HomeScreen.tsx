@@ -134,6 +134,35 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* Business Intelligence & Smart Procurement Banners */}
+        <View style={styles.promoRow}>
+          <TouchableOpacity
+            style={[styles.promoCard, { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' }]}
+            activeOpacity={0.88}
+            onPress={() => navigation.navigate('Bills', { screen: 'Analytics' })}
+          >
+            <Text style={styles.promoEmoji}>📊</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.promoTitle, { color: '#065F46' }]}>Dukaan Profit & GST</Text>
+              <Text style={styles.promoSub}>Daily sales, net margins & CA tax report</Text>
+            </View>
+            <Text style={styles.promoArrow}>➔</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.promoCard, { backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }]}
+            activeOpacity={0.88}
+            onPress={() => navigation.navigate('Purchases', { screen: 'SmartReorder' })}
+          >
+            <Text style={styles.promoEmoji}>⚡</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.promoTitle, { color: '#1E40AF' }]}>Smart AI Reorder</Text>
+              <Text style={styles.promoSub}>Burn velocity & 1-tap WhatsApp order</Text>
+            </View>
+            <Text style={styles.promoArrow}>➔</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Stock & Store Overview Stats */}
         <Text style={styles.sectionTitle}>Store Inventory</Text>
         <View style={styles.statsGrid}>
@@ -151,7 +180,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             icon="⚠️"
             color={colors.accent}
             subtext="Needs restock"
-            onPress={handleGoToProducts}
+            onPress={() => navigation.navigate('Purchases', { screen: 'SmartReorder' })}
           />
           <StatCard
             title="Out of Stock"
@@ -294,7 +323,37 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  promoRow: {
+    flexDirection: 'column',
+    gap: 8,
+    marginBottom: 20,
+  },
+  promoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 12,
+  },
+  promoEmoji: {
+    fontSize: 24,
+  },
+  promoTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  promoSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  promoArrow: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#94A3B8',
   },
   actionBtn: {
     alignItems: 'center',

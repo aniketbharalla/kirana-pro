@@ -6,6 +6,7 @@ import { CreatePurchaseScreen } from '../screens/purchase/CreatePurchaseScreen';
 import { ScanInvoiceScreen } from '../screens/purchase/ScanInvoiceScreen';
 import { ReviewInvoiceScreen } from '../screens/purchase/ReviewInvoiceScreen';
 import { SupplierDetailScreen } from '../screens/purchase/SupplierDetailScreen';
+import { SmartReorderScreen } from '../screens/procurement/SmartReorderScreen';
 import { colors } from '../theme';
 
 const Stack = createNativeStackNavigator();
@@ -53,6 +54,11 @@ export const PurchaseNavigator = () => {
         name="SupplierDetail"
         component={SupplierDetailScreen}
         options={{ title: 'Vendor Ledger & Khata' }}
+      />
+      <Stack.Screen
+        name="SmartReorder"
+        component={SmartReorderScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

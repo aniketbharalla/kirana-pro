@@ -8,6 +8,8 @@ import { CheckoutModal } from '../components/bills/CheckoutModal';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { KhataScreen } from '../screens/khata/KhataScreen';
 import { CustomerDetailScreen } from '../screens/khata/CustomerDetailScreen';
+import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
+import { SmartReorderScreen } from '../screens/procurement/SmartReorderScreen';
 import { CustomerKhata, Invoice } from '@kirana-pro/shared';
 
 export type BillsStackParamList = {
@@ -16,6 +18,8 @@ export type BillsStackParamList = {
   BillsHistory: undefined;
   Khata: undefined;
   CustomerDetail: { customer: CustomerKhata };
+  Analytics: undefined;
+  SmartReorder: undefined;
 };
 
 const Stack = createNativeStackNavigator<BillsStackParamList>();
@@ -55,7 +59,13 @@ export const BillsNavigator: React.FC = () => {
         options={({ navigation }) => ({
           title: 'Kirana POS',
           headerRight: () => (
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <TouchableOpacity
+                style={styles.historyBtn}
+                onPress={() => navigation.navigate('Analytics')}
+              >
+                <Text style={styles.historyBtnText}>📊 Profit</Text>
+              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.historyBtn}
                 onPress={() => navigation.navigate('Khata')}
@@ -66,7 +76,7 @@ export const BillsNavigator: React.FC = () => {
                 style={styles.historyBtn}
                 onPress={() => navigation.navigate('BillsHistory')}
               >
-                <Text style={styles.historyBtnText}>📜 History</Text>
+                <Text style={styles.historyBtnText}>📜 Bills</Text>
               </TouchableOpacity>
             </View>
           ),
@@ -102,6 +112,22 @@ export const BillsNavigator: React.FC = () => {
         options={{
           title: 'Customer Ledger',
           headerBackTitle: 'Khata',
+        }}
+      />
+      <Stack.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{
+          title: 'Dukaan Profit & Reports',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SmartReorder"
+        component={SmartReorderScreen}
+        options={{
+          title: 'Smart Reorder',
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
