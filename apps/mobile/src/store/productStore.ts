@@ -7,7 +7,7 @@ export const DEFAULT_STARTER_PRODUCTS: Product[] = [
     storeId: 'demo_store_1',
     name: 'Aashirvaad Shudh Chakki Atta 5kg',
     nameHindi: 'आशीर्वाद चक्की आटा',
-    category: 'atta-flour',
+    category: 'atta_flour',
     barcode: '8901030000001',
     purchasePrice: 220,
     sellingPrice: 250,
@@ -27,7 +27,7 @@ export const DEFAULT_STARTER_PRODUCTS: Product[] = [
     storeId: 'demo_store_1',
     name: 'Tata Salt Vacuum Evaporated 1kg',
     nameHindi: 'टाटा नमक',
-    category: 'spices-masala',
+    category: 'spices_masala',
     barcode: '8901030000002',
     purchasePrice: 22,
     sellingPrice: 28,
@@ -47,7 +47,7 @@ export const DEFAULT_STARTER_PRODUCTS: Product[] = [
     storeId: 'demo_store_1',
     name: 'Loose Basmati Chawal (Premium)',
     nameHindi: 'खुला बासमती चावल',
-    category: 'rice',
+    category: 'rice_grains',
     barcode: null,
     purchasePrice: 40,
     sellingPrice: 50,
@@ -67,7 +67,7 @@ export const DEFAULT_STARTER_PRODUCTS: Product[] = [
     storeId: 'demo_store_1',
     name: 'Loose Shakar Cheeni (Pure Sugar)',
     nameHindi: 'खुली शक्कर चीनी',
-    category: 'sugar-jaggery',
+    category: 'sugar_jaggery',
     barcode: null,
     purchasePrice: 36,
     sellingPrice: 42,
@@ -87,7 +87,7 @@ export const DEFAULT_STARTER_PRODUCTS: Product[] = [
     storeId: 'demo_store_1',
     name: 'Maggi 2-Minute Masala Noodles 70g',
     nameHindi: 'मैगी नूडल्स',
-    category: 'snacks-namkeen',
+    category: 'snacks_namkeen',
     barcode: '8901058852331',
     purchasePrice: 11.5,
     sellingPrice: 14,
@@ -107,7 +107,7 @@ export const DEFAULT_STARTER_PRODUCTS: Product[] = [
     storeId: 'demo_store_1',
     name: 'Fortune Sunlite Refined Sunflower Oil 1L',
     nameHindi: 'फॉर्च्यून रिफाइंड तेल',
-    category: 'oil-ghee',
+    category: 'oil_ghee',
     barcode: '8906007281014',
     purchasePrice: 128,
     sellingPrice: 145,
@@ -171,9 +171,17 @@ export const useProductStore = create<ProductState>((set, get) => ({
     return products.filter((p) => {
       if (p.isActive === false) return false;
 
-      // Category filter
-      if (selectedCategory && p.category !== selectedCategory) {
-        return false;
+      // Category filter with hyphen/underscore tolerance
+      if (selectedCategory) {
+        const normSelected = selectedCategory.replace(/-/g, '_').toLowerCase();
+        const normProductCat = (p.category || '').replace(/-/g, '_').toLowerCase();
+        if (
+          normProductCat !== normSelected &&
+          !normProductCat.includes(normSelected) &&
+          !normSelected.includes(normProductCat)
+        ) {
+          return false;
+        }
       }
 
       // Search query filter (matches name or barcode)

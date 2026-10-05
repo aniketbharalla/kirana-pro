@@ -16,6 +16,7 @@ import { useProductStore } from '../../store/productStore';
 import { useAuthStore } from '../../store/authStore';
 import { CartItemList } from '../../components/bills/CartItemList';
 import { QuickItemPicker } from '../../components/bills/QuickItemPicker';
+import { POSBarcodeScannerModal } from '../../components/bills/POSBarcodeScannerModal';
 import { Product } from '@kirana-pro/shared';
 
 export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpenCheckout }) => {
@@ -33,6 +34,7 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [scannerModalVisible, setScannerModalVisible] = useState(false);
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -59,7 +61,7 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
   };
 
   const handleScanBarcode = () => {
-    navigation.navigate('ProductsTab', { screen: 'BarcodeScanner' });
+    setScannerModalVisible(true);
   };
 
   return (
@@ -184,6 +186,12 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
           </TouchableOpacity>
         </View>
       )}
+
+      {/* POS Barcode Scanner Modal */}
+      <POSBarcodeScannerModal
+        visible={scannerModalVisible}
+        onClose={() => setScannerModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };
