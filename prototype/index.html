@@ -9,22 +9,401 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #F97316;
-      --primary-dark: #C2410C;
-      --primary-light: #FFEDD5;
-      --secondary: #10B981;
-      --secondary-dark: #047857;
-      --accent: #0284C7;
+      --primary: #10B981;
+      --primary-dark: #059669;
+      --primary-light: #ECFDF5;
+      --accent-warm: #F59E0B;
+      --accent-warm-light: #FEF3C7;
       --dark: #0F172A;
       --surface: #FFFFFF;
       --surface-subtle: #F8FAFC;
-      --border: #E2E8F0;
-      --text-main: #1E293B;
+      --border: #F1F5F9;
+      --border-subtle: #E2E8F0;
+      --text-main: #0F172A;
       --text-muted: #64748B;
       --danger: #EF4444;
-      --radius: 16px;
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-      --shadow-lg: 0 20px 35px -8px rgba(249, 115, 22, 0.15);
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 28px;
+      --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+      --shadow-floating: 0 20px 40px -8px rgba(16, 185, 129, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, sans-serif;
+    }
+
+    body {
+      background: #0B0F17;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Control Banner */
+    .top-bar {
+      background: #151D2A;
+      border-bottom: 1px solid #1E293B;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .view-toggles {
+      display: flex;
+      background: #0F172A;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      gap: 4px;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-btn.active {
+      background: #10B981;
+      color: white;
+    }
+
+    .lang-btn {
+      background: #1E293B;
+      color: #CBD5E1;
+      border: 1px solid #334155;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Main Workspace */
+    .workspace {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    /* Mobile Prototype Frame */
+    .mobile-frame-wrapper {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      max-width: 1200px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .phone-mockup {
+      width: 410px;
+      height: 850px;
+      background: #F8FAFC;
+      border-radius: 46px;
+      border: 10px solid #1E293B;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .phone-notch {
+      height: 28px;
+      background: #1E293B;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      color: #94A3B8;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .screen-container {
+      flex: 1;
+      overflow-y: auto;
+      background: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 75px;
+    }
+
+    /* Modern Dribbble Top Bar */
+    .dribbble-header {
+      background: transparent;
+      padding: 18px 20px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-profile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .store-badge-group h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-pill {
+      background: #DCFCE7;
+      color: #166534;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Modern Dribbble Search Bar */
+    .dribbble-search {
+      padding: 6px 20px 12px;
+    }
+
+    .search-box-inner {
+      background: white;
+      border: 1px solid #E2E8F0;
+      border-radius: 24px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .search-box-inner input {
+      border: none;
+      outline: none;
+      font-size: 14px;
+      color: #0F172A;
+      flex: 1;
+      background: transparent;
+    }
+
+    .camera-scan-btn {
+      background: #F1F5F9;
+      border: none;
+      color: #475569;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .camera-scan-btn:hover {
+      background: #10B981;
+      color: white;
+    }
+
+    /* Category Pill Carousel */
+    .category-pills-row {
+      display: flex;
+      gap: 8px;
+      padding: 4px 20px 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .category-pills-row::-webkit-scrollbar { display: none; }
+
+    .cat-pill {
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .cat-pill.p-green { background: #DCFCE7; color: #166534; }
+    .cat-pill.p-orange { background: #FFEDD5; color: #9A3412; }
+    .cat-pill.p-blue { background: #E0F2FE; color: #075985; }
+    .cat-pill.p-yellow { background: #FEF08A; color: #854D0E; }
+    .cat-pill.p-red { background: #FFE4E6; color: #9F1239; }
+    .cat-pill.active { border-color: #0F172A; transform: scale(1.03); }
+
+    /* 2-Column Product Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 20px;
+    }
+
+    .modern-product-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .modern-product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px -5px rgba(0,0,0,0.06);
+    }
+
+    .prod-img-box {
+      width: 100%;
+      height: 110px;
+      background: #F8FAFC;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .prod-stock-tag {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(255,255,255,0.9);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 800;
+      color: #10B981;
+    }
+
+    .modern-product-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .prod-unit-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .prod-card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+
+    .prod-price {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0F172A;
+    }
+
+    .btn-add-floating {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: #10B981;
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-add-floating:hover {
+      background: #059669;
+      transform: scale(1.08);
+    }
+
+    /* Floating Glassmorphic Bottom Navigation Bar */
+    .floating-bottom-nav {
+      position: absolute;
+      bottom: 14px;
+      left: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 28px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 8px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      z-index: 20;
     }
 
     * {
@@ -735,61 +1114,146 @@
           <span>5G • 100%</span>
         </div>
 
-        <div class="mobile-header">
-          <div class="store-info">
-            <h3 id="txt-store-name">Sharma Kirana Store</h3>
-            <p id="txt-store-sub">Sector 14, Gurugram • Chacha ki Dukaan</p>
+        <!-- Modern Dribbble Top Bar -->
+        <div class="dribbble-header">
+          <div class="user-profile-header">
+            <div class="avatar-circle">👨🏽‍💼</div>
+            <div class="store-badge-group">
+              <h3 id="txt-store-name">Sharma Kirana <span class="status-pill">ACTIVE</span></h3>
+              <p id="txt-store-sub" style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Sec 14, Gurugram • Chacha ki Dukaan</p>
+            </div>
           </div>
-          <div class="online-chip">
+          <div class="online-chip" style="box-shadow: var(--shadow-subtle);">
             <div class="online-dot"></div>
-            <span>Auto-Sync</span>
+            <span>Cloud Sync</span>
+          </div>
+        </div>
+
+        <!-- Modern Dribbble Search Bar -->
+        <div class="dribbble-search">
+          <div class="search-box-inner">
+            <span style="font-size: 15px; color: #94A3B8; margin-right: 8px;">🔍</span>
+            <input type="text" id="global-search-input" placeholder="Search oil, dal, atta, biscuits..." />
+            <button class="camera-scan-btn" onclick="openBarcodeScannerModal()">
+              <span>📷</span>
+              <span>Scan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pastel Category Pills Carousel -->
+        <div class="category-pills-row">
+          <div class="cat-pill p-green active" onclick="filterCategory(this, 'all')">
+            <span>🛒</span> <span>All Items</span>
+          </div>
+          <div class="cat-pill p-orange" onclick="filterCategory(this, 'grains')">
+            <span>🌾</span> <span>Grains & Dal</span>
+          </div>
+          <div class="cat-pill p-blue" onclick="filterCategory(this, 'oils')">
+            <span>🛢️</span> <span>Oils & Ghee</span>
+          </div>
+          <div class="cat-pill p-yellow" onclick="filterCategory(this, 'dairy')">
+            <span>🥛</span> <span>Dairy & Milk</span>
+          </div>
+          <div class="cat-pill p-red" onclick="filterCategory(this, 'spices')">
+            <span>🌶️</span> <span>Spices & Salt</span>
+          </div>
+          <div class="cat-pill p-orange" onclick="filterCategory(this, 'snacks')">
+            <span>🍪</span> <span>Biscuits & Snacks</span>
           </div>
         </div>
 
         <div class="screen-container">
           
-          <!-- Screen 1: Home Dashboard -->
-          <div class="screen" id="screen-home">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
-              <div style="background: white; border: 1px solid var(--border); padding: 14px; border-radius: 14px;">
-                <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">TODAY'S SALE</div>
-                <div style="font-size: 22px; font-weight: 800; color: #0F172A; margin-top: 4px;">₹14,250</div>
-                <div style="font-size: 11px; color: #10B981; font-weight: 600;">↑ 24 Bills today</div>
+          <!-- Screen 1: Modern Dribbble Home & Product Feed -->
+          <div class="screen active" id="screen-home">
+            <!-- Modern 2-Column Product Grid -->
+            <div class="product-grid" id="home-product-grid">
+              
+              <!-- Card 1 -->
+              <div class="modern-product-card">
+                <div class="prod-img-box" style="background: #FFF7ED;">
+                  <span class="prod-stock-tag">18 in stock</span>
+                  <span>🛢️</span>
+                </div>
+                <h4>Saffola Gold Oil</h4>
+                <div class="prod-unit-sub">1 Litre Pouch • MRP ₹160</div>
+                <div class="prod-card-bottom">
+                  <div class="prod-price">₹145</div>
+                  <button class="btn-add-floating" onclick="quickAddProductToCart('Saffola Gold Oil (1L)', 145)">+</button>
+                </div>
               </div>
-              <div style="background: #FEF2F2; border: 1px solid #FEE2E2; padding: 14px; border-radius: 14px;">
-                <div style="font-size: 11px; color: #991B1B; font-weight: 600;">KHATA DUE</div>
-                <div style="font-size: 22px; font-weight: 800; color: #B91C1C; margin-top: 4px;">₹3,450</div>
-                <div style="font-size: 11px; color: #DC2626; font-weight: 600;">5 Overdue customers</div>
-              </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-              <button onclick="navTo('taraju')" style="background: #FFF7ED; border: 1.5px solid #FDBA74; padding: 14px; border-radius: 14px; text-align: left; cursor: pointer;">
-                <div style="font-size: 26px;">⚖️</div>
-                <div style="font-size: 14px; font-weight: 700; color: #C2410C; margin-top: 4px;">Taraju Scale</div>
-                <div style="font-size: 11px; color: #9A3412;">Price-to-Weight calc</div>
-              </button>
-              <button onclick="navTo('billing')" style="background: #ECFDF5; border: 1.5px solid #A7F3D0; padding: 14px; border-radius: 14px; text-align: left; cursor: pointer;">
-                <div style="font-size: 26px;">🧾</div>
-                <div style="font-size: 14px; font-weight: 700; color: #065F46; margin-top: 4px;">Quick POS Bill</div>
-                <div style="font-size: 11px; color: #047857;">Generate invoice</div>
-              </button>
-            </div>
+              <!-- Card 2 (Taraju Enabled) -->
+              <div class="modern-product-card" style="border: 1.5px solid #FDBA74;">
+                <div class="prod-img-box" style="background: #FEF3C7;">
+                  <span class="prod-stock-tag" style="color: #C2410C;">Taraju ⚖️</span>
+                  <span>🌾</span>
+                </div>
+                <h4>Fortune Basmati Rice</h4>
+                <div class="prod-unit-sub">Loose per Kg • ₹50/kg</div>
+                <div class="prod-card-bottom">
+                  <div class="prod-price">₹50<span style="font-size: 11px; color: #64748B;">/kg</span></div>
+                  <button class="btn-add-floating" style="background: #F97316;" onclick="navTo('taraju')">⚖️</button>
+                </div>
+              </div>
 
-            <h4 style="font-size: 13px; text-transform: uppercase; color: #64748B; margin-bottom: 8px;">Quick Stock Status</h4>
-            <div style="background: white; border: 1px solid var(--border); border-radius: 14px; padding: 12px;">
-              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px;">
-                <span>India Gate Basmati Rice</span>
-                <span style="font-weight: 700; color: #10B981;">38 kg left</span>
+              <!-- Card 3 -->
+              <div class="modern-product-card">
+                <div class="prod-img-box" style="background: #FEF9C3;">
+                  <span class="prod-stock-tag">30 in stock</span>
+                  <span>🧈</span>
+                </div>
+                <h4>Amul Butter</h4>
+                <div class="prod-unit-sub">500g Pack • Dairy</div>
+                <div class="prod-card-bottom">
+                  <div class="prod-price">₹260</div>
+                  <button class="btn-add-floating" onclick="quickAddProductToCart('Amul Butter (500g)', 260)">+</button>
+                </div>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px;">
-                <span>Toor Dal Special</span>
-                <span style="font-weight: 700; color: #F59E0B;">4 kg (Low!)</span>
+
+              <!-- Card 4 (Taraju Enabled) -->
+              <div class="modern-product-card" style="border: 1.5px solid #FDBA74;">
+                <div class="prod-img-box" style="background: #ECFDF5;">
+                  <span class="prod-stock-tag" style="color: #C2410C;">Taraju ⚖️</span>
+                  <span>🥣</span>
+                </div>
+                <h4>Tata Sampann Toor Dal</h4>
+                <div class="prod-unit-sub">Loose per Kg • ₹135/kg</div>
+                <div class="prod-card-bottom">
+                  <div class="prod-price">₹135<span style="font-size: 11px; color: #64748B;">/kg</span></div>
+                  <button class="btn-add-floating" style="background: #F97316;" onclick="navTo('taraju')">⚖️</button>
+                </div>
               </div>
-              <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px;">
-                <span>Tata Salt (1kg)</span>
-                <span style="font-weight: 700; color: #EF4444;">0 pkts (Out!)</span>
+
+              <!-- Card 5 -->
+              <div class="modern-product-card">
+                <div class="prod-img-box" style="background: #FEE2E2;">
+                  <span class="prod-stock-tag">12 in stock</span>
+                  <span>☕</span>
+                </div>
+                <h4>Brooke Bond Red Label</h4>
+                <div class="prod-unit-sub">500g Carton • Tea</div>
+                <div class="prod-card-bottom">
+                  <div class="prod-price">₹310</div>
+                  <button class="btn-add-floating" onclick="quickAddProductToCart('Red Label Tea (500g)', 310)">+</button>
+                </div>
               </div>
+
+              <!-- Card 6 -->
+              <div class="modern-product-card">
+                <div class="prod-img-box" style="background: #E0F2FE;">
+                  <span class="prod-stock-tag">45 in stock</span>
+                  <span>🥔</span>
+                </div>
+                <h4>Lay's Classic Salted</h4>
+                <div class="prod-unit-sub">₹20 Pack • Chips</div>
+                <div class="prod-card-bottom">
+                  <div class="prod-price">₹20</div>
+                  <button class="btn-add-floating" onclick="quickAddProductToCart('Lays Classic Salted (Pack)', 20)">+</button>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -998,23 +1462,23 @@
 
         </div>
 
-        <!-- Phone Bottom Navigation -->
-        <nav class="bottom-nav">
-          <button class="nav-item" id="nav-btn-home" onclick="navTo('home')">
+        <!-- Phone Floating Glassmorphic Bottom Navigation -->
+        <nav class="floating-bottom-nav">
+          <button class="nav-item active" id="nav-btn-home" onclick="navTo('home')">
             <span class="icon">🏠</span>
             <span>Home</span>
           </button>
-          <button class="nav-item" id="nav-btn-products" onclick="navTo('products')">
-            <span class="icon">📦</span>
-            <span>Products</span>
-          </button>
-          <button class="nav-item active" id="nav-btn-taraju" onclick="navTo('taraju')">
+          <button class="nav-item" id="nav-btn-taraju" onclick="navTo('taraju')">
             <span class="icon">⚖️</span>
             <span>Taraju</span>
           </button>
           <button class="nav-item" id="nav-btn-billing" onclick="navTo('billing')">
             <span class="icon">🧾</span>
             <span>Billing</span>
+          </button>
+          <button class="nav-item" id="nav-btn-products" onclick="navTo('products')">
+            <span class="icon">📦</span>
+            <span>Inventory</span>
           </button>
         </nav>
       </div>
@@ -1473,6 +1937,23 @@
       renderCatalog();
       closeBarcodeScannerModal();
       showToast(`🎉 Added "${newItem.name}" to store with ${newItem.stock} stock!`);
+    }
+
+    function quickAddProductToCart(name, price) {
+      billItems.push({
+        name: name,
+        qty: "1 pc",
+        rate: `₹${price.toFixed(2)}`,
+        price: price
+      });
+      renderBill();
+      showToast(`🛒 Added ${name} (₹${price}) to Bill!`);
+    }
+
+    function filterCategory(el, cat) {
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      showToast(`Filter: ${el.innerText.trim()}`);
     }
 
     // Initialize
