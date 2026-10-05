@@ -106,7 +106,14 @@ export const StoreSetupScreen: React.FC = () => {
       );
     } catch (err: any) {
       console.error('Store creation error:', err);
-      setErrorMsg(err.message || 'Failed to create store. Please try again.');
+      let msg = err.message || 'Failed to create store. Please try again.';
+      try {
+        const parsed = JSON.parse(err.message);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].message) {
+          msg = `${parsed[0].path?.join('.') || 'Error'}: ${parsed[0].message}`;
+        }
+      } catch {}
+      setErrorMsg(msg);
       setLoading(false);
     }
   };

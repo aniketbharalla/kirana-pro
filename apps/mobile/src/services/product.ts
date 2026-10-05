@@ -22,6 +22,7 @@ export const addProduct = async (
 ): Promise<Product> => {
   // Validate schema
   productSchema.parse({
+    storeId,
     name: data.name,
     nameHindi: data.nameHindi,
     category: data.category,

@@ -33,6 +33,7 @@ export const createStore = async (
     customType: storeData.customType,
     address: storeData.address,
     gstNumber: storeData.gstNumber,
+    ownerId,
   });
 
   const db = getFirestoreDb();
