@@ -1,10 +1,12 @@
-import React from 'react';
-import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
+import { DailyGallaScreen } from '../galla/DailyGallaScreen';
 import { colors } from '../../theme';
 
 export const ProfileScreen: React.FC = () => {
   const { user, clearUser } = useAuthStore();
+  const [showGallaModal, setShowGallaModal] = useState(false);
 
   const handleSignOut = () => {
     clearUser();
@@ -62,9 +64,45 @@ export const ProfileScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Store Tools & Galla */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionHeader}>Dukaan Tools & Galla</Text>
+          <TouchableOpacity
+            style={styles.gallaTile}
+            onPress={() => setShowGallaModal(true)}
+          >
+            <View style={styles.gallaIconBg}>
+              <Text style={{ fontSize: 24 }}>💰</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.gallaTileTitle}>Daily Galla (दैनिक गल्ला)</Text>
+              <Text style={styles.gallaTileSubtitle}>
+                Morning cash opening & night drawer closing settlement
+              </Text>
+            </View>
+            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Modal for Daily Galla */}
+        {showGallaModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Daily Galla Settlement</Text>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setShowGallaModal(false)}
+              >
+                <Text style={styles.modalCloseText}>✕ Close</Text>
+              </TouchableOpacity>
+            </View>
+            <DailyGallaScreen />
+          </View>
+        )}
+
         {/* App Version Info */}
         <View style={styles.appInfo}>
-          <Text style={styles.versionText}>Kirana Pro v1.0.0 (Phase 1)</Text>
+          <Text style={styles.versionText}>Kirana Pro v3.0.0 (Phase 3)</Text>
           <Text style={styles.copyrightText}>Designed for Indian Kirana Dukaan Owners</Text>
         </View>
 
@@ -229,5 +267,61 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     fontSize: 15,
     fontWeight: '700',
+  },
+  gallaTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  gallaIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gallaTileTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  gallaTileSubtitle: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  modalOverlay: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 16,
+    marginBottom: 16,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.divider,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: colors.text,
+  },
+  modalCloseBtn: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  modalCloseText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.textSecondary,
   },
 });
