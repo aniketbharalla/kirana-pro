@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../store/authStore';
+import { useProductStore } from '../../store/productStore';
 import { StatCard } from '../../components/common/StatCard';
 import { colors } from '../../theme';
 
@@ -26,6 +27,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
   const navigation = useNavigation<any>();
   const { user } = useAuthStore();
+  const { products, getLowStockProducts, getLooseProducts } = useProductStore();
 
   const handleGoToProducts = () => {
     if (onNavigateToProducts) onNavigateToProducts();
@@ -137,7 +139,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <View style={styles.statsGrid}>
           <StatCard
             title="Total Items"
-            value="120"
+            value={products.length}
             icon="📦"
             color={colors.primary}
             subtext="In active catalog"
@@ -145,7 +147,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           />
           <StatCard
             title="Low Stock"
-            value="4"
+            value={getLowStockProducts().length}
             icon="⚠️"
             color={colors.accent}
             subtext="Needs restock"
@@ -153,7 +155,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           />
           <StatCard
             title="Out of Stock"
-            value="1"
+            value={products.filter((p) => p.currentStock === 0).length}
             icon="❌"
             color={colors.danger}
             subtext="Depleted items"
@@ -161,7 +163,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           />
           <StatCard
             title="Loose (Taraju)"
-            value="18"
+            value={getLooseProducts().length}
             icon="⚖️"
             color="#6366F1"
             subtext="By weight (kg/g)"

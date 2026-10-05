@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { BillsPlaceholderScreen } from '../screens/bills/BillsPlaceholderScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
+import { ProductsNavigator } from './ProductsNavigator';
 import { colors } from '../theme';
 
 export type MainTabParamList = {
@@ -13,15 +14,6 @@ export type MainTabParamList = {
   Bills: undefined;
   Profile: undefined;
 };
-
-// Placeholder components that will be replaced when Tasks 6 & 7 implement Products and Taraju
-const ProductsTabPlaceholder: React.FC = () => (
-  <View style={styles.center}>
-    <Text style={styles.placeholderEmoji}>📦</Text>
-    <Text style={styles.placeholderTitle}>Product Catalog</Text>
-    <Text style={styles.placeholderSubtitle}>Loading catalog & stock items...</Text>
-  </View>
-);
 
 const TarajuTabPlaceholder: React.FC = () => (
   <View style={styles.center}>
@@ -70,7 +62,7 @@ export const MainTabNavigator: React.FC<{
       />
       <Tab.Screen
         name="Products"
-        component={ProductsComponent || ProductsTabPlaceholder}
+        component={ProductsComponent || ProductsNavigator}
         options={{
           tabBarLabel: 'Products',
           tabBarIcon: ({ color, focused }) => (
