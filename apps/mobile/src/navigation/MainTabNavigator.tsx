@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { BillsPlaceholderScreen } from '../screens/bills/BillsPlaceholderScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ProductsNavigator } from './ProductsNavigator';
+import { TarajuScreen } from '../screens/taraju/TarajuScreen';
 import { colors } from '../theme';
 
 export type MainTabParamList = {
@@ -14,14 +14,6 @@ export type MainTabParamList = {
   Bills: undefined;
   Profile: undefined;
 };
-
-const TarajuTabPlaceholder: React.FC = () => (
-  <View style={styles.center}>
-    <Text style={styles.placeholderEmoji}>⚖️</Text>
-    <Text style={styles.placeholderTitle}>Taraju Smart Scale</Text>
-    <Text style={styles.placeholderSubtitle}>Loading price-to-weight calculator...</Text>
-  </View>
-);
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -72,7 +64,7 @@ export const MainTabNavigator: React.FC<{
       />
       <Tab.Screen
         name="Taraju"
-        component={TarajuComponent || TarajuTabPlaceholder}
+        component={TarajuComponent || TarajuScreen}
         options={{
           tabBarLabel: 'Taraju',
           tabBarIcon: ({ color, focused }) => (

@@ -15,3 +15,6 @@ export * from './validation/store';
 // Firebase Config & Helpers
 export * from './firebase/config';
 
+// Taraju Calculator Utilities
+export * from './utils/taraju';
+
