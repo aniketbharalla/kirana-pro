@@ -85,11 +85,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Price & Action Row */}
       <View style={styles.bottomRow}>
-        <View>
-          <Text style={styles.priceText}>
-            ₹{product?.sellingPrice ?? 0}
-            <Text style={styles.unitText}>/{unit}</Text>
-          </Text>
+        <View style={{ flex: 1 }}>
+          <View style={styles.priceLine}>
+            <Text style={styles.priceText}>
+              ₹{product?.sellingPrice ?? 0}
+              <Text style={styles.unitText}>/{unit}</Text>
+            </Text>
+            {product?.purchasePrice != null && product.purchasePrice > 0 ? (
+              <Text style={styles.costText}>
+                Cost: ₹{product.purchasePrice}
+              </Text>
+            ) : null}
+          </View>
+
+          {product?.sellingPrice && product?.purchasePrice ? (
+            <Text style={styles.profitText}>
+              +₹{(product.sellingPrice - product.purchasePrice).toFixed(1)} profit (
+              {Math.round(((product.sellingPrice - product.purchasePrice) / product.sellingPrice) * 100)}%)
+            </Text>
+          ) : null}
+
           {displayBarcode ? (
             <Text style={styles.barcodeText} numberOfLines={1}>
               📷 {displayBarcode}
@@ -189,13 +204,33 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     marginTop: 6,
   },
+  priceLine: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+  },
+  costText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  profitText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#059669',
+    marginTop: 2,
+  },
   priceText: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '800',
     color: '#0F172A',
   },
   unitText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '500',
     color: '#64748B',
   },

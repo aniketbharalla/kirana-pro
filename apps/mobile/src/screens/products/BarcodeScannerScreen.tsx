@@ -37,6 +37,9 @@ export const BarcodeScannerScreen: React.FC = () => {
   const [isScanningPaused, setIsScanningPaused] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
+  // Controlled camera state: camera only starts when user clicks "Start Camera" CTA!
+  const [isCameraActive, setIsCameraActive] = useState(false);
+
   // Web camera & ZXing references
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const zxingControlsRef = useRef<IScannerControls | null>(null);
@@ -64,93 +67,123 @@ export const BarcodeScannerScreen: React.FC = () => {
   const [customStock, setCustomStock] = useState('10');
   const [savingCustomProduct, setSavingCustomProduct] = useState(false);
 
-  // Initialize Web ZXing Scanner
-  useEffect(() => {
-    let mounted = true;
+  // Start Camera upon explicit user click
+  const handleStartCamera = async () => {
+    setCameraError(null);
+    setIsScanningPaused(false);
 
     if (Platform.OS === 'web') {
-      const startWebCamera = async () => {
-        try {
-          setCameraError(null);
-          const reader = new BrowserMultiFormatReader();
-
-          // Wait a tick for video element to mount in DOM
-          setTimeout(async () => {
-            if (!videoRef.current || !mounted) return;
-
-            try {
-              const controls = await reader.decodeFromConstraints(
-                {
-                  video: {
-                    facingMode: { ideal: 'environment' },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                  },
+      setIsCameraActive(true);
+      try {
+        const reader = new BrowserMultiFormatReader();
+        setTimeout(async () => {
+          if (!videoRef.current) return;
+          try {
+            const controls = await reader.decodeFromConstraints(
+              {
+                video: {
+                  facingMode: { ideal: 'environment' },
+                  width: { ideal: 1280 },
+                  height: { ideal: 720 },
                 },
-                videoRef.current,
-                (result, err) => {
-                  if (result && !isScanningPausedRef.current && mounted) {
-                    const text = result.getText();
-                    if (text && text.trim()) {
-                      handleProcessBarcode(text.trim());
-                    }
+              },
+              videoRef.current,
+              (result) => {
+                if (result && !isScanningPausedRef.current) {
+                  const text = result.getText();
+                  if (text && text.trim()) {
+                    handleProcessBarcode(text.trim());
                   }
                 }
-              );
-
-              if (mounted) {
-                zxingControlsRef.current = controls;
-              } else {
-                controls.stop();
               }
-            } catch (cameraErr: any) {
-              console.warn('ZXing camera start error:', cameraErr);
-              if (mounted) {
-                setCameraError(
-                  cameraErr.name === 'NotAllowedError'
-                    ? 'Camera permission denied in browser. Please allow camera access in your browser settings.'
-                    : 'Could not access camera. You can type or pick a photo from gallery.'
-                );
-              }
-            }
-          }, 300);
-        } catch (err: any) {
-          console.warn('Web scanner init error:', err);
-        }
-      };
-
-      startWebCamera();
+            );
+            zxingControlsRef.current = controls;
+          } catch (cameraErr: any) {
+            console.warn('ZXing camera start error:', cameraErr);
+            setCameraError(
+              cameraErr.name === 'NotAllowedError'
+                ? 'Camera access was blocked by your browser. Please allow camera in browser permissions.'
+                : 'Could not start camera on this device. You can type the barcode or upload from gallery.'
+            );
+          }
+        }, 300);
+      } catch (err: any) {
+        setCameraError('Failed to initialize camera scanner.');
+      }
     } else {
-      // Native camera permission
-      if (!nativePermission?.granted && nativePermission?.canAskAgain) {
-        requestNativePermission();
+      // Native iOS/Android
+      const res = await requestNativePermission();
+      if (res.granted) {
+        setIsCameraActive(true);
+      } else {
+        Alert.alert('Permission Needed', 'Camera permission is required to scan barcodes.');
       }
     }
+  };
 
+  const handleStopCamera = () => {
+    setIsCameraActive(false);
+    if (zxingControlsRef.current) {
+      zxingControlsRef.current.stop();
+      zxingControlsRef.current = null;
+    }
+  };
+
+  useEffect(() => {
     return () => {
-      mounted = false;
       if (zxingControlsRef.current) {
         zxingControlsRef.current.stop();
         zxingControlsRef.current = null;
       }
     };
-  }, [Platform.OS]);
+  }, []);
 
-  // Trigger haptic feedback
-  const triggerHaptic = () => {
+  // Retail POS scanner audio chirp beep and vibration feedback
+  const playScanBeep = () => {
     try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {
-      // Haptics not available on web
+      if (typeof window !== 'undefined') {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1760, ctx.currentTime); // High crisp A6 1760Hz POS chirp
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.14);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.14);
+        }
+      }
+    } catch (e) {
+      console.warn('Audio scan beep error:', e);
     }
   };
 
-  // Main barcode processor (from camera, image picker, or manual input)
+  const triggerScanSuccessFeedback = () => {
+    // 1. Audio Beep
+    playScanBeep();
+
+    // 2. Vibration Feedback (Web & Native)
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } catch {
+      // Haptics fallback
+    }
+  };
+
+  // Main barcode processor
   const handleProcessBarcode = async (rawBarcode: string) => {
     const clean = rawBarcode.trim();
     if (!clean) return;
 
-    triggerHaptic();
+    triggerScanSuccessFeedback();
     setIsScanningPaused(true);
 
     // 1. Check if product already exists in current Dukaan catalog
@@ -192,7 +225,7 @@ export const BarcodeScannerScreen: React.FC = () => {
     handleProcessBarcode(data);
   };
 
-  // Pick barcode image from gallery (with both ZXing and native support)
+  // Pick barcode image from gallery
   const handlePickBarcodeImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -386,72 +419,92 @@ export const BarcodeScannerScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Real Camera Viewfinder / Scanner Area */}
-        <View style={styles.viewfinderCard}>
-          {Platform.OS === 'web' ? (
-            <video
-              ref={videoRef as any}
-              autoPlay
-              playsInline
-              muted
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-              }}
-            />
-          ) : nativePermission?.granted ? (
-            <CameraView
-              style={StyleSheet.absoluteFillObject}
-              facing="back"
-              barcodeScannerSettings={{
-                barcodeTypes: [
-                  'ean13',
-                  'ean8',
-                  'upc_a',
-                  'upc_e',
-                  'code128',
-                  'code39',
-                  'qr',
-                ],
-              }}
-              onBarcodeScanned={isScanningPaused ? undefined : handleNativeBarcodeScanned}
-            />
+        {/* Scanner Card */}
+        <View style={styles.scannerWrapper}>
+          {isCameraActive ? (
+            <View style={styles.activeCameraContainer}>
+              {Platform.OS === 'web' ? (
+                <video
+                  ref={videoRef as any}
+                  autoPlay
+                  playsInline
+                  muted
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                  }}
+                />
+              ) : nativePermission?.granted ? (
+                <CameraView
+                  style={StyleSheet.absoluteFillObject}
+                  facing="back"
+                  barcodeScannerSettings={{
+                    barcodeTypes: [
+                      'ean13',
+                      'ean8',
+                      'upc_a',
+                      'upc_e',
+                      'code128',
+                      'code39',
+                      'qr',
+                    ],
+                  }}
+                  onBarcodeScanned={isScanningPaused ? undefined : handleNativeBarcodeScanned}
+                />
+              ) : null}
+
+              {/* Viewfinder Target Framing Box (Shows exact location where to position barcode) */}
+              <View style={styles.viewfinderCenterFrame} pointerEvents="none">
+                {/* 4 Green Corner Brackets */}
+                <View style={styles.cornerTL} />
+                <View style={styles.cornerTR} />
+                <View style={styles.cornerBL} />
+                <View style={styles.cornerBR} />
+
+                {/* Animated Red Laser Scan Line */}
+                <View style={styles.redLaserLine} />
+
+                {/* Instruction Pill */}
+                <View style={styles.targetBadge}>
+                  <Text style={styles.targetBadgeText}>🎯 Keep Barcode Inside Box (बारकोड यहाँ रखें)</Text>
+                </View>
+              </View>
+
+              {/* Stop Camera Button */}
+              <TouchableOpacity style={styles.stopCameraBtn} onPress={handleStopCamera}>
+                <Text style={styles.stopCameraBtnText}>✕ Close Camera</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
-            <View style={styles.permissionPlaceholder}>
-              <Text style={styles.cameraIcon}>📷</Text>
-              <Text style={styles.permissionTitle}>Camera Permission Required</Text>
-              <Text style={styles.permissionDesc}>
-                Point camera at product barcode to scan automatically.
+            /* Standby Card with Click to Start CTA */
+            <View style={styles.standbyCard}>
+              <View style={styles.standbyIconBadge}>
+                <Text style={styles.standbyIcon}>📷</Text>
+              </View>
+              <Text style={styles.standbyTitle}>Smart Product Barcode Scanner</Text>
+              <Text style={styles.standbyDesc}>
+                Scan any Indian FMCG package (Maggi, Parle-G, Chips, Soap) to auto-fill details and track buying/selling profits.
               </Text>
-              <TouchableOpacity
-                style={styles.permissionBtn}
-                onPress={requestNativePermission}
-              >
-                <Text style={styles.permissionBtnText}>Enable Camera</Text>
+
+              {cameraError ? (
+                <View style={styles.cameraErrorBanner}>
+                  <Text style={styles.cameraErrorText}>⚠️ {cameraError}</Text>
+                </View>
+              ) : null}
+
+              <TouchableOpacity style={styles.startScanCTA} onPress={handleStartCamera}>
+                <Text style={styles.startScanCTAText}>📸 Click to Start Camera Scanner</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.galleryCTA} onPress={handlePickBarcodeImage}>
+                <Text style={styles.galleryCTAText}>🖼️ Or Pick Photo from Gallery</Text>
               </TouchableOpacity>
             </View>
           )}
-
-          {/* Camera Error Notice if blocked in browser */}
-          {cameraError ? (
-            <View style={styles.cameraErrorBanner}>
-              <Text style={styles.cameraErrorText}>⚠️ {cameraError}</Text>
-            </View>
-          ) : null}
-
-          {/* Viewfinder Target Reticle Overlay */}
-          <View style={styles.reticleOverlay} pointerEvents="none">
-            <View style={styles.cornerTopLeft} />
-            <View style={styles.cornerTopRight} />
-            <View style={styles.cornerBottomLeft} />
-            <View style={styles.cornerBottomRight} />
-            <View style={styles.redLaserLine} />
-            <Text style={styles.reticleInstruction}>Align 1D Barcode Inside Frame</Text>
-          </View>
 
           {/* Searching Badge */}
           {isSearching && (
@@ -460,19 +513,11 @@ export const BarcodeScannerScreen: React.FC = () => {
               <Text style={styles.searchingText}>Searching Catalog & Open Food Facts...</Text>
             </View>
           )}
-
-          {/* Quick Gallery / Scan from Photo Action */}
-          <TouchableOpacity
-            style={styles.galleryFloatingBtn}
-            onPress={handlePickBarcodeImage}
-          >
-            <Text style={styles.galleryFloatingBtnText}>🖼️ Pick Photo / File</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Manual Barcode Input & Quick Demos */}
         <View style={styles.bottomControls}>
-          <Text style={styles.controlHeader}>Manual Barcode Entry (या बारकोड टाइप करें)</Text>
+          <Text style={styles.controlHeader}>Manual Barcode Entry (या बारकोड नंबर डालें)</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.barcodeInput}
@@ -885,140 +930,220 @@ export const BarcodeScannerScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F8FAFC',
   },
   container: {
     flex: 1,
     justifyContent: 'space-between',
   },
-  viewfinderCard: {
+  scannerWrapper: {
     flex: 1,
     margin: 16,
-    backgroundColor: '#000000',
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+    borderRadius: 20,
     overflow: 'hidden',
   },
-  permissionPlaceholder: {
-    alignItems: 'center',
-    padding: 24,
-  },
-  cameraIcon: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  permissionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginTop: 8,
-  },
-  permissionDesc: {
-    fontSize: 13,
-    color: '#94A3B8',
-    textAlign: 'center',
-    marginTop: 6,
-    maxWidth: 240,
-  },
-  permissionBtn: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 16,
-  },
-  permissionBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  cameraErrorBanner: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(239, 68, 68, 0.9)',
-    borderRadius: 10,
-    padding: 10,
-    zIndex: 10,
-  },
-  cameraErrorText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  reticleOverlay: {
-    ...StyleSheet.absoluteFillObject,
+  activeCameraContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+    borderRadius: 20,
+    overflow: 'hidden',
+    position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cornerTopLeft: {
-    position: 'absolute',
-    top: 36,
-    left: 36,
-    width: 36,
-    height: 36,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderColor: '#10B981',
+  standbyCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#E2E8F0',
+    borderStyle: 'dashed',
   },
-  cornerTopRight: {
-    position: 'absolute',
-    top: 36,
-    right: 36,
-    width: 36,
-    height: 36,
-    borderTopWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#10B981',
+  standbyIconBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#ECFDF5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  cornerBottomLeft: {
-    position: 'absolute',
-    bottom: 36,
-    left: 36,
-    width: 36,
-    height: 36,
-    borderBottomWidth: 4,
-    borderLeftWidth: 4,
-    borderColor: '#10B981',
+  standbyIcon: {
+    fontSize: 32,
   },
-  cornerBottomRight: {
-    position: 'absolute',
-    bottom: 36,
-    right: 36,
-    width: 36,
-    height: 36,
-    borderBottomWidth: 4,
-    borderRightWidth: 4,
-    borderColor: '#10B981',
+  standbyTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+    textAlign: 'center',
   },
-  redLaserLine: {
-    width: '70%',
-    height: 2,
-    backgroundColor: 'rgba(239, 68, 68, 0.85)',
-    shadowColor: '#EF4444',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 6,
-    elevation: 4,
+  standbyDesc: {
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 6,
+    lineHeight: 18,
+    maxWidth: 280,
+    marginBottom: 20,
   },
-  reticleInstruction: {
+  startScanCTA: {
+    backgroundColor: '#10B981',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 14,
+    width: '100%',
+    maxWidth: 300,
+    alignItems: 'center',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
+    marginBottom: 10,
+  },
+  startScanCTAText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  galleryCTA: {
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    width: '100%',
+    maxWidth: 300,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  galleryCTAText: {
+    color: '#334155',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  stopCameraBtn: {
     position: 'absolute',
-    bottom: 46,
-    color: '#F8FAFC',
+    top: 14,
+    right: 14,
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    zIndex: 30,
+  },
+  stopCameraBtnText: {
+    color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
-    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+  },
+  cameraErrorBanner: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 14,
+    width: '100%',
+  },
+  cameraErrorText: {
+    color: '#DC2626',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  viewfinderCenterFrame: {
+    width: 280,
+    height: 180,
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -140 }, { translateY: -90 }],
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  cornerTL: {
+    position: 'absolute',
+    top: -2,
+    left: -2,
+    width: 28,
+    height: 28,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: '#10B981',
+    borderTopLeftRadius: 10,
+  },
+  cornerTR: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 28,
+    height: 28,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#10B981',
+    borderTopRightRadius: 10,
+  },
+  cornerBL: {
+    position: 'absolute',
+    bottom: -2,
+    left: -2,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: '#10B981',
+    borderBottomLeftRadius: 10,
+  },
+  cornerBR: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 28,
+    height: 28,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#10B981',
+    borderBottomRightRadius: 10,
+  },
+  redLaserLine: {
+    width: '90%',
+    height: 3,
+    backgroundColor: '#EF4444',
+    borderRadius: 2,
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  targetBadge: {
+    position: 'absolute',
+    bottom: -40,
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
     paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  targetBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   searchingBadge: {
     position: 'absolute',
-    bottom: 75,
+    bottom: 20,
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#10B981',
@@ -1034,28 +1159,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
   },
-  galleryFloatingBtn: {
-    position: 'absolute',
-    bottom: 14,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    zIndex: 15,
-  },
-  galleryFloatingBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
   bottomControls: {
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
     paddingBottom: 30,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
   },
   controlHeader: {
     fontSize: 14,

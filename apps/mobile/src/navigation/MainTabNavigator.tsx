@@ -59,6 +59,11 @@ export const MainTabNavigator: React.FC<{
       <Tab.Screen
         name="Products"
         component={ProductsComponent || ProductsNavigator}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            navigation.navigate('Products', { screen: 'ProductList' });
+          },
+        })}
         options={{
           tabBarLabel: 'Products',
           tabBarIcon: ({ color, focused }) => (

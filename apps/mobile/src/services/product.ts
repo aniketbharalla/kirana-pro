@@ -12,7 +12,7 @@ import {
   Product,
   productSchema,
 } from '@kirana-pro/shared';
-import { useProductStore } from '../store/productStore';
+import { useProductStore, DEFAULT_STARTER_PRODUCTS } from '../store/productStore';
 import { recordStockMovement } from './stock';
 
 export const addProduct = async (
@@ -132,15 +132,33 @@ export const subscribeToProducts = (storeId: string): (() => void) => {
           .map((d) => d.data() as Product)
           .filter((p) => p.isActive !== false);
 
-        useProductStore.getState().setProducts(list);
+        if (list.length > 0) {
+          useProductStore.getState().setProducts(list);
+        } else {
+          // If remote store is empty, keep starter products so catalog is never blank!
+          const current = useProductStore.getState().products;
+          if (!current || current.length === 0) {
+            useProductStore.getState().setProducts(DEFAULT_STARTER_PRODUCTS);
+          } else {
+            useProductStore.getState().setLoading(false);
+          }
+        }
       },
       (err) => {
         console.warn('Realtime products listener notice (running in local/offline mode):', err.message);
+        const current = useProductStore.getState().products;
+        if (!current || current.length === 0) {
+          useProductStore.getState().setProducts(DEFAULT_STARTER_PRODUCTS);
+        }
         useProductStore.getState().setLoading(false);
       }
     );
   } catch (err: any) {
     console.warn('Could not initialize realtime products listener (continuing in local state):', err.message);
+    const current = useProductStore.getState().products;
+    if (!current || current.length === 0) {
+      useProductStore.getState().setProducts(DEFAULT_STARTER_PRODUCTS);
+    }
     useProductStore.getState().setLoading(false);
     return () => {};
   }
