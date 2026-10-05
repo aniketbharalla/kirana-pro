@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -14,6 +14,7 @@ import {
   Platform,
 } from 'react-native';
 import { CameraView, useCameraPermissions, Camera } from 'expo-camera';
+import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
@@ -30,16 +31,21 @@ export const BarcodeScannerScreen: React.FC = () => {
   const { user } = useAuthStore();
   const { findByBarcode } = useProductStore();
 
-  const [permission, requestPermission] = useCameraPermissions();
+  const [nativePermission, requestNativePermission] = useCameraPermissions();
   const [manualCode, setManualCode] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [isScanningPaused, setIsScanningPaused] = useState(false);
-  const [cameraActive, setCameraActive] = useState(true);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
+  // Web camera & ZXing references
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const zxingControlsRef = useRef<IScannerControls | null>(null);
+  const isScanningPausedRef = useRef(false);
+  isScanningPausedRef.current = isScanningPaused;
 
   // Modal 1: Existing Product found -> Quick Stock Increment & Price update
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   const [stockIncrement, setStockIncrement] = useState<number>(5);
-  const [existingPurchasePrice, setExistingPurchasePrice] = useState<string>('');
   const [updatingStock, setUpdatingStock] = useState(false);
 
   // Modal 2: Product found from Open Food Facts -> Add with Buying & Selling Price
@@ -58,12 +64,77 @@ export const BarcodeScannerScreen: React.FC = () => {
   const [customStock, setCustomStock] = useState('10');
   const [savingCustomProduct, setSavingCustomProduct] = useState(false);
 
-  // Request camera permission on mount
+  // Initialize Web ZXing Scanner
   useEffect(() => {
-    if (!permission?.granted && permission?.canAskAgain) {
-      requestPermission();
+    let mounted = true;
+
+    if (Platform.OS === 'web') {
+      const startWebCamera = async () => {
+        try {
+          setCameraError(null);
+          const reader = new BrowserMultiFormatReader();
+
+          // Wait a tick for video element to mount in DOM
+          setTimeout(async () => {
+            if (!videoRef.current || !mounted) return;
+
+            try {
+              const controls = await reader.decodeFromConstraints(
+                {
+                  video: {
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                  },
+                },
+                videoRef.current,
+                (result, err) => {
+                  if (result && !isScanningPausedRef.current && mounted) {
+                    const text = result.getText();
+                    if (text && text.trim()) {
+                      handleProcessBarcode(text.trim());
+                    }
+                  }
+                }
+              );
+
+              if (mounted) {
+                zxingControlsRef.current = controls;
+              } else {
+                controls.stop();
+              }
+            } catch (cameraErr: any) {
+              console.warn('ZXing camera start error:', cameraErr);
+              if (mounted) {
+                setCameraError(
+                  cameraErr.name === 'NotAllowedError'
+                    ? 'Camera permission denied in browser. Please allow camera access in your browser settings.'
+                    : 'Could not access camera. You can type or pick a photo from gallery.'
+                );
+              }
+            }
+          }, 300);
+        } catch (err: any) {
+          console.warn('Web scanner init error:', err);
+        }
+      };
+
+      startWebCamera();
+    } else {
+      // Native camera permission
+      if (!nativePermission?.granted && nativePermission?.canAskAgain) {
+        requestNativePermission();
+      }
     }
-  }, [permission]);
+
+    return () => {
+      mounted = false;
+      if (zxingControlsRef.current) {
+        zxingControlsRef.current.stop();
+        zxingControlsRef.current = null;
+      }
+    };
+  }, [Platform.OS]);
 
   // Trigger haptic feedback
   const triggerHaptic = () => {
@@ -74,7 +145,7 @@ export const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  // Main barcode handler (from camera, image picker, or manual input)
+  // Main barcode processor (from camera, image picker, or manual input)
   const handleProcessBarcode = async (rawBarcode: string) => {
     const clean = rawBarcode.trim();
     if (!clean) return;
@@ -86,7 +157,6 @@ export const BarcodeScannerScreen: React.FC = () => {
     const existing = findByBarcode(clean);
     if (existing) {
       setExistingProduct(existing);
-      setExistingPurchasePrice(existing.purchasePrice ? String(existing.purchasePrice) : '');
       setStockIncrement(5);
       return;
     }
@@ -116,13 +186,13 @@ export const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  // Camera barcode detection callback
-  const handleBarcodeScanned = ({ data }: { data: string }) => {
+  // Native camera barcode detection callback
+  const handleNativeBarcodeScanned = ({ data }: { data: string }) => {
     if (isScanningPaused || !data) return;
     handleProcessBarcode(data);
   };
 
-  // Pick barcode image from gallery
+  // Pick barcode image from gallery (with both ZXing and native support)
   const handlePickBarcodeImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -135,7 +205,14 @@ export const BarcodeScannerScreen: React.FC = () => {
         setIsSearching(true);
 
         try {
-          if (Camera && typeof Camera.scanFromURLAsync === 'function') {
+          if (Platform.OS === 'web') {
+            const reader = new BrowserMultiFormatReader();
+            const zxResult = await reader.decodeFromImageUrl(uri);
+            if (zxResult) {
+              handleProcessBarcode(zxResult.getText());
+              return;
+            }
+          } else if (Camera && typeof Camera.scanFromURLAsync === 'function') {
             const barcodes = await Camera.scanFromURLAsync(uri);
             if (barcodes && barcodes.length > 0) {
               handleProcessBarcode(barcodes[0].data);
@@ -143,13 +220,12 @@ export const BarcodeScannerScreen: React.FC = () => {
             }
           }
         } catch (scanErr) {
-          console.warn('scanFromURLAsync failed, falling back:', scanErr);
+          console.warn('Barcode decoding from image failed:', scanErr);
         }
 
-        // If automatic scan failed, ask user to verify code
         Alert.alert(
-          'Image Selected',
-          'Could not detect standard 1D barcode automatically from this photo. You can type the digits printed below the barcode stripes.',
+          'Barcode Not Detected',
+          'Could not detect standard 1D barcode automatically from this photo. You can type the numbers printed below the barcode stripes.',
           [{ text: 'OK' }]
         );
         setIsSearching(false);
@@ -169,7 +245,7 @@ export const BarcodeScannerScreen: React.FC = () => {
     return { s, b, profit, margin };
   };
 
-  // Action: Increment Stock & optionally update Buying Price on Existing Item
+  // Action: Increment Stock on Existing Item
   const handleConfirmStockUpdate = async () => {
     if (!existingProduct || !user?.storeId) return;
     setUpdatingStock(true);
@@ -312,7 +388,22 @@ export const BarcodeScannerScreen: React.FC = () => {
       <View style={styles.container}>
         {/* Real Camera Viewfinder / Scanner Area */}
         <View style={styles.viewfinderCard}>
-          {permission?.granted && cameraActive ? (
+          {Platform.OS === 'web' ? (
+            <video
+              ref={videoRef as any}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}
+            />
+          ) : nativePermission?.granted ? (
             <CameraView
               style={StyleSheet.absoluteFillObject}
               facing="back"
@@ -327,25 +418,30 @@ export const BarcodeScannerScreen: React.FC = () => {
                   'qr',
                 ],
               }}
-              onBarcodeScanned={isScanningPaused ? undefined : handleBarcodeScanned}
+              onBarcodeScanned={isScanningPaused ? undefined : handleNativeBarcodeScanned}
             />
           ) : (
             <View style={styles.permissionPlaceholder}>
               <Text style={styles.cameraIcon}>📷</Text>
-              <Text style={styles.permissionTitle}>Camera Scanner</Text>
+              <Text style={styles.permissionTitle}>Camera Permission Required</Text>
               <Text style={styles.permissionDesc}>
-                {permission?.granted === false
-                  ? 'Camera permission was denied. Tap below to enable.'
-                  : 'Point camera at product barcode to scan automatically.'}
+                Point camera at product barcode to scan automatically.
               </Text>
               <TouchableOpacity
                 style={styles.permissionBtn}
-                onPress={requestPermission}
+                onPress={requestNativePermission}
               >
                 <Text style={styles.permissionBtnText}>Enable Camera</Text>
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Camera Error Notice if blocked in browser */}
+          {cameraError ? (
+            <View style={styles.cameraErrorBanner}>
+              <Text style={styles.cameraErrorText}>⚠️ {cameraError}</Text>
+            </View>
+          ) : null}
 
           {/* Viewfinder Target Reticle Overlay */}
           <View style={styles.reticleOverlay} pointerEvents="none">
@@ -354,6 +450,7 @@ export const BarcodeScannerScreen: React.FC = () => {
             <View style={styles.cornerBottomLeft} />
             <View style={styles.cornerBottomRight} />
             <View style={styles.redLaserLine} />
+            <Text style={styles.reticleInstruction}>Align 1D Barcode Inside Frame</Text>
           </View>
 
           {/* Searching Badge */}
@@ -797,7 +894,7 @@ const styles = StyleSheet.create({
   viewfinderCard: {
     flex: 1,
     margin: 16,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#000000',
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
@@ -807,6 +904,10 @@ const styles = StyleSheet.create({
   permissionPlaceholder: {
     alignItems: 'center',
     padding: 24,
+  },
+  cameraIcon: {
+    fontSize: 48,
+    marginBottom: 8,
   },
   permissionTitle: {
     fontSize: 18,
@@ -832,6 +933,22 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 14,
+  },
+  cameraErrorBanner: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(239, 68, 68, 0.9)',
+    borderRadius: 10,
+    padding: 10,
+    zIndex: 10,
+  },
+  cameraErrorText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   reticleOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -881,20 +998,27 @@ const styles = StyleSheet.create({
   redLaserLine: {
     width: '70%',
     height: 2,
-    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+    backgroundColor: 'rgba(239, 68, 68, 0.85)',
     shadowColor: '#EF4444',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.9,
     shadowRadius: 6,
     elevation: 4,
   },
-  cameraIcon: {
-    fontSize: 48,
-    marginBottom: 8,
+  reticleInstruction: {
+    position: 'absolute',
+    bottom: 46,
+    color: '#F8FAFC',
+    fontSize: 12,
+    fontWeight: '700',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
   },
   searchingBadge: {
     position: 'absolute',
-    bottom: 60,
+    bottom: 75,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#10B981',
@@ -903,6 +1027,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 8,
     elevation: 5,
+    zIndex: 20,
   },
   searchingText: {
     color: '#FFFFFF',
@@ -912,12 +1037,13 @@ const styles = StyleSheet.create({
   galleryFloatingBtn: {
     position: 'absolute',
     bottom: 14,
-    backgroundColor: 'rgba(15, 23, 42, 0.8)',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    zIndex: 15,
   },
   galleryFloatingBtnText: {
     color: '#FFFFFF',
