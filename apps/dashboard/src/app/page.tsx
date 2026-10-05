@@ -37,11 +37,14 @@ export default function DashboardOverviewPage() {
         </div>
 
         <div style={styles.bannerActions}>
-          <Link href="/products" style={styles.primaryBtn}>
-            + Manage Products
+          <Link href="/bills" style={styles.primaryBtn}>
+            🧾 View Sales & Bills
           </Link>
-          <Link href="/stock" style={styles.secondaryBtn}>
-            View Stock Log →
+          <Link href="/khata" style={styles.secondaryBtn}>
+            📒 Customer Khata →
+          </Link>
+          <Link href="/products" style={styles.secondaryBtn}>
+            📦 Manage Catalog
           </Link>
         </div>
       </div>

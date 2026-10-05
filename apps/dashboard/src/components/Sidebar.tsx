@@ -9,6 +9,8 @@ export const Sidebar: React.FC = () => {
 
   const navLinks = [
     { href: '/', label: 'Overview', icon: '📊' },
+    { href: '/bills', label: 'Sales & Invoices', icon: '🧾' },
+    { href: '/khata', label: 'Customer Khata', icon: '📒' },
     { href: '/products', label: 'Products & Catalog', icon: '📦' },
     { href: '/stock', label: 'Stock Movement Log', icon: '📋' },
   ];
