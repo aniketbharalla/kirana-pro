@@ -3,17 +3,17 @@ import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'rea
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
 import { AuthNavigator } from './AuthNavigator';
+import { MainTabNavigator } from './MainTabNavigator';
 
-// Placeholder screen for store setup (Task 5) or main tabs (Task 4)
-// These will be swapped when Task 4 and Task 5 are mounted.
-const TempSetupOrHome: React.FC = () => {
+// Placeholder screen for store setup (Task 5)
+const TempStoreSetup: React.FC = () => {
   const { user, clearUser } = useAuthStore();
 
   return (
     <View style={styles.center}>
-      <Text style={styles.title}>Welcome, {user?.displayName}!</Text>
+      <Text style={styles.title}>Setup Your Dukaan</Text>
       <Text style={styles.subtitle}>
-        Store ID: {user?.storeId || 'None (Needs Store Setup)'}
+        Welcome, {user?.displayName}! Please configure your store to continue.
       </Text>
       <TouchableOpacity style={styles.logoutBtn} onPress={clearUser}>
         <Text style={styles.logoutText}>Sign Out</Text>
@@ -36,14 +36,17 @@ export const RootNavigator: React.FC<{
     );
   }
 
+  const Main = MainComponent || MainTabNavigator;
+  const Setup = SetupComponent || TempStoreSetup;
+
   return (
     <NavigationContainer>
       {!isAuthenticated ? (
         <AuthNavigator />
       ) : !user?.storeId ? (
-        SetupComponent ? <SetupComponent /> : <TempSetupOrHome />
+        <Setup />
       ) : (
-        MainComponent ? <MainComponent /> : <TempSetupOrHome />
+        <Main />
       )}
     </NavigationContainer>
   );
