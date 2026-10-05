@@ -12,7 +12,13 @@
     "test": "turbo run test"
   },
   "devDependencies": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "turbo": "^2.4.0"
+  },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "packageManager": "npm@11.13.0"
 }
