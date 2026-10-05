@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { BillingScreen } from '../screens/bills/BillingScreen';
 import { BillReceiptScreen } from '../screens/bills/BillReceiptScreen';
 import { BillsHistoryScreen } from '../screens/bills/BillsHistoryScreen';
 import { CheckoutModal } from '../components/bills/CheckoutModal';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
-import { Invoice } from '@kirana-pro/shared';
+import { KhataScreen } from '../screens/khata/KhataScreen';
+import { CustomerDetailScreen } from '../screens/khata/CustomerDetailScreen';
+import { CustomerKhata, Invoice } from '@kirana-pro/shared';
 
 export type BillsStackParamList = {
   BillingScreen: undefined;
   BillReceipt: { invoice: Invoice };
   BillsHistory: undefined;
+  Khata: undefined;
+  CustomerDetail: { customer: CustomerKhata };
 };
 
 const Stack = createNativeStackNavigator<BillsStackParamList>();
@@ -51,12 +55,20 @@ export const BillsNavigator: React.FC = () => {
         options={({ navigation }) => ({
           title: 'Kirana POS',
           headerRight: () => (
-            <TouchableOpacity
-              style={styles.historyBtn}
-              onPress={() => navigation.navigate('BillsHistory')}
-            >
-              <Text style={styles.historyBtnText}>📜 History</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity
+                style={styles.historyBtn}
+                onPress={() => navigation.navigate('Khata')}
+              >
+                <Text style={styles.historyBtnText}>📒 Khata</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.historyBtn}
+                onPress={() => navigation.navigate('BillsHistory')}
+              >
+                <Text style={styles.historyBtnText}>📜 History</Text>
+              </TouchableOpacity>
+            </View>
           ),
         })}
       />
@@ -74,6 +86,22 @@ export const BillsNavigator: React.FC = () => {
         options={{
           title: 'Sales & Invoices History',
           headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
+        name="Khata"
+        component={KhataScreen}
+        options={{
+          title: 'Customer Khata (उधार)',
+          headerBackTitle: 'POS',
+        }}
+      />
+      <Stack.Screen
+        name="CustomerDetail"
+        component={CustomerDetailScreen}
+        options={{
+          title: 'Customer Ledger',
+          headerBackTitle: 'Khata',
         }}
       />
     </Stack.Navigator>
