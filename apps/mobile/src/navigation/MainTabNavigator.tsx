@@ -2,7 +2,7 @@ import React from 'react';
 import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen } from '../screens/home/HomeScreen';
-import { BillsPlaceholderScreen } from '../screens/bills/BillsPlaceholderScreen';
+import { BillsNavigator } from './BillsNavigator';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ProductsNavigator } from './ProductsNavigator';
 import { TarajuScreen } from '../screens/taraju/TarajuScreen';
@@ -75,7 +75,7 @@ export const MainTabNavigator: React.FC<{
       />
       <Tab.Screen
         name="Bills"
-        component={BillsPlaceholderScreen}
+        component={BillsNavigator}
         options={{
           tabBarLabel: 'Bills',
           tabBarIcon: ({ color, focused }) => (
