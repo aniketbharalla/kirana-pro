@@ -236,6 +236,22 @@ export const AddProductScreen: React.FC = () => {
               </View>
             </View>
 
+            {sellingPrice && purchasePrice ? (
+              <View style={styles.profitBannerBox}>
+                {parseFloat(sellingPrice) >= parseFloat(purchasePrice) ? (
+                  <Text style={styles.profitBannerGain}>
+                    📊 Expected Profit: ₹{(parseFloat(sellingPrice) - parseFloat(purchasePrice)).toFixed(2)} / unit (
+                    {(((parseFloat(sellingPrice) - parseFloat(purchasePrice)) / parseFloat(sellingPrice)) * 100).toFixed(1)}% margin)
+                  </Text>
+                ) : (
+                  <Text style={styles.profitBannerLoss}>
+                    ⚠️ Selling price is less than buying price (Loss: ₹
+                    {(parseFloat(purchasePrice) - parseFloat(sellingPrice)).toFixed(2)}/unit)
+                  </Text>
+                )}
+              </View>
+            ) : null}
+
             <Text style={[styles.fieldLabel, { marginTop: 12 }]}>UNIT</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillRow}>
               {PRODUCT_UNITS.map((u) => (
@@ -495,5 +511,23 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '800',
+  },
+  profitBannerBox: {
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 8,
+  },
+  profitBannerGain: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#166534',
+  },
+  profitBannerLoss: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#DC2626',
   },
 });

@@ -30,7 +30,7 @@ export const SupplierListScreen = ({ navigation }: any) => {
   const renderSupplierItem = ({ item }: { item: Supplier }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => navigation.navigate('CreatePurchase', { supplier: item })}
+      onPress={() => navigation.navigate('SupplierDetail', { supplierId: item.id, supplier: item })}
     >
       <View style={styles.cardHeader}>
         <View style={styles.nameBlock}>

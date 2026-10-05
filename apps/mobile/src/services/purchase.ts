@@ -161,13 +161,63 @@ export const recordPurchaseInvoice = async (
   const supplierStore = useSupplierStore.getState();
   supplierStore.addPurchase(invoice);
 
-  const existingSup = supplierStore.suppliers.find((s) => s.id === invoice.supplierId);
+  const existingSup = supplierStore.suppliers.find(
+    (s) =>
+      s.id === invoice.supplierId ||
+      s.name.trim().toLowerCase() === invoice.supplierName.trim().toLowerCase()
+  );
+
+  const pendingAmount = invoice.netPayable - invoice.paidAmt;
+
   if (existingSup) {
+    const updatedBalance = (existingSup.balance || 0) + pendingAmount;
     supplierStore.updateSupplier(existingSup.id, {
       totalPurchases: (existingSup.totalPurchases || 0) + invoice.netPayable,
-      balance: (existingSup.balance || 0) + (invoice.netPayable - invoice.paidAmt),
+      balance: updatedBalance,
       invoiceCount: (existingSup.invoiceCount || 0) + 1,
       updatedAt: Date.now(),
+    });
+
+    supplierStore.addTransaction({
+      id: `tx_inv_${Date.now()}`,
+      storeId,
+      supplierId: existingSup.id,
+      type: 'PURCHASE_INVOICE',
+      amount: invoice.netPayable,
+      balanceAfter: updatedBalance,
+      invoiceNo: invoice.invoiceNo,
+      note: `Inwarded ${invoice.items.length} items from bill ${invoice.invoiceNo}`,
+      createdAt: Date.now(),
+    });
+  } else {
+    // Auto-create new supplier/vendor if not added before
+    const newSup = {
+      id: invoice.supplierId || `sup_${Date.now()}`,
+      storeId,
+      name: invoice.supplierName,
+      phone: (invoice as any).supplierPhone || '7415845631',
+      gstin: (invoice as any).supplierGstin || '23MNQPK6685L1Z0',
+      address: (invoice as any).supplierAddress || 'Bhopal Mandi, Bhopal',
+      type: 'Distributor' as const,
+      totalPurchases: invoice.netPayable,
+      totalPaid: invoice.paidAmt,
+      balance: pendingAmount,
+      invoiceCount: 1,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    supplierStore.addSupplier(newSup);
+
+    supplierStore.addTransaction({
+      id: `tx_inv_${Date.now()}`,
+      storeId,
+      supplierId: newSup.id,
+      type: 'PURCHASE_INVOICE',
+      amount: invoice.netPayable,
+      balanceAfter: pendingAmount,
+      invoiceNo: invoice.invoiceNo,
+      note: `Inwarded ${invoice.items.length} items from bill ${invoice.invoiceNo}`,
+      createdAt: Date.now(),
     });
   }
 };

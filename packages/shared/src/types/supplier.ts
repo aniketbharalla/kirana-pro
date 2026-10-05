@@ -17,3 +17,19 @@ export interface Supplier {
   createdAt: number;
   updatedAt: number;
 }
+
+export type SupplierTxnType = 'PURCHASE_INVOICE' | 'PAYMENT';
+
+export interface SupplierTransaction {
+  id: string;
+  storeId: string;
+  supplierId: string;
+  type: SupplierTxnType;
+  amount: number;
+  balanceAfter: number;
+  invoiceNo?: string;
+  paymentMode?: 'Cash' | 'UPI' | 'Bank' | 'Cheque';
+  referenceNo?: string;
+  note?: string;
+  createdAt: number;
+}

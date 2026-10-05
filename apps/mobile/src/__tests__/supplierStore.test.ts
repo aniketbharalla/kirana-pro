@@ -55,4 +55,26 @@ describe('Supplier Store', () => {
     expect(filtered).toHaveLength(1);
     expect(filtered[0].id).toBe('sup_2');
   });
+
+  it('records payment to a supplier and decrements pending balance', () => {
+    useSupplierStore.getState().setSuppliers([mockSupplier]);
+    useSupplierStore.getState().setTransactions([]);
+
+    // Record a payment of 1000 via UPI
+    useSupplierStore.getState().recordPayment('sup_1', 1000, 'UPI', 'UPI Ref 123456');
+
+    const updatedSup = useSupplierStore.getState().suppliers.find((s) => s.id === 'sup_1');
+    expect(updatedSup).toBeDefined();
+    // 3000 - 1000 = 2000
+    expect(updatedSup?.balance).toBe(2000);
+    // 12000 + 1000 = 13000
+    expect(updatedSup?.totalPaid).toBe(13000);
+
+    const txs = useSupplierStore.getState().getSupplierTransactions('sup_1');
+    expect(txs).toHaveLength(1);
+    expect(txs[0].type).toBe('PAYMENT');
+    expect(txs[0].amount).toBe(1000);
+    expect(txs[0].balanceAfter).toBe(2000);
+    expect(txs[0].paymentMode).toBe('UPI');
+  });
 });

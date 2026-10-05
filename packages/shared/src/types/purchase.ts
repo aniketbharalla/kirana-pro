@@ -47,6 +47,9 @@ export interface PurchaseInvoice {
 
 export interface PurchaseInvoiceDraft {
   supplierName?: string;
+  supplierPhone?: string;
+  supplierGstin?: string;
+  supplierAddress?: string;
   invoiceNo?: string;
   items: PurchaseItem[];
   subtotal: number;

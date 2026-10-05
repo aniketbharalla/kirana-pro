@@ -26,6 +26,9 @@ export function parseInvoiceText(rawText: string): PurchaseInvoiceDraft {
 
   let invoiceNo = '';
   let supplierName = '';
+  let supplierPhone = '';
+  let supplierGstin = '';
+  let supplierAddress = '';
 
   for (const line of lines) {
     if (!supplierName && (line.includes('ENTERPRISE') || line.includes('Distributor') || line.includes('LTD') || line.includes('AGENCIES'))) {
@@ -34,6 +37,17 @@ export function parseInvoiceText(rawText: string): PurchaseInvoiceDraft {
     if (!invoiceNo && (line.toLowerCase().includes('invoice') || line.toLowerCase().includes('bill no'))) {
       const match = line.match(/(?:invoice|bill)\s*(?:no|number)?[:\s]*([A-Za-z0-9\/\-]+)/i);
       if (match) invoiceNo = match[1];
+    }
+    if (!supplierPhone) {
+      const phoneMatch = line.match(/(?:contact|phone|ph|mobile|mo)[\s\.:no]*([6-9]\d{9})/i);
+      if (phoneMatch) supplierPhone = phoneMatch[1];
+    }
+    if (!supplierGstin) {
+      const gstinMatch = line.match(/\b([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1})\b/i);
+      if (gstinMatch) supplierGstin = gstinMatch[1];
+    }
+    if (!supplierAddress && (line.includes('MANDI') || line.includes('ROAD') || line.includes('COLONY'))) {
+      supplierAddress = line.replace(/[-:]/g, ' ').trim();
     }
 
     // Skip summary / header lines
@@ -136,6 +150,9 @@ export function parseInvoiceText(rawText: string): PurchaseInvoiceDraft {
 
   return {
     supplierName: supplierName || undefined,
+    supplierPhone: supplierPhone || undefined,
+    supplierGstin: supplierGstin || undefined,
+    supplierAddress: supplierAddress || undefined,
     invoiceNo: invoiceNo || undefined,
     items,
     subtotal,

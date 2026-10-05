@@ -113,19 +113,25 @@ export const ScanInvoiceScreen = ({ route, navigation }: any) => {
 
       setExtractedRawText(rawText);
 
-      if (draft.items.length === 0) {
-        setShowManualEdit(true);
-        Alert.alert(
-          'OCR Extraction Notice',
-          'Recognized text from image, but could not detect standard FMCG line items automatically. Please review the extracted text below.'
-        );
-      } else {
-        navigation.navigate('ReviewInvoice', {
-          draft,
-          supplier,
-          invoiceImageUri: targetUri,
-        });
-      }
+      // Directly navigate to Review Extracted Bill screen immediately upon OCR completion
+      navigation.navigate('ReviewInvoice', {
+        draft:
+          draft.items.length > 0
+            ? draft
+            : {
+                supplierName: draft.supplierName || 'Wholesaler / Distributor',
+                invoiceNo: draft.invoiceNo || `INV/${Date.now().toString().slice(-6)}`,
+                items: [],
+                subtotal: 0,
+                totalCGST: 0,
+                totalSGST: 0,
+                netPayable: 0,
+                confidence: 50,
+              },
+        supplier,
+        invoiceImageUri: targetUri,
+        rawText,
+      });
     } catch (err: any) {
       setShowManualEdit(true);
       Alert.alert('OCR Error', 'Failed to scan image: ' + (err.message || 'Unknown OCR error'));
