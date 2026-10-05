@@ -1,4 +1,5 @@
 import React from 'react';
+import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { BillsPlaceholderScreen } from '../screens/bills/BillsPlaceholderScreen';
@@ -95,27 +96,3 @@ export const MainTabNavigator: React.FC<{
     </Tab.Navigator>
   );
 };
-
-const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    padding: 20,
-  },
-  placeholderEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  placeholderTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 6,
-  },
-  placeholderSubtitle: {
-    fontSize: 14,
-    color: '#64748B',
-  },
-});
