@@ -942,21 +942,26 @@
       display: none;
       width: 100%;
       max-width: 1320px;
-      background: #0F172A;
-      border-radius: 20px;
-      border: 1px solid #1E293B;
+    /* Desktop View Container (Light Theme) */
+    .desktop-view-container {
+      display: none;
+      width: 100%;
+      max-width: 1320px;
+      background: #F8FAFC;
+      border-radius: 24px;
+      border: 1px solid #E2E8F0;
       overflow: hidden;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.25);
     }
 
     .desktop-header {
-      background: #151D2A;
-      padding: 14px 24px;
+      background: #FFFFFF;
+      padding: 16px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1E293B;
-      color: white;
+      border-bottom: 1px solid #E2E8F0;
+      color: #0F172A;
     }
 
     .desktop-body {
@@ -966,18 +971,18 @@
 
     .desktop-sidebar {
       width: 240px;
-      background: #111827;
-      border-right: 1px solid #1E293B;
-      padding: 18px 12px;
+      background: #FFFFFF;
+      border-right: 1px solid #E2E8F0;
+      padding: 20px 14px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
 
     .d-nav-item {
-      padding: 10px 14px;
-      border-radius: 10px;
-      color: #94A3B8;
+      padding: 11px 14px;
+      border-radius: 12px;
+      color: #64748B;
       font-size: 13px;
       font-weight: 600;
       display: flex;
@@ -985,21 +990,25 @@
       gap: 10px;
       cursor: pointer;
       text-decoration: none;
+      transition: all 0.15s ease;
     }
-    .d-nav-item.active, .d-nav-item:hover {
-      background: #1F2937;
-      color: white;
+    .d-nav-item:hover {
+      background: #F1F5F9;
+      color: #0F172A;
     }
     .d-nav-item.active {
-      border-left: 3px solid #F97316;
+      background: #ECFDF5;
+      color: #065F46;
+      border-left: 3.5px solid #10B981;
+      font-weight: 700;
     }
 
     .desktop-main {
       flex: 1;
-      padding: 24px;
+      padding: 28px;
       overflow-y: auto;
-      background: #090D16;
-      color: white;
+      background: #F8FAFC;
+      color: #0F172A;
     }
 
     .kpi-row {
@@ -1010,30 +1019,32 @@
     }
 
     .kpi-card {
-      background: #131B2B;
-      border: 1px solid #1E293B;
-      border-radius: 16px;
-      padding: 18px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
     }
 
     .kpi-title {
       font-size: 12px;
-      color: #94A3B8;
+      color: #64748B;
       margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 700;
     }
 
     .kpi-val {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 800;
-      color: white;
+      color: #0F172A;
     }
 
     .kpi-trend {
       font-size: 12px;
-      font-weight: 600;
-      margin-top: 4px;
+      font-weight: 700;
+      margin-top: 6px;
       color: #10B981;
     }
     .kpi-trend.alert {
@@ -1041,41 +1052,44 @@
     }
 
     .data-table-card {
-      background: #131B2B;
-      border: 1px solid #1E293B;
-      border-radius: 16px;
-      padding: 20px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
     }
 
     .d-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 14px;
+      margin-top: 16px;
       font-size: 13px;
     }
 
     .d-table th {
       text-align: left;
-      padding: 10px 12px;
+      padding: 12px 14px;
       color: #64748B;
-      border-bottom: 1px solid #1E293B;
+      font-weight: 700;
+      border-bottom: 1px solid #E2E8F0;
+      background: #F8FAFC;
     }
 
     .d-table td {
-      padding: 12px;
-      border-bottom: 1px solid #1E293B;
-      color: #CBD5E1;
+      padding: 14px;
+      border-bottom: 1px solid #F1F5F9;
+      color: #1E293B;
     }
 
     .badge-stock {
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 700;
     }
-    .badge-ok { background: rgba(16, 185, 129, 0.15); color: #34D399; }
-    .badge-low { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
-    .badge-out { background: rgba(239, 68, 68, 0.15); color: #F87171; }
+    .badge-ok { background: #ECFDF5; color: #059669; }
+    .badge-low { background: #FEF3C7; color: #D97706; }
+    .badge-out { background: #FEE2E2; color: #DC2626; }
   </style>
 </head>
 <body>
@@ -1513,16 +1527,23 @@
 
     </div>
 
-    <!-- DESKTOP ENTERPRISE DASHBOARD PROTOTYPE -->
+    <!-- DESKTOP ENTERPRISE DASHBOARD PROTOTYPE (LIGHT THEME) -->
     <div class="desktop-view-container" id="desktop-view-wrapper">
       <div class="desktop-header">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 18px; font-weight: 800;">🛒 Kirana Pro Enterprise HQ</span>
-          <span style="background: #1E293B; color: #94A3B8; padding: 4px 8px; border-radius: 6px; font-size: 11px;">Store: Sharma Kirana #1</span>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span style="font-size: 20px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+            <span style="color: #10B981;">🛒</span> Kirana Pro
+          </span>
+          <span style="background: #F1F5F9; color: #475569; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; border: 1px solid #E2E8F0;">
+            Branch: Sharma Kirana #1 • Gurugram
+          </span>
         </div>
-        <div style="display: flex; align-items: center; gap: 14px; font-size: 13px;">
-          <span>Suresh Gupta (Store Owner)</span>
-          <button style="background: #EF4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Sign Out</button>
+        <div style="display: flex; align-items: center; gap: 16px; font-size: 13px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 16px;">👨🏽‍💼</div>
+            <span style="font-weight: 700; color: #0F172A;">Rahul Sharma (Owner)</span>
+          </div>
+          <button style="background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">Sign Out</button>
         </div>
       </div>
 
@@ -1563,8 +1584,8 @@
 
           <div class="data-table-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <h3 style="font-size: 16px; font-weight: 700;">Live Inventory & Stock Health</h3>
-              <button style="background: #F97316; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Add New Product</button>
+              <h3 style="font-size: 16px; font-weight: 800; color: #0F172A;">Live Inventory & Stock Health</h3>
+              <button style="background: #10B981; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);">+ Add New Product</button>
             </div>
 
             <table class="d-table">

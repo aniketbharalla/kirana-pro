@@ -632,9 +632,9 @@ Install Firebase: `npm install firebase` in `apps/dashboard`.
 
 `app/stock/page.tsx` — `StockLog`: table of stock movements. Columns: Date, Product, Type (In/Out/Adjust), Quantity, Reason, Performed By. Newest first. Filterable by product and type.
 
-- [ ] **Step 8: Add dark mode support**
+- [ ] **Step 8: Implement Light Theme styling as primary default**
 
-CSS variables for light/dark themes. System preference detection via `prefers-color-scheme`. Toggle button in Sidebar.
+Configure CSS variables for crisp Light Theme (soft off-white canvas `#F8FAFC`, white cards `#FFFFFF`, emerald `#10B981` accents, `#0F172A` text). Include an optional dark mode toggle switch in the sidebar with system preference detection via `prefers-color-scheme`.
 
 - [ ] **Step 9: Commit**
 

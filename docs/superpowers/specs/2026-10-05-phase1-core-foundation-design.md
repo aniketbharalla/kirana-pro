@@ -381,12 +381,13 @@ For Phase 1, the dashboard is a **read-only overview** — full features come in
 3. **Products** — Table view of all products with search/filter, sortable columns
 4. **Stock Log** — Table view of stock movements
 
-### Design
+### Design (Light Theme Primary)
 
-- Clean, minimal Material Design-inspired layout
-- Sidebar navigation
-- Responsive (works on tablets too)
-- Dark mode support
+- **Aesthetic:** Crisp, modern Light Theme with airy whitespace, soft off-white canvas (`#F8FAFC`), and pure white cards (`#FFFFFF`) with subtle soft shadows (`0 4px 16px rgba(0,0,0,0.04)`).
+- **Navigation:** Clean white sidebar with emerald green (`#10B981`) active indicator pills.
+- **Data Density:** High-contrast KPI metric cards, clear tabular layouts, and status color pills (mint green for in stock, amber for low stock, red for critical).
+- **Responsive:** Fluid layout optimizing for desktops and laptops, with tablet responsiveness.
+- **Optional Dark Mode Toggle:** Available in settings for nighttime book-keeping.
 
 ---
 
