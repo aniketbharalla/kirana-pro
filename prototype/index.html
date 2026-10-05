@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kirana Pro — Interactive UI/UX Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #F97316;
+      --primary-dark: #C2410C;
+      --primary-light: #FFEDD5;
+      --secondary: #10B981;
+      --secondary-dark: #047857;
+      --accent: #0284C7;
+      --dark: #0F172A;
+      --surface: #FFFFFF;
+      --surface-subtle: #F8FAFC;
+      --border: #E2E8F0;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --danger: #EF4444;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      --shadow-lg: 0 20px 35px -8px rgba(249, 115, 22, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, sans-serif;
+    }
+
+    body {
+      background: #0B0F17;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Control Banner */
+    .top-bar {
+      background: #151D2A;
+      border-bottom: 1px solid #1E293B;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #F97316, #EA580C);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .view-toggles {
+      display: flex;
+      background: #0F172A;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      gap: 4px;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-btn.active {
+      background: #F97316;
+      color: white;
+    }
+
+    .lang-btn {
+      background: #1E293B;
+      color: #CBD5E1;
+      border: 1px solid #334155;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Main Workspace */
+    .workspace {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    /* Mobile Prototype Frame */
+    .mobile-frame-wrapper {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+      max-width: 1200px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .phone-mockup {
+      width: 410px;
+      height: 840px;
+      background: white;
+      border-radius: 46px;
+      border: 10px solid #1E293B;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .phone-notch {
+      height: 28px;
+      background: #1E293B;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      color: #94A3B8;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .screen-container {
+      flex: 1;
+      overflow-y: auto;
+      background: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Screen Headers */
+    .mobile-header {
+      background: white;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .store-info h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .store-info p {
+      font-size: 12px;
+      color: #64748B;
+    }
+
+    .online-chip {
+      background: #ECFDF5;
+      color: #059669;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .online-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10B981;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      background: white;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 4px 14px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: #64748B;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+
+    .nav-item .icon {
+      font-size: 20px;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+    .nav-item.active .icon {
+      transform: translateY(-2px);
+    }
+
+    /* Screens */
+    .screen {
+      display: none;
+      padding: 16px;
+      flex: 1;
+    }
+    .screen.active {
+      display: block;
+    }
+
+    /* Taraju Screen Specifics */
+    .taraju-card {
+      background: white;
+      border-radius: 20px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .item-select-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #FFF7ED;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid #FFEDD5;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .item-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #F97316;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .item-meta h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1E293B;
+    }
+
+    .item-meta span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #C2410C;
+    }
+
+    /* Mode Segmented Switch */
+    .mode-switch {
+      display: flex;
+      background: #F1F5F9;
+      padding: 4px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: #64748B;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-tab.active {
+      background: white;
+      color: #0F172A;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    /* Big Digital Display */
+    .digital-meter {
+      background: linear-gradient(135deg, #064E3B, #047857);
+      border-radius: 18px;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 20px rgba(6, 78, 59, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .meter-label {
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 6px;
+    }
+
+    .meter-value {
+      font-size: 42px;
+      font-weight: 800;
+      color: #A7F3D0;
+      text-shadow: 0 0 15px rgba(167, 243, 208, 0.4);
+      line-height: 1.1;
+    }
+
+    .meter-sub {
+      font-size: 13px;
+      margin-top: 6px;
+      opacity: 0.9;
+    }
+
+    /* Input Field */
+    .input-box {
+      margin-bottom: 16px;
+    }
+
+    .input-box label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .currency-symbol {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      font-weight: 700;
+      color: #94A3B8;
+    }
+
+    .number-input {
+      width: 100%;
+      padding: 14px 14px 14px 38px;
+      font-size: 22px;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .number-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px #FFEDD5;
+    }
+
+    /* Quick Chips */
+    .quick-chips-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .quick-chip {
+      background: white;
+      border: 1.5px solid #CBD5E1;
+      padding: 10px 0;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-chip:hover, .quick-chip.active {
+      background: #FFF7ED;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-add-bill {
+      width: 100%;
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s;
+    }
+
+    .btn-add-bill:hover {
+      transform: translateY(-2px);
+    }
+
+    .history-strip {
+      margin-top: 18px;
+    }
+
+    .history-strip h5 {
+      font-size: 12px;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .history-items {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .history-pill {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    /* Interactive Explanation Panel */
+    .prototype-sidebar {
+      background: #151D2A;
+      border: 1px solid #1E293B;
+      border-radius: 24px;
+      padding: 24px;
+      width: 440px;
+      color: #E2E8F0;
+    }
+
+    .sidebar-heading {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-tag {
+      background: #F97316;
+      color: white;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .spec-point {
+      margin-bottom: 16px;
+      background: #0F172A;
+      padding: 14px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .spec-point h4 {
+      font-size: 14px;
+      color: #F8FAFC;
+      margin-bottom: 4px;
+    }
+
+    .spec-point p {
+      font-size: 13px;
+      color: #94A3B8;
+      line-height: 1.5;
+    }
+
+    /* Cart Toast Notification */
+    .toast {
+      position: absolute;
+      bottom: 70px;
+      left: 20px;
+      right: 20px;
+      background: #0F172A;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Desktop View Container */
+    .desktop-view-container {
+      display: none;
+      width: 100%;
+      max-width: 1320px;
+      background: #0F172A;
+      border-radius: 20px;
+      border: 1px solid #1E293B;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+
+    .desktop-header {
+      background: #151D2A;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1E293B;
+      color: white;
+    }
+
+    .desktop-body {
+      display: flex;
+      height: 720px;
+    }
+
+    .desktop-sidebar {
+      width: 240px;
+      background: #111827;
+      border-right: 1px solid #1E293B;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .d-nav-item {
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: #94A3B8;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .d-nav-item.active, .d-nav-item:hover {
+      background: #1F2937;
+      color: white;
+    }
+    .d-nav-item.active {
+      border-left: 3px solid #F97316;
+    }
+
+    .desktop-main {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      background: #090D16;
+      color: white;
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: #131B2B;
+      border: 1px solid #1E293B;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .kpi-title {
+      font-size: 12px;
+      color: #94A3B8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .kpi-trend {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 4px;
+      color: #10B981;
+    }
+    .kpi-trend.alert {
+      color: #EF4444;
+    }
+
+    .data-table-card {
+      background: #131B2B;
+      border: 1px solid #1E293B;
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .d-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    .d-table th {
+      text-align: left;
+      padding: 10px 12px;
+      color: #64748B;
+      border-bottom: 1px solid #1E293B;
+    }
+
+    .d-table td {
+      padding: 12px;
+      border-bottom: 1px solid #1E293B;
+      color: #CBD5E1;
+    }
+
+    .badge-stock {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-ok { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+    .badge-low { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+    .badge-out { background: rgba(239, 68, 68, 0.15); color: #F87171; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & View Controller -->
+  <header class="top-bar">
+    <div class="brand">
+      <span>🛒 Kirana Pro</span>
+      <span class="brand-badge">UI/UX Interactive Prototype</span>
+    </div>
+
+    <div class="view-toggles">
+      <button class="toggle-btn active" id="btn-mobile-view" onclick="switchView('mobile')">
+        📱 Mobile Store App
+      </button>
+      <button class="toggle-btn" id="btn-desktop-view" onclick="switchView('desktop')">
+        🖥️ Desktop Enterprise Dashboard
+      </button>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="lang-btn" id="lang-btn" onclick="toggleLang()">🌐 हिंदी / English</button>
+    </div>
+  </header>
+
+  <!-- Main Canvas -->
+  <main class="workspace">
+
+    <!-- MOBILE VIEW PROTOTYPE -->
+    <div class="mobile-frame-wrapper" id="mobile-view-wrapper">
+      
+      <!-- Interactive Phone -->
+      <div class="phone-mockup">
+        <div class="phone-notch">
+          <span>9:41</span>
+          <span>5G • 100%</span>
+        </div>
+
+        <div class="mobile-header">
+          <div class="store-info">
+            <h3 id="txt-store-name">Sharma Kirana Store</h3>
+            <p id="txt-store-sub">Sector 14, Gurugram • Chacha ki Dukaan</p>
+          </div>
+          <div class="online-chip">
+            <div class="online-dot"></div>
+            <span>Auto-Sync</span>
+          </div>
+        </div>
+
+        <div class="screen-container">
+          
+          <!-- Screen 1: Home Dashboard -->
+          <div class="screen" id="screen-home">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+              <div style="background: white; border: 1px solid var(--border); padding: 14px; border-radius: 14px;">
+                <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">TODAY'S SALE</div>
+                <div style="font-size: 22px; font-weight: 800; color: #0F172A; margin-top: 4px;">₹14,250</div>
+                <div style="font-size: 11px; color: #10B981; font-weight: 600;">↑ 24 Bills today</div>
+              </div>
+              <div style="background: #FEF2F2; border: 1px solid #FEE2E2; padding: 14px; border-radius: 14px;">
+                <div style="font-size: 11px; color: #991B1B; font-weight: 600;">KHATA DUE</div>
+                <div style="font-size: 22px; font-weight: 800; color: #B91C1C; margin-top: 4px;">₹3,450</div>
+                <div style="font-size: 11px; color: #DC2626; font-weight: 600;">5 Overdue customers</div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+              <button onclick="navTo('taraju')" style="background: #FFF7ED; border: 1.5px solid #FDBA74; padding: 14px; border-radius: 14px; text-align: left; cursor: pointer;">
+                <div style="font-size: 26px;">⚖️</div>
+                <div style="font-size: 14px; font-weight: 700; color: #C2410C; margin-top: 4px;">Taraju Scale</div>
+                <div style="font-size: 11px; color: #9A3412;">Price-to-Weight calc</div>
+              </button>
+              <button onclick="navTo('billing')" style="background: #ECFDF5; border: 1.5px solid #A7F3D0; padding: 14px; border-radius: 14px; text-align: left; cursor: pointer;">
+                <div style="font-size: 26px;">🧾</div>
+                <div style="font-size: 14px; font-weight: 700; color: #065F46; margin-top: 4px;">Quick POS Bill</div>
+                <div style="font-size: 11px; color: #047857;">Generate invoice</div>
+              </button>
+            </div>
+
+            <h4 style="font-size: 13px; text-transform: uppercase; color: #64748B; margin-bottom: 8px;">Quick Stock Status</h4>
+            <div style="background: white; border: 1px solid var(--border); border-radius: 14px; padding: 12px;">
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px;">
+                <span>India Gate Basmati Rice</span>
+                <span style="font-weight: 700; color: #10B981;">38 kg left</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px;">
+                <span>Toor Dal Special</span>
+                <span style="font-weight: 700; color: #F59E0B;">4 kg (Low!)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px;">
+                <span>Tata Salt (1kg)</span>
+                <span style="font-weight: 700; color: #EF4444;">0 pkts (Out!)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen 2: TARAJU CALCULATOR (Signature Feature) -->
+          <div class="screen active" id="screen-taraju">
+            
+            <!-- Item Selector -->
+            <div class="item-select-bar" onclick="cycleProduct()">
+              <div class="item-badge" id="product-icon">🌾</div>
+              <div class="item-meta">
+                <h4 id="product-name">Basmati Rice (Loose)</h4>
+                <span>₹<span id="product-rate">50</span> / kg • <span style="font-size:11px; color:#64748B; text-decoration: underline;">Tap to change</span></span>
+              </div>
+            </div>
+
+            <!-- Mode Switcher -->
+            <div class="mode-switch">
+              <button class="mode-tab active" id="tab-rupee-to-wt" onclick="setTarajuMode('rupee-to-wt')">
+                ₹ → Weight (कितने का?)
+              </button>
+              <button class="mode-tab" id="tab-wt-to-rupee" onclick="setTarajuMode('wt-to-rupee')">
+                Weight → ₹ (कितने ग्राम?)
+              </button>
+            </div>
+
+            <!-- Digital Weighing Display -->
+            <div class="digital-meter">
+              <div class="meter-label" id="meter-label">TARAAJU MEASUREMENT</div>
+              <div class="meter-value" id="meter-output">100 grams</div>
+              <div class="meter-sub" id="meter-sub">₹5.00 worth at ₹50.00/kg</div>
+            </div>
+
+            <!-- Input Box -->
+            <div class="input-box">
+              <label id="input-label">Customer Amount (₹):</label>
+              <div class="input-wrapper">
+                <span class="currency-symbol" id="symbol-display">₹</span>
+                <input type="number" id="calc-input" class="number-input" value="5" oninput="calculateLive()" />
+              </div>
+            </div>
+
+            <!-- Quick Amount Chips (for ₹ mode) -->
+            <div class="quick-chips-row" id="quick-chips-container">
+              <button class="quick-chip active" onclick="setQuickVal(5)">₹5</button>
+              <button class="quick-chip" onclick="setQuickVal(10)">₹10</button>
+              <button class="quick-chip" onclick="setQuickVal(20)">₹20</button>
+              <button class="quick-chip" onclick="setQuickVal(50)">₹50</button>
+              <button class="quick-chip" onclick="setQuickVal(100)">₹100</button>
+            </div>
+
+            <!-- Add to Bill CTA -->
+            <button class="btn-add-bill" onclick="addCurrentItemToBill()">
+              <span>🧾 Add to Bill Draft</span>
+              <span id="btn-bill-tag">(100g • ₹5.00)</span>
+            </button>
+
+            <!-- Weighing History -->
+            <div class="history-strip">
+              <h5>Recent Scale Lookups</h5>
+              <div class="history-items">
+                <div class="history-pill">🌾 Rice 100g = ₹5</div>
+                <div class="history-pill">🥣 Toor Dal 250g = ₹30</div>
+                <div class="history-pill">🧂 Sugar 500g = ₹22</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Screen 3: Billing POS & Cart -->
+          <div class="screen" id="screen-billing">
+            <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 12px; color: #1E293B;">Current Bill Draft</h4>
+            
+            <div id="bill-items-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+              <!-- Generated Dynamically -->
+              <div style="background: white; border: 1px solid var(--border); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 700; font-size: 14px;">Basmati Rice (Taraju)</div>
+                  <div style="font-size: 12px; color: #64748B;">100 grams @ ₹50/kg</div>
+                </div>
+                <div style="font-weight: 800; font-size: 15px;">₹5.00</div>
+              </div>
+            </div>
+
+            <div style="background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 13px; color: #64748B; margin-bottom: 6px;">
+                <span>Items Subtotal</span>
+                <span id="bill-subtotal">₹5.00</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 13px; color: #64748B; margin-bottom: 6px;">
+                <span>GST (Tax)</span>
+                <span>₹0.00</span>
+              </div>
+              <div style="border-top: 1px dashed var(--border); margin: 8px 0; padding-top: 8px; display: flex; justify-content: space-between; font-size: 17px; font-weight: 800; color: #0F172A;">
+                <span>Grand Total</span>
+                <span id="bill-total" style="color: #10B981;">₹5.00</span>
+              </div>
+            </div>
+
+            <div style="font-size: 12px; font-weight: 600; color: #64748B; margin-bottom: 8px;">PAYMENT METHOD</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+              <button style="background: #EFF6FF; border: 1.5px solid #BFDBFE; color: #1D4ED8; font-weight: 700; padding: 10px; border-radius: 10px; cursor: pointer;">
+                UPI QR
+              </button>
+              <button style="background: #F0FDF4; border: 1.5px solid #BBF7D0; color: #15803D; font-weight: 700; padding: 10px; border-radius: 10px; cursor: pointer;">
+                Cash
+              </button>
+              <button style="background: #FEF2F2; border: 1.5px solid #FECACA; color: #B91C1C; font-weight: 700; padding: 10px; border-radius: 10px; cursor: pointer;">
+                Khata (Udhar)
+              </button>
+            </div>
+
+            <button onclick="shareWhatsAppBill()" style="width: 100%; background: #25D366; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span>💬 Send Bill via WhatsApp</span>
+            </button>
+          </div>
+
+          <!-- Screen 4: Products Catalog -->
+          <div class="screen" id="screen-products">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+              <input type="text" id="search-products-input" placeholder="Search dal, atta, oil..." style="flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 13px;" />
+              <button onclick="openBarcodeScannerModal()" style="background: #F97316; color: white; border: none; padding: 0 14px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">📷 Scan</button>
+            </div>
+            
+            <div id="catalog-list" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- Dynamic product catalog cards -->
+            </div>
+          </div>
+
+          <!-- Barcode Scanner Modal Simulation -->
+          <div id="barcode-scanner-modal" style="display: none; position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 50; flex-direction: column; padding: 20px; color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h4 style="font-size: 16px; font-weight: 700;">📷 Barcode Camera Scanner</h4>
+              <button onclick="closeBarcodeScannerModal()" style="background: #334155; border: none; color: white; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 16px;">✕</button>
+            </div>
+
+            <!-- Viewfinder camera preview -->
+            <div style="flex: 1; border: 2px dashed #F97316; border-radius: 20px; background: #0B0F17; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 20px; text-align: center;">
+              <div style="width: 220px; height: 120px; border: 2px solid #10B981; border-radius: 12px; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);">
+                <div style="position: absolute; width: 100%; height: 2px; background: #EF4444; animation: scanLine 2s infinite ease-in-out;"></div>
+                <span style="font-size: 11px; color: #94A3B8;">Align barcode in box</span>
+              </div>
+              <p style="font-size: 12px; color: #94A3B8; margin-top: 18px;">Simulate camera scanning an item:</p>
+              
+              <!-- Quick demo scan trigger buttons -->
+              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 280px; margin-top: 12px;">
+                <button onclick="simulateScan('8901234567890')" style="background: #1E293B; border: 1px solid #334155; color: #F8FAFC; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                  🟢 Scan Existing (Fortune Oil)
+                </button>
+                <button onclick="simulateScan('8909998887771')" style="background: #1E293B; border: 1px solid #334155; color: #F8FAFC; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
+                  🟡 Scan New Unknown Barcode
+                </button>
+              </div>
+            </div>
+
+            <!-- Action Prompt Drawer (Existing item -> Update Stock) -->
+            <div id="scan-existing-drawer" style="display: none; background: white; color: #0F172A; border-radius: 18px; padding: 18px; margin-top: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <span style="background: #ECFDF5; color: #059669; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px;">EXISTING PRODUCT DETECTED</span>
+                  <h4 id="existing-prod-name" style="font-size: 16px; font-weight: 800; margin-top: 4px;">Fortune Sunflower Oil (1L)</h4>
+                  <div style="font-size: 12px; color: #64748B;">Current Stock: <strong id="existing-prod-stock">18</strong> packets</div>
+                </div>
+              </div>
+              <div style="margin: 12px 0;">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;">Add Stock Arrival Qty (+):</label>
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                  <button onclick="adjustScanStock(1)" style="flex: 1; padding: 8px; border: 1px solid #CBD5E1; border-radius: 8px; background: #F8FAFC; font-weight: 700; cursor: pointer;">+1</button>
+                  <button onclick="adjustScanStock(5)" style="flex: 1; padding: 8px; border: 1px solid #CBD5E1; border-radius: 8px; background: #F8FAFC; font-weight: 700; cursor: pointer;">+5</button>
+                  <button onclick="adjustScanStock(10)" style="flex: 1; padding: 8px; border: 1px solid #CBD5E1; border-radius: 8px; background: #F8FAFC; font-weight: 700; cursor: pointer;">+10</button>
+                  <input type="number" id="scan-stock-input" value="5" style="width: 70px; padding: 8px; border: 1.5px solid var(--primary); border-radius: 8px; text-align: center; font-weight: 700;" />
+                </div>
+              </div>
+              <button onclick="confirmStockUpdate()" style="width: 100%; background: #10B981; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                ✓ Update Stock Now
+              </button>
+            </div>
+
+            <!-- Action Prompt Drawer (New item -> Prompt Add Item) -->
+            <div id="scan-new-drawer" style="display: none; background: white; color: #0F172A; border-radius: 18px; padding: 18px; margin-top: 14px;">
+              <span style="background: #FFF7ED; color: #C2410C; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px;">NEW BARCODE SCANNED</span>
+              <h4 style="font-size: 15px; font-weight: 800; margin-top: 4px;">Barcode: <span id="new-barcode-val" style="color: #F97316;">8909998887771</span></h4>
+              <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">Item not found in store. Add details below:</p>
+
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="text" id="new-item-name" placeholder="Item Name (e.g. Parle-G Gold 250g)" style="padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px;" />
+                <div style="display: flex; gap: 8px;">
+                  <input type="number" id="new-item-price" placeholder="Price (₹)" style="flex: 1; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px;" />
+                  <input type="number" id="new-item-qty" placeholder="Initial Stock" value="20" style="flex: 1; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px;" />
+                </div>
+                <button onclick="confirmAddNewItem()" style="background: #F97316; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 4px;">
+                  + Add Item to Catalog
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Toast Alert -->
+          <div class="toast" id="toast-msg">
+            <span id="toast-text">Added 100g Rice (₹5.00) to Bill Draft!</span>
+            <span style="color: #38BDF8; font-weight: 700; cursor: pointer;" onclick="navTo('billing')">View Bill →</span>
+          </div>
+
+        </div>
+
+        <!-- Phone Bottom Navigation -->
+        <nav class="bottom-nav">
+          <button class="nav-item" id="nav-btn-home" onclick="navTo('home')">
+            <span class="icon">🏠</span>
+            <span>Home</span>
+          </button>
+          <button class="nav-item" id="nav-btn-products" onclick="navTo('products')">
+            <span class="icon">📦</span>
+            <span>Products</span>
+          </button>
+          <button class="nav-item active" id="nav-btn-taraju" onclick="navTo('taraju')">
+            <span class="icon">⚖️</span>
+            <span>Taraju</span>
+          </button>
+          <button class="nav-item" id="nav-btn-billing" onclick="navTo('billing')">
+            <span class="icon">🧾</span>
+            <span>Billing</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Explanatory Details for the Client -->
+      <div class="prototype-sidebar">
+        <div class="sidebar-heading">
+          <span>✨ Kirana Pro Highlights</span>
+          <span class="feature-tag">Phase 1 Specs</span>
+        </div>
+
+        <div class="spec-point">
+          <h4>⚖️ Instant Taraju Math (Try it on the left!)</h4>
+          <p>Solves the real-world shopkeeper headache: when a customer asks for <strong>"₹5 ka chawal"</strong> or <strong>"₹10 ki cheeni"</strong>, it automatically calculates the exact gram weight to place on the physical scale and lets the shopkeeper add it to the bill in 1 tap.</p>
+        </div>
+
+        <div class="spec-point">
+          <h4>📱 Two-way Weight / Rupee Toggle</h4>
+          <p>Switch between <strong>₹ to Weight</strong> and <strong>Weight to ₹</strong>. Handles loose grain products (dal, sugar, spices, atta) with whole-gram rounding precision.</p>
+        </div>
+
+        <div class="spec-point">
+          <h4>⚡ Zero-Cost Architecture (100% Free Tier)</h4>
+          <p>Firebase Firestore (1GB storage, 50k reads/day), Firebase Auth with Google + Phone OTP, free Next.js Vercel hosting, direct WhatsApp deeplinks.</p>
+        </div>
+
+        <div class="spec-point">
+          <h4>🇮🇳 Vernacular & Indian Kirana Focused</h4>
+          <p>Hindi + English toggle, WhatsApp receipt generator, and Udhar/Khata tracking with zero expensive SMS gateways.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DESKTOP ENTERPRISE DASHBOARD PROTOTYPE -->
+    <div class="desktop-view-container" id="desktop-view-wrapper">
+      <div class="desktop-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 18px; font-weight: 800;">🛒 Kirana Pro Enterprise HQ</span>
+          <span style="background: #1E293B; color: #94A3B8; padding: 4px 8px; border-radius: 6px; font-size: 11px;">Store: Sharma Kirana #1</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; font-size: 13px;">
+          <span>Suresh Gupta (Store Owner)</span>
+          <button style="background: #EF4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">Sign Out</button>
+        </div>
+      </div>
+
+      <div class="desktop-body">
+        <aside class="desktop-sidebar">
+          <a class="d-nav-item active">📊 Dashboard & Sales</a>
+          <a class="d-nav-item">📦 Inventory & Stock</a>
+          <a class="d-nav-item">⚖️ Taraju Analytics</a>
+          <a class="d-nav-item">🚚 Supplier Orders</a>
+          <a class="d-nav-item">📖 Khata (Credit Book)</a>
+          <a class="d-nav-item">📑 GST Reports</a>
+          <a class="d-nav-item">⚙️ Store Settings</a>
+        </aside>
+
+        <main class="desktop-main">
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <div class="kpi-title">Monthly Revenue</div>
+              <div class="kpi-val">₹4,82,000</div>
+              <div class="kpi-trend">↑ 14.5% vs last month</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Gross Margin</div>
+              <div class="kpi-val">18.4%</div>
+              <div class="kpi-trend">↑ 2.1% net profit</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Khata Outstanding</div>
+              <div class="kpi-val">₹42,500</div>
+              <div class="kpi-trend alert">8 overdue customers</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-title">Stock Alerts</div>
+              <div class="kpi-val">4 Items</div>
+              <div class="kpi-trend alert">Reorder needed</div>
+            </div>
+          </div>
+
+          <div class="data-table-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <h3 style="font-size: 16px; font-weight: 700;">Live Inventory & Stock Health</h3>
+              <button style="background: #F97316; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Add New Product</button>
+            </div>
+
+            <table class="d-table">
+              <thead>
+                <tr>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Unit Type</th>
+                  <th>Selling Price</th>
+                  <th>Current Stock</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>India Gate Basmati Rice</td>
+                  <td>Rice / Grains</td>
+                  <td>Per Kg (Loose ⚖️)</td>
+                  <td>₹50.00</td>
+                  <td>120 kg</td>
+                  <td><span class="badge-stock badge-ok">In Stock</span></td>
+                </tr>
+                <tr>
+                  <td>Toor Dal Special Grade</td>
+                  <td>Dal / Pulses</td>
+                  <td>Per Kg (Loose ⚖️)</td>
+                  <td>₹120.00</td>
+                  <td>8 kg</td>
+                  <td><span class="badge-stock badge-low">Low Stock</span></td>
+                </tr>
+                <tr>
+                  <td>Fortune Sunflower Oil 1L</td>
+                  <td>Edible Oil</td>
+                  <td>Packet</td>
+                  <td>₹145.00</td>
+                  <td>28 packets</td>
+                  <td><span class="badge-stock badge-ok">In Stock</span></td>
+                </tr>
+                <tr>
+                  <td>Tata Salt Vacuum Evaporated</td>
+                  <td>Salt & Spices</td>
+                  <td>Packet</td>
+                  <td>₹28.00</td>
+                  <td>0 packets</td>
+                  <td><span class="badge-stock badge-out">Out of Stock</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Product Database for Taraju simulation
+    const products = [
+      { name: "Basmati Rice (Loose)", rate: 50, unit: "kg", icon: "🌾", hindi: "बासमती चावल" },
+      { name: "Toor Dal (Arhar)", rate: 120, unit: "kg", icon: "🥣", hindi: "अरहर तूर दाल" },
+      { name: "Shuddh Cheeni (Sugar)", rate: 44, unit: "kg", icon: "🧂", hindi: "सफ़ेद चीनी" },
+      { name: "Sarson Tel (Mustard Oil)", rate: 160, unit: "liter", icon: "🛢️", hindi: "सरसों तेल" }
+    ];
+
+    let currentProdIdx = 0;
+    let currentMode = 'rupee-to-wt'; // or 'wt-to-rupee'
+    let isHindi = false;
+    let billItems = [
+      { name: "Basmati Rice (Taraju)", qty: "100g", rate: "₹50/kg", price: 5.00 }
+    ];
+
+    function switchView(mode) {
+      const mobWrapper = document.getElementById('mobile-view-wrapper');
+      const deskWrapper = document.getElementById('desktop-view-wrapper');
+      const btnMob = document.getElementById('btn-mobile-view');
+      const btnDesk = document.getElementById('btn-desktop-view');
+
+      if (mode === 'mobile') {
+        mobWrapper.style.display = 'flex';
+        deskWrapper.style.display = 'none';
+        btnMob.classList.add('active');
+        btnDesk.classList.remove('active');
+      } else {
+        mobWrapper.style.display = 'none';
+        deskWrapper.style.display = 'block';
+        btnDesk.classList.add('active');
+        btnMob.classList.remove('active');
+      }
+    }
+
+    function navTo(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById('screen-' + screenId);
+      if (target) target.classList.add('active');
+
+      const btn = document.getElementById('nav-btn-' + screenId);
+      if (btn) btn.classList.add('active');
+    }
+
+    function cycleProduct() {
+      currentProdIdx = (currentProdIdx + 1) % products.length;
+      const p = products[currentProdIdx];
+      document.getElementById('product-name').innerText = isHindi ? p.hindi : p.name;
+      document.getElementById('product-rate').innerText = p.rate;
+      document.getElementById('product-icon').innerText = p.icon;
+      calculateLive();
+    }
+
+    function setTarajuMode(mode) {
+      currentMode = mode;
+      const tabRupee = document.getElementById('tab-rupee-to-wt');
+      const tabWt = document.getElementById('tab-wt-to-rupee');
+      const chips = document.getElementById('quick-chips-container');
+      const symbol = document.getElementById('symbol-display');
+      const label = document.getElementById('input-label');
+      const input = document.getElementById('calc-input');
+
+      if (mode === 'rupee-to-wt') {
+        tabRupee.classList.add('active');
+        tabWt.classList.remove('active');
+        chips.style.display = 'grid';
+        symbol.innerText = '₹';
+        label.innerText = isHindi ? 'ग्राहक को कितने का चाहिए (₹):' : 'Customer Amount (₹):';
+        input.value = '5';
+      } else {
+        tabWt.classList.add('active');
+        tabRupee.classList.remove('active');
+        chips.style.display = 'none';
+        symbol.innerText = 'g';
+        label.innerText = isHindi ? 'तराजू पर कितना वजन रखा (Grams):' : 'Weight placed on scale (Grams):';
+        input.value = '250';
+      }
+      calculateLive();
+    }
+
+    function setQuickVal(val) {
+      document.querySelectorAll('.quick-chip').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('calc-input').value = val;
+      calculateLive();
+    }
+
+    function calculateLive() {
+      const inputVal = parseFloat(document.getElementById('calc-input').value) || 0;
+      const p = products[currentProdIdx];
+      const meterOutput = document.getElementById('meter-output');
+      const meterSub = document.getElementById('meter-sub');
+      const btnTag = document.getElementById('btn-bill-tag');
+
+      if (currentMode === 'rupee-to-wt') {
+        // Customer says ₹X. Calculate grams = (amount / ratePerKg) * 1000
+        const grams = Math.round((inputVal / p.rate) * 1000);
+        let displayStr = grams >= 1000 ? (grams/1000).toFixed(2) + " kg" : grams + " grams";
+        meterOutput.innerText = displayStr;
+        meterSub.innerText = `₹${inputVal.toFixed(2)} worth at ₹${p.rate}/kg`;
+        btnTag.innerText = `(${displayStr} • ₹${inputVal.toFixed(2)})`;
+      } else {
+        // Customer asks for Y grams. Calculate price = (grams / 1000) * ratePerKg
+        const price = Math.round((inputVal / 1000) * p.rate * 100) / 100;
+        meterOutput.innerText = `₹${price.toFixed(2)}`;
+        meterSub.innerText = `${inputVal} grams at ₹${p.rate}/kg`;
+        btnTag.innerText = `(${inputVal}g • ₹${price.toFixed(2)})`;
+      }
+    }
+
+    function addCurrentItemToBill() {
+      const p = products[currentProdIdx];
+      const inputVal = parseFloat(document.getElementById('calc-input').value) || 0;
+      let qtyStr = "";
+      let priceVal = 0;
+
+      if (currentMode === 'rupee-to-wt') {
+        const grams = Math.round((inputVal / p.rate) * 1000);
+        qtyStr = grams >= 1000 ? (grams/1000).toFixed(2) + " kg" : grams + "g";
+        priceVal = inputVal;
+      } else {
+        qtyStr = inputVal + "g";
+        priceVal = Math.round((inputVal / 1000) * p.rate * 100) / 100;
+      }
+
+      billItems.push({
+        name: p.name + " (Taraju)",
+        qty: qtyStr,
+        rate: `₹${p.rate}/kg`,
+        price: priceVal
+      });
+
+      renderBill();
+      showToast(`Added ${qtyStr} ${p.name} (₹${priceVal.toFixed(2)}) to Bill!`);
+    }
+
+    function renderBill() {
+      const list = document.getElementById('bill-items-list');
+      list.innerHTML = "";
+      let total = 0;
+
+      billItems.forEach(item => {
+        total += item.price;
+        const row = document.createElement('div');
+        row.style = "background: white; border: 1px solid var(--border); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;";
+        row.innerHTML = `
+          <div>
+            <div style="font-weight: 700; font-size: 14px;">${item.name}</div>
+            <div style="font-size: 12px; color: #64748B;">${item.qty} @ ${item.rate}</div>
+          </div>
+          <div style="font-weight: 800; font-size: 15px;">₹${item.price.toFixed(2)}</div>
+        `;
+        list.appendChild(row);
+      });
+
+      document.getElementById('bill-subtotal').innerText = `₹${total.toFixed(2)}`;
+      document.getElementById('bill-total').innerText = `₹${total.toFixed(2)}`;
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast-msg');
+      document.getElementById('toast-text').innerText = text;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function shareWhatsAppBill() {
+      let total = billItems.reduce((acc, curr) => acc + curr.price, 0);
+      alert(`💬 WhatsApp Bill Generated:\n\n*Sharma Kirana Store*\nItems: ${billItems.length}\nTotal Amount: ₹${total.toFixed(2)}\n\nThank you for shopping with us!`);
+    }
+
+    function toggleLang() {
+      isHindi = !isHindi;
+      document.getElementById('txt-store-name').innerText = isHindi ? "शर्मा किराना स्टोर" : "Sharma Kirana Store";
+      document.getElementById('txt-store-sub').innerText = isHindi ? "सेक्टर 14, गुरुग्राम • चाचा की दुकान" : "Sector 14, Gurugram • Chacha ki Dukaan";
+      cycleProduct();
+    }
+
+    // Inventory Catalog Database
+    let catalog = [
+      { id: "1", barcode: "8901234567890", name: "Fortune Sunflower Oil (1L)", category: "Oil/Ghee", price: 145, stock: 18, unit: "packet" },
+      { id: "2", barcode: "8902345678901", name: "Aashirvaad Shudh Chakki Atta (5kg)", category: "Atta/Flour", price: 240, stock: 3, unit: "bag" },
+      { id: "3", barcode: "8903456789012", name: "Tata Salt Vacuum Evaporated (1kg)", category: "Spices/Salt", price: 28, stock: 0, unit: "packet" }
+    ];
+
+    let activeScannedProduct = null;
+    let pendingBarcode = null;
+
+    function renderCatalog() {
+      const list = document.getElementById('catalog-list');
+      if (!list) return;
+      list.innerHTML = "";
+      catalog.forEach(item => {
+        let badgeColor = item.stock > 10 ? '#10B981' : (item.stock > 0 ? '#F59E0B' : '#EF4444');
+        let stockLabel = item.stock > 10 ? `${item.stock} in stock` : (item.stock > 0 ? `${item.stock} left (Low!)` : `0 in stock (Out!)`);
+
+        const card = document.createElement('div');
+        card.style = "background: white; border: 1px solid var(--border); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;";
+        card.innerHTML = `
+          <div>
+            <div style="font-weight: 700; font-size: 14px;">${item.name}</div>
+            <div style="font-size: 11px; color: #64748B;">Category: ${item.category} • Barcode: ${item.barcode}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: 800; color: #0F172A; font-size: 15px;">₹${item.price}</div>
+            <div style="font-size: 11px; color: ${badgeColor}; font-weight: 700;">${stockLabel}</div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function openBarcodeScannerModal() {
+      document.getElementById('barcode-scanner-modal').style.display = 'flex';
+      document.getElementById('scan-existing-drawer').style.display = 'none';
+      document.getElementById('scan-new-drawer').style.display = 'none';
+    }
+
+    function closeBarcodeScannerModal() {
+      document.getElementById('barcode-scanner-modal').style.display = 'none';
+      document.getElementById('scan-existing-drawer').style.display = 'none';
+      document.getElementById('scan-new-drawer').style.display = 'none';
+    }
+
+    function simulateScan(barcode) {
+      const existing = catalog.find(p => p.barcode === barcode);
+      const existingDrawer = document.getElementById('scan-existing-drawer');
+      const newDrawer = document.getElementById('scan-new-drawer');
+
+      if (existing) {
+        // Barcode exists! Prompt to update stock
+        activeScannedProduct = existing;
+        document.getElementById('existing-prod-name').innerText = existing.name;
+        document.getElementById('existing-prod-stock').innerText = existing.stock;
+        document.getElementById('scan-stock-input').value = 5;
+        existingDrawer.style.display = 'block';
+        newDrawer.style.display = 'none';
+      } else {
+        // Barcode is new! Prompt to Add Item with name, price, quantity
+        pendingBarcode = barcode;
+        document.getElementById('new-barcode-val').innerText = barcode;
+        document.getElementById('new-item-name').value = '';
+        document.getElementById('new-item-price').value = '';
+        document.getElementById('new-item-qty').value = '25';
+        newDrawer.style.display = 'block';
+        existingDrawer.style.display = 'none';
+      }
+    }
+
+    function adjustScanStock(qty) {
+      const input = document.getElementById('scan-stock-input');
+      input.value = parseInt(input.value || 0) + qty;
+    }
+
+    function confirmStockUpdate() {
+      if (!activeScannedProduct) return;
+      const addQty = parseInt(document.getElementById('scan-stock-input').value) || 0;
+      activeScannedProduct.stock += addQty;
+      renderCatalog();
+      closeBarcodeScannerModal();
+      showToast(`✅ Stock updated! ${activeScannedProduct.name} now has ${activeScannedProduct.stock} units.`);
+    }
+
+    function confirmAddNewItem() {
+      const name = document.getElementById('new-item-name').value.trim();
+      const price = parseFloat(document.getElementById('new-item-price').value);
+      const qty = parseInt(document.getElementById('new-item-qty').value) || 0;
+
+      if (!name || isNaN(price)) {
+        alert("Please enter a valid item name and price.");
+        return;
+      }
+
+      const newItem = {
+        id: String(catalog.length + 1),
+        barcode: pendingBarcode,
+        name: name,
+        category: "General",
+        price: price,
+        stock: qty,
+        unit: "packet"
+      };
+
+      catalog.unshift(newItem);
+      renderCatalog();
+      closeBarcodeScannerModal();
+      showToast(`🎉 Added "${newItem.name}" to store with ${newItem.stock} stock!`);
+    }
+
+    // Initialize
+    calculateLive();
+    renderBill();
+    renderCatalog();
+  </script>
+</body>
+</html>

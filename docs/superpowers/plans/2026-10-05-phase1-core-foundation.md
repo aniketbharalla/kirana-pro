@@ -435,9 +435,11 @@ describe('recordStockMovement', () => {
 
 Form with: name (TextInput), category (dropdown from PRODUCT_CATEGORIES), purchase price, selling price, GST rate (dropdown from GST_RATES), unit (dropdown from PRODUCT_UNITS), `isLoose` toggle (Switch), initial stock quantity, min stock alert level, barcode (TextInput + "Scan" icon button). "Save" button validates with `productSchema` and calls `addProduct()`.
 
-- [ ] **Step 9: Build BarcodeScannerScreen**
+- [ ] **Step 9: Build BarcodeScannerScreen with Smart Stock Update Flow**
 
-Request camera permission with `expo-barcode-scanner`. On permission denied → show message + "Enter barcode manually" button. On scan → search products for matching barcode. If found → navigate to ProductDetail. If not found → navigate to AddProduct with barcode pre-filled.
+Request camera permission with `expo-barcode-scanner`. On permission denied → show error message + "Enter barcode manually" button. On successful scan:
+- **If barcode matches existing product in store:** Display an instant modal bottom sheet showing product name, current stock, and quick increment chips (`+1`, `+5`, `+10`, custom entry) with a 1-tap "Update Stock" button that runs `recordStockMovement(in, purchase)` and atomically updates stock.
+- **If barcode does NOT exist:** Play haptic feedback and display an "Add Item" dialog/screen pre-filled with the scanned barcode, prompting the user for **Name**, **Selling Price**, and **Initial Quantity in Stock**. Saving automatically registers the product in Firestore and updates store inventory.
 
 - [ ] **Step 10: Build ProductDetailScreen and stock screens**
 

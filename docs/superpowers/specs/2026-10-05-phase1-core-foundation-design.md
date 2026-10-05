@@ -212,18 +212,26 @@ interface Product {
 /stores/{storeId}/products/{productId}
 ```
 
-### Barcode Scanning Flow
+### Barcode Scanning & Smart Stock Update Flow
 
-1. Tap "Scan Barcode" button on Add Product screen
-2. Camera opens with `expo-barcode-scanner`
-3. On scan, search existing products for matching barcode
-4. If found → show product details (already exists)
-5. If not found → pre-fill barcode field, user enters remaining details
-6. Save product with barcode attached
+1. Tap **"Scan Barcode"** button (accessible from Home, Products catalog, and Stock-In screen).
+2. Camera scanner opens using `expo-barcode-scanner`.
+3. Camera scans the product barcode.
+4. **Branch A — Existing Barcode Detected:**
+   - Displays a sleek modal bottom sheet with the product name, image/icon, selling price, and current stock level.
+   - Shows quick increment buttons (`+1`, `+5`, `+10`, or custom entry) for stock arrival.
+   - 1-tap **"Update Stock"** button immediately records a `StockMovement` (type: 'in', reason: 'purchase') and increments the product's `currentStock` atomically.
+   - Also includes an optional **"Add to Bill"** shortcut if scanning from the billing screen.
+5. **Branch B — New Unknown Barcode Scanned:**
+   - App sounds an alert and displays an **"Add New Item"** prompt with the barcode pre-filled.
+   - Prompts the shopkeeper for:
+     - **Item Name** (e.g., "Parle-G Gold 250g")
+     - **Selling Price / MRP** (e.g., "₹25")
+     - **Initial Quantity in Stock** (e.g., "30")
+     - Unit & Category (pre-selected defaults, customizable)
+   - On tap of **"Save Item"**, the new product is created in Firestore and immediately available for future instant scans and billing.
 
-**Note:** We do NOT use any paid barcode-to-product lookup API. The store builds
-its own barcode database over time. First scan = manual entry. Subsequent scans
-of the same product = instant lookup.
+**Zero Cost Guarantee:** No paid third-party barcode lookups. The store organically populates its custom barcode inventory database on first scan, and every subsequent scan is a rapid zero-delay local/cached lookup.
 
 ---
 
