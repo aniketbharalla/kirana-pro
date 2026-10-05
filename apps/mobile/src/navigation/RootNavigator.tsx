@@ -1,26 +1,10 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
 import { AuthNavigator } from './AuthNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
-
-// Placeholder screen for store setup (Task 5)
-const TempStoreSetup: React.FC = () => {
-  const { user, clearUser } = useAuthStore();
-
-  return (
-    <View style={styles.center}>
-      <Text style={styles.title}>Setup Your Dukaan</Text>
-      <Text style={styles.subtitle}>
-        Welcome, {user?.displayName}! Please configure your store to continue.
-      </Text>
-      <TouchableOpacity style={styles.logoutBtn} onPress={clearUser}>
-        <Text style={styles.logoutText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
+import { StoreSetupScreen } from '../screens/setup/StoreSetupScreen';
 
 export const RootNavigator: React.FC<{
   MainComponent?: React.ComponentType<any>;
@@ -37,7 +21,7 @@ export const RootNavigator: React.FC<{
   }
 
   const Main = MainComponent || MainTabNavigator;
-  const Setup = SetupComponent || TempStoreSetup;
+  const Setup = SetupComponent || StoreSetupScreen;
 
   return (
     <NavigationContainer>
