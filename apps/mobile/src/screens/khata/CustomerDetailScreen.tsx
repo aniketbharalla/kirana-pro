@@ -11,7 +11,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { CustomerKhata } from '@kirana-pro/shared';
+import { CustomerKhata, formatWhatsAppUdharReminder } from '@kirana-pro/shared';
 import { RecordPaymentModal } from '../../components/khata/RecordPaymentModal';
 import { useStoreStore } from '../../store/storeStore';
 import { useKhataStore } from '../../store/khataStore';
@@ -37,6 +37,7 @@ export const CustomerDetailScreen: React.FC = () => {
   }
 
   const storeName = store?.name || 'Kirana Pro Dukaan';
+  const storeUpi = (store as any)?.upiVpa || 'kirana.pro@upi';
 
   const handleSendReminder = async () => {
     if (customer.currentBalance <= 0) {
@@ -44,7 +45,12 @@ export const CustomerDetailScreen: React.FC = () => {
       return;
     }
 
-    const reminderText = `नमस्ते ${customer.name} जी,\n\nआपके ${storeName} पर कुल *₹${customer.currentBalance}* का बकाया (उधार) शेष है।\n\nकृपया सुविधा अनुसार समय पर भुगतान करने का कष्ट करें।\n\nधन्यवाद 🙏\n*${storeName}*`;
+    const reminderText = formatWhatsAppUdharReminder(
+      customer.name,
+      customer.currentBalance,
+      storeName,
+      storeUpi
+    );
     const cleanPhone = customer.phoneNumber.replace(/\D/g, '');
     const url = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(reminderText)}`;
 

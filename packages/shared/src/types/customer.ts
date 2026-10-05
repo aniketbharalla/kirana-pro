@@ -6,6 +6,7 @@ export interface CustomerKhata {
   address?: string;
   currentBalance: number;  // Positive: Customer owes store; Negative: Customer advance
   creditLimit?: number;
+  loyaltyPoints?: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
