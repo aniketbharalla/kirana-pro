@@ -7,6 +7,8 @@ import { BarcodeScannerScreen } from '../screens/products/BarcodeScannerScreen';
 import { StockInScreen } from '../screens/stock/StockInScreen';
 import { colors } from '../theme';
 
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+
 export type ProductsStackParamList = {
   ProductList: undefined;
   AddProduct: { barcode?: string; name?: string; isLoose?: boolean; unit?: string } | undefined;
@@ -16,6 +18,24 @@ export type ProductsStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<ProductsStackParamList>();
+
+const SafeProductListScreen: React.FC = (props: any) => (
+  <ErrorBoundary componentName="ProductListScreen">
+    <ProductListScreen {...props} />
+  </ErrorBoundary>
+);
+
+const SafeAddProductScreen: React.FC = (props: any) => (
+  <ErrorBoundary componentName="AddProductScreen">
+    <AddProductScreen {...props} />
+  </ErrorBoundary>
+);
+
+const SafeProductDetailScreen: React.FC = (props: any) => (
+  <ErrorBoundary componentName="ProductDetailScreen">
+    <ProductDetailScreen {...props} />
+  </ErrorBoundary>
+);
 
 export const ProductsNavigator: React.FC = () => {
   return (
@@ -30,17 +50,17 @@ export const ProductsNavigator: React.FC = () => {
     >
       <Stack.Screen
         name="ProductList"
-        component={ProductListScreen}
+        component={SafeProductListScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="AddProduct"
-        component={AddProductScreen}
+        component={SafeAddProductScreen}
         options={{ title: 'Add New Product', headerBackTitle: 'Cancel' }}
       />
       <Stack.Screen
         name="ProductDetail"
-        component={ProductDetailScreen}
+        component={SafeProductDetailScreen}
         options={{ title: 'Item Details', headerBackTitle: 'Catalog' }}
       />
       <Stack.Screen

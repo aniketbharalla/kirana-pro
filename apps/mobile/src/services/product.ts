@@ -120,22 +120,28 @@ export const fetchProducts = async (storeId: string): Promise<Product[]> => {
 };
 
 export const subscribeToProducts = (storeId: string): (() => void) => {
-  const db = getFirestoreDb();
-  const productsCol = collection(db, 'stores', storeId, 'products');
-  useProductStore.getState().setLoading(true);
+  try {
+    const db = getFirestoreDb();
+    const productsCol = collection(db, 'stores', storeId, 'products');
+    useProductStore.getState().setLoading(true);
 
-  return onSnapshot(
-    productsCol,
-    (snap) => {
-      const list = snap.docs
-        .map((d) => d.data() as Product)
-        .filter((p) => p.isActive !== false);
+    return onSnapshot(
+      productsCol,
+      (snap) => {
+        const list = snap.docs
+          .map((d) => d.data() as Product)
+          .filter((p) => p.isActive !== false);
 
-      useProductStore.getState().setProducts(list);
-    },
-    (err) => {
-      console.error('Products listener error:', err);
-      useProductStore.getState().setLoading(false);
-    }
-  );
+        useProductStore.getState().setProducts(list);
+      },
+      (err) => {
+        console.warn('Realtime products listener notice (running in local/offline mode):', err.message);
+        useProductStore.getState().setLoading(false);
+      }
+    );
+  } catch (err: any) {
+    console.warn('Could not initialize realtime products listener (continuing in local state):', err.message);
+    useProductStore.getState().setLoading(false);
+    return () => {};
+  }
 };

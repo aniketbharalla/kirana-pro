@@ -6,6 +6,8 @@ import { AuthNavigator } from './AuthNavigator';
 import { MainTabNavigator } from './MainTabNavigator';
 import { StoreSetupScreen } from '../screens/setup/StoreSetupScreen';
 
+import { ErrorBoundary } from '../components/common/ErrorBoundary';
+
 export const RootNavigator: React.FC<{
   MainComponent?: React.ComponentType<any>;
   SetupComponent?: React.ComponentType<any>;
@@ -24,15 +26,17 @@ export const RootNavigator: React.FC<{
   const Setup = SetupComponent || StoreSetupScreen;
 
   return (
-    <NavigationContainer>
-      {!isAuthenticated ? (
-        <AuthNavigator />
-      ) : !user?.storeId ? (
-        <Setup />
-      ) : (
-        <Main />
-      )}
-    </NavigationContainer>
+    <ErrorBoundary componentName="RootNavigator">
+      <NavigationContainer>
+        {!isAuthenticated ? (
+          <AuthNavigator />
+        ) : !user?.storeId ? (
+          <Setup />
+        ) : (
+          <Main />
+        )}
+      </NavigationContainer>
+    </ErrorBoundary>
   );
 };
 

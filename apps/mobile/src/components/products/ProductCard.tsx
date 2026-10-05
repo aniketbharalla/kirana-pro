@@ -14,12 +14,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onPress,
   onQuickStockIn,
 }) => {
-  const isOutOfStock = product.currentStock === 0;
-  const isLowStock = !isOutOfStock && product.currentStock <= product.minStockAlert;
+  const currentStock = product?.currentStock ?? 0;
+  const minStockAlert = product?.minStockAlert ?? 5;
+  const isOutOfStock = currentStock === 0;
+  const isLowStock = !isOutOfStock && currentStock <= minStockAlert;
+  const unit = product?.unit || 'unit';
 
   let stockBadgeBg = '#ECFDF5';
   let stockBadgeText = '#065F46';
-  let stockLabel = `${product.currentStock} ${product.unit}`;
+  let stockLabel = `${currentStock} ${unit}`;
 
   if (isOutOfStock) {
     stockBadgeBg = '#FEF2F2';
@@ -28,8 +31,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   } else if (isLowStock) {
     stockBadgeBg = '#FFFBEB';
     stockBadgeText = '#B45309';
-    stockLabel = `${product.currentStock} ${product.unit} (Low)`;
+    stockLabel = `${currentStock} ${unit} (Low)`;
   }
+
+  const barcodeStr = product?.barcode ? String(product.barcode) : null;
+  const displayBarcode = barcodeStr && barcodeStr.length > 6 ? barcodeStr.slice(-6) : barcodeStr;
 
   return (
     <TouchableOpacity
@@ -45,7 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </Text>
         </View>
 
-        {product.isLoose && (
+        {product?.isLoose && (
           <View style={styles.looseBadge}>
             <Text style={styles.looseText}>⚖️ Loose</Text>
           </View>
@@ -54,7 +60,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Thumbnail or Fallback Icon */}
       <View style={styles.imageBox}>
-        {product.imageURL ? (
+        {product?.imageURL ? (
           <Image
             source={{ uri: product.imageURL }}
             style={styles.productImage}
@@ -62,16 +68,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           />
         ) : (
           <Text style={styles.fallbackEmoji}>
-            {product.isLoose ? '🌾' : '📦'}
+            {product?.isLoose ? '🌾' : '📦'}
           </Text>
         )}
       </View>
 
       {/* Product Details */}
       <Text style={styles.productName} numberOfLines={2}>
-        {product.name}
+        {product?.name || 'Unnamed Product'}
       </Text>
-      {product.nameHindi ? (
+      {product?.nameHindi ? (
         <Text style={styles.hindiName} numberOfLines={1}>
           {product.nameHindi}
         </Text>
@@ -81,12 +87,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <View style={styles.bottomRow}>
         <View>
           <Text style={styles.priceText}>
-            ₹{product.sellingPrice}
-            <Text style={styles.unitText}>/{product.unit}</Text>
+            ₹{product?.sellingPrice ?? 0}
+            <Text style={styles.unitText}>/{unit}</Text>
           </Text>
-          {product.barcode ? (
+          {displayBarcode ? (
             <Text style={styles.barcodeText} numberOfLines={1}>
-              📷 {product.barcode.slice(-6)}
+              📷 {displayBarcode}
             </Text>
           ) : null}
         </View>
@@ -96,7 +102,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             style={styles.quickAddBtn}
             activeOpacity={0.8}
             onPress={(e) => {
-              e.stopPropagation();
+              e?.stopPropagation?.();
               onQuickStockIn();
             }}
           >
