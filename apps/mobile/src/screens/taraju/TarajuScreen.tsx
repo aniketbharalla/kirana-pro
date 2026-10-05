@@ -10,12 +10,13 @@ import {
   StatusBar,
   Alert,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useProductStore } from '../../store/productStore';
-import { calculateWeight, calculatePrice } from '@kirana-pro/shared';
+import { useCartStore } from '../../store/cartStore';
+import { calculateWeight, calculatePrice, Product } from '@kirana-pro/shared';
 import { QuickAmountButtons } from '../../components/taraju/QuickAmountButtons';
 import { CalculationResult } from '../../components/taraju/CalculationResult';
 import { colors } from '../../theme';
-import { Product } from '@kirana-pro/shared';
 
 export interface TarajuHistoryItem {
   id: string;
@@ -27,6 +28,7 @@ export interface TarajuHistoryItem {
 }
 
 export const TarajuScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const { getLooseProducts } = useProductStore();
   const looseProducts = getLooseProducts();
 
@@ -249,22 +251,64 @@ export const TarajuScreen: React.FC = () => {
           inputDisplay={inputValue}
         />
 
-        {/* Action Button: Save / Add to Bill */}
+        {/* Action Buttons: Add to Bill & Save to Log */}
         <TouchableOpacity
           style={styles.addBillBtn}
           activeOpacity={0.88}
           onPress={() => {
             handleAddToHistory();
+
+            // Calculate quantity in kg
+            let qtyInKg = 0;
+            if (mode === 'amount_to_weight') {
+              const grams = Math.round((numInput / activeRate) * 1000);
+              qtyInKg = grams / 1000;
+            } else {
+              qtyInKg = Math.round((numInput / 1000) * 1000) / 1000;
+            }
+
+            if (qtyInKg <= 0) {
+              Alert.alert('Invalid Weight', 'Please enter a valid amount or weight.');
+              return;
+            }
+
+            const targetProduct: Product = selectedProduct || {
+              id: `loose_custom_${activeRate}`,
+              storeId: 'demo_store_1',
+              name: `Loose Kirana Item (₹${activeRate}/kg)`,
+              category: 'other',
+              barcode: null,
+              purchasePrice: activeRate * 0.85,
+              sellingPrice: activeRate,
+              gstRate: 0,
+              unit: 'kg',
+              isLoose: true,
+              pricePerUnit: activeRate,
+              currentStock: 999,
+              minStockAlert: 10,
+              imageURL: null,
+              isActive: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+
+            useCartStore.getState().addItem(targetProduct, qtyInKg, activeRate);
+
             Alert.alert(
-              'Item Calculated! ⚖️',
-              `Saved ${resultDisplay} of ${
-                selectedProduct ? selectedProduct.name : 'Loose Item'
-              } in calculation history.`
+              'Added to Bill! 🛒',
+              `${resultDisplay} of ${targetProduct.name} added to cart.`,
+              [
+                { text: 'Keep Weighing', style: 'cancel' },
+                {
+                  text: 'Go to Cart ➔',
+                  onPress: () => (navigation as any)?.navigate?.('BillsTab'),
+                },
+              ]
             );
           }}
         >
           <Text style={styles.addBillText}>
-            + Save to Calculation Log
+            🛒 Add to Active Bill ({resultDisplay})
           </Text>
         </TouchableOpacity>
 
