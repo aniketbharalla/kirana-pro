@@ -934,12 +934,15 @@
               <p style="font-size: 12px; color: #94A3B8; margin-top: 18px;">Simulate camera scanning an item:</p>
               
               <!-- Quick demo scan trigger buttons -->
-              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 280px; margin-top: 12px;">
-                <button onclick="simulateScan('8901234567890')" style="background: #1E293B; border: 1px solid #334155; color: #F8FAFC; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
-                  🟢 Scan Existing (Fortune Oil)
+              <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 290px; margin-top: 12px;">
+                <button onclick="simulateScan('8901234567890')" style="background: #1E293B; border: 1px solid #334155; color: #F8FAFC; padding: 9px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: 600;">
+                  🟢 Scan Existing Store Item (Fortune Oil)
                 </button>
-                <button onclick="simulateScan('8909998887771')" style="background: #1E293B; border: 1px solid #334155; color: #F8FAFC; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
-                  🟡 Scan New Unknown Barcode
+                <button onclick="simulateScanWithOpenFoodFacts('8901491101837')" style="background: #064E3B; border: 1px solid #059669; color: #A7F3D0; padding: 9px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: 700;">
+                  🌐 Scan Lay's (Auto-fill via Open Food Facts)
+                </button>
+                <button onclick="simulateScan('8909998887771')" style="background: #1E293B; border: 1px solid #334155; color: #F8FAFC; padding: 9px; border-radius: 10px; font-size: 11px; cursor: pointer; font-weight: 600;">
+                  🟡 Scan Unknown Barcode (Manual Entry)
                 </button>
               </div>
             </div>
@@ -1404,9 +1407,37 @@
       }
     }
 
-    function adjustScanStock(qty) {
-      const input = document.getElementById('scan-stock-input');
-      input.value = parseInt(input.value || 0) + qty;
+    async function simulateScanWithOpenFoodFacts(barcode) {
+      pendingBarcode = barcode;
+      const newDrawer = document.getElementById('scan-new-drawer');
+      const existingDrawer = document.getElementById('scan-existing-drawer');
+      existingDrawer.style.display = 'none';
+
+      document.getElementById('new-barcode-val').innerText = `${barcode} (Fetching Open Food Facts...)`;
+      document.getElementById('new-item-name').value = 'Loading item details from Open Food Facts...';
+      document.getElementById('new-item-price').value = '20';
+      document.getElementById('new-item-qty').value = '30';
+      newDrawer.style.display = 'block';
+
+      try {
+        const res = await fetch(`https://world.openfoodfacts.net/api/v2/product/${barcode}.json`, {
+          headers: { "User-Agent": "KiranaPro-App/1.0 - contact@kiranapro.in" }
+        });
+        const data = await res.json();
+        if (data.status === 1 && data.product) {
+          const pName = data.product.product_name || data.product.product_name_en || "Packaged Grocery Item";
+          const pBrand = data.product.brands ? ` (${data.product.brands})` : "";
+          document.getElementById('new-barcode-val').innerText = `${barcode} (Found in Open Food Facts! 🎉)`;
+          document.getElementById('new-item-name').value = `${pName}${pBrand}`;
+        } else {
+          document.getElementById('new-barcode-val').innerText = barcode;
+          document.getElementById('new-item-name').value = "Lay's Classic Salted Potato Chips (Lay's)";
+        }
+      } catch (err) {
+        // Fallback for CORS or offline demo
+        document.getElementById('new-barcode-val').innerText = barcode;
+        document.getElementById('new-item-name').value = "Lay's Classic Salted Potato Chips (Lay's)";
+      }
     }
 
     function confirmStockUpdate() {

@@ -223,15 +223,16 @@ interface Product {
    - 1-tap **"Update Stock"** button immediately records a `StockMovement` (type: 'in', reason: 'purchase') and increments the product's `currentStock` atomically.
    - Also includes an optional **"Add to Bill"** shortcut if scanning from the billing screen.
 5. **Branch B — New Unknown Barcode Scanned:**
-   - App sounds an alert and displays an **"Add New Item"** prompt with the barcode pre-filled.
-   - Prompts the shopkeeper for:
-     - **Item Name** (e.g., "Parle-G Gold 250g")
-     - **Selling Price / MRP** (e.g., "₹25")
-     - **Initial Quantity in Stock** (e.g., "30")
-     - Unit & Category (pre-selected defaults, customizable)
-   - On tap of **"Save Item"**, the new product is created in Firestore and immediately available for future instant scans and billing.
+   - App checks the **Open Food Facts API** (`https://world.openfoodfacts.org/api/v2/product/{barcode}.json`, 100% free open-source database with millions of Indian packaged items like Maggi, Parle-G, Lay's, Tata Salt, Haldiram's, etc.).
+   - **If found in Open Food Facts:**
+     - **Auto-populates** product name (e.g., "Lay's Classic Salted", "Maggi 2-Minute Noodles"), brand, packaging unit, and product image automatically!
+     - Displays an instant confirmation card: *"Found item in Open Food Facts! Confirm price & initial stock."*
+     - The shopkeeper only needs to enter **Selling Price (₹)** and **Initial Stock Quantity** (no tedious typing of product names!).
+   - **If not found in Open Food Facts:**
+     - Falls back to a clean manual entry prompt: **Item Name**, **Selling Price / MRP**, and **Initial Stock Quantity**.
+   - On tap of **"Save Item"**, the new product is saved to the store's Firestore collection and becomes immediately available for future local instant scans and billing.
 
-**Zero Cost Guarantee:** No paid third-party barcode lookups. The store organically populates its custom barcode inventory database on first scan, and every subsequent scan is a rapid zero-delay local/cached lookup.
+**Zero Cost Guarantee:** Open Food Facts is completely free and community-driven (zero API subscription or key required). Combined with Firestore caching, this gives an enterprise-grade barcode experience without paying third-party catalog API fees.
 
 ---
 

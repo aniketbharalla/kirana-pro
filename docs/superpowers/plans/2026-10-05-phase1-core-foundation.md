@@ -435,11 +435,18 @@ describe('recordStockMovement', () => {
 
 Form with: name (TextInput), category (dropdown from PRODUCT_CATEGORIES), purchase price, selling price, GST rate (dropdown from GST_RATES), unit (dropdown from PRODUCT_UNITS), `isLoose` toggle (Switch), initial stock quantity, min stock alert level, barcode (TextInput + "Scan" icon button). "Save" button validates with `productSchema` and calls `addProduct()`.
 
-- [ ] **Step 9: Build BarcodeScannerScreen with Smart Stock Update Flow**
+- [ ] **Step 9: Build BarcodeScannerScreen with Open Food Facts & Smart Stock Update**
 
+Implement `apps/mobile/src/services/openFoodFacts.ts`:
+- `fetchProductByBarcode(barcode: string)` fetches `https://world.openfoodfacts.org/api/v2/product/{barcode}.json` with `User-Agent: KiranaPro-App/1.0`. Extracts `product_name`, `brands`, and `image_front_small_url`. Returns clean metadata or `null` if not found.
+
+In `BarcodeScannerScreen.tsx`:
 Request camera permission with `expo-barcode-scanner`. On permission denied → show error message + "Enter barcode manually" button. On successful scan:
 - **If barcode matches existing product in store:** Display an instant modal bottom sheet showing product name, current stock, and quick increment chips (`+1`, `+5`, `+10`, custom entry) with a 1-tap "Update Stock" button that runs `recordStockMovement(in, purchase)` and atomically updates stock.
-- **If barcode does NOT exist:** Play haptic feedback and display an "Add Item" dialog/screen pre-filled with the scanned barcode, prompting the user for **Name**, **Selling Price**, and **Initial Quantity in Stock**. Saving automatically registers the product in Firestore and updates store inventory.
+- **If barcode is new to store:** Call `fetchProductByBarcode(barcode)`.
+  - If found in Open Food Facts: Display "Add Item" dialog with **Product Name** (e.g. Lay's Classic Salted) and **Brand** pre-filled automatically! User only types **Selling Price (₹)** and **Initial Stock**.
+  - If not found in Open Food Facts: Display "Add Item" dialog with barcode pre-filled for manual entry (Name, Price, Stock).
+Saving automatically registers the product in Firestore and updates store inventory.
 
 - [ ] **Step 10: Build ProductDetailScreen and stock screens**
 
