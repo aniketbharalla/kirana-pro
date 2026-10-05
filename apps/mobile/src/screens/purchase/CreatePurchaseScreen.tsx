@@ -21,42 +21,42 @@ export const CreatePurchaseScreen = ({ route, navigation }: any) => {
         Select an option to record goods received and update your inventory automatically.
       </Text>
 
-      {/* Option 1: AI OCR Bill Scanner */}
+      {/* Option 1: Real OCR Bill Scanner */}
       <TouchableOpacity
         style={styles.optionCard}
         onPress={() => navigation.navigate('ScanInvoice', { supplier })}
       >
         <View style={styles.optionIconContainer}>
-          <Text style={styles.optionIcon}>📷</Text>
+          <Text style={styles.optionIcon}>📸</Text>
         </View>
         <View style={styles.optionContent}>
-          <Text style={styles.optionTitle}>Scan Distributor Bill (OCR)</Text>
+          <Text style={styles.optionTitle}>Real Bill Scanner (Camera / Photo)</Text>
           <Text style={styles.optionDesc}>
-            Take a photo of printed bill. Automatically extracts HSN, pack multipliers (PB/JAR), rates & GST.
+            Capture a live camera photo or pick an invoice image from your phone/files. On-device Tesseract OCR scans the physical bill directly.
           </Text>
           <View style={styles.recommendedBadge}>
-            <Text style={styles.recommendedBadgeText}>⚡ Recommended • 1-Click</Text>
+            <Text style={styles.recommendedBadgeText}>⚡ Real OCR • Zero Paid APIs</Text>
           </View>
         </View>
       </TouchableOpacity>
 
-      {/* Option 2: Quick Demo Parle Bill */}
+      {/* Option 2: Paste Bill Text */}
       <TouchableOpacity
         style={[styles.optionCard, styles.optionCardSecondary]}
         onPress={() =>
           navigation.navigate('ScanInvoice', {
             supplier,
-            useSampleBill: true,
+            useSampleBill: false,
           })
         }
       >
         <View style={styles.optionIconContainer}>
-          <Text style={styles.optionIcon}>⚡</Text>
+          <Text style={styles.optionIcon}>📝</Text>
         </View>
         <View style={styles.optionContent}>
-          <Text style={styles.optionTitle}>Demo: Test Parle Distributor Bill</Text>
+          <Text style={styles.optionTitle}>Paste Bill Text / Manual Raw Review</Text>
           <Text style={styles.optionDesc}>
-            Instantly load 5 items from N R Enterprises (20-20, Parle-G, Hide & Seek, Monaco) with 5% GST.
+            Type or paste copied lines from a WhatsApp invoice or PDF to parse items, rates, and GST.
           </Text>
         </View>
       </TouchableOpacity>

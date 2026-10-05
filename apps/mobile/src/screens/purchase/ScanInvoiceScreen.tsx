@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,96 +7,222 @@ import {
   ActivityIndicator,
   TextInput,
   ScrollView,
+  Image,
+  Alert,
 } from 'react-native';
-import { processInvoiceImage, SAMPLE_PARLE_BILL_TEXT } from '../../services/ocrService';
+import * as ImagePicker from 'expo-image-picker';
+import {
+  processInvoiceImage,
+  rotateImage,
+  OCRProgress,
+  SAMPLE_PARLE_BILL_TEXT,
+} from '../../services/ocrService';
 import { colors } from '../../theme';
 import { Supplier } from '@kirana-pro/shared';
 
 export const ScanInvoiceScreen = ({ route, navigation }: any) => {
   const supplier: Supplier | undefined = route.params?.supplier;
-  const useSampleBill = route.params?.useSampleBill;
 
+  const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [billText, setBillText] = useState(SAMPLE_PARLE_BILL_TEXT.trim());
-  const [showManualText, setShowManualText] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState<OCRProgress>({
+    status: '',
+    progress: 0,
+  });
+  const [extractedRawText, setExtractedRawText] = useState('');
+  const [showManualEdit, setShowManualEdit] = useState(false);
 
-  useEffect(() => {
-    if (useSampleBill) {
-      handleRunOCR(SAMPLE_PARLE_BILL_TEXT);
+  // Pick image from camera
+  const handleTakePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Needed',
+          'Camera access is required to take a photo of the bill. You can also select an existing image from your gallery.'
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        setSelectedImageUri(uri);
+        handleExecuteRealOCR(uri);
+      }
+    } catch (err: any) {
+      Alert.alert('Camera Error', err.message || 'Could not open camera.');
     }
-  }, [useSampleBill]);
+  };
 
-  const handleRunOCR = async (textToProcess?: string) => {
+  // Pick image from Gallery / Files
+  const handlePickFromGallery = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        setSelectedImageUri(uri);
+        handleExecuteRealOCR(uri);
+      }
+    } catch (err: any) {
+      Alert.alert('Gallery Error', err.message || 'Could not select image.');
+    }
+  };
+
+  // Rotate selected bill photo 90 degrees
+  const handleRotateImage = async () => {
+    if (!selectedImageUri) return;
     try {
       setIsProcessing(true);
-      const draft = await processInvoiceImage(undefined, textToProcess || billText);
-
-      navigation.navigate('ReviewInvoice', {
-        draft,
-        supplier,
-      });
+      setOcrProgress({ status: 'Rotating bill image 90°...', progress: 30 });
+      const rotatedUri = await rotateImage(selectedImageUri, 90);
+      setSelectedImageUri(rotatedUri);
     } catch (err: any) {
-      alert('Failed to process bill OCR: ' + err.message);
+      Alert.alert('Rotate Error', 'Could not rotate image.');
     } finally {
       setIsProcessing(false);
     }
   };
 
+  // Run real OCR engine on the actual image
+  const handleExecuteRealOCR = async (imageUriToScan?: string, textOverride?: string) => {
+    const targetUri = imageUriToScan || selectedImageUri;
+
+    if (!targetUri && !textOverride) {
+      Alert.alert('Select Bill Image', 'Please capture or choose an invoice photo first.');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      setOcrProgress({ status: 'Starting Optical Character Recognition...', progress: 10 });
+
+      const { draft, rawText } = await processInvoiceImage(
+        targetUri || undefined,
+        textOverride,
+        (progress) => setOcrProgress(progress)
+      );
+
+      setExtractedRawText(rawText);
+
+      if (draft.items.length === 0) {
+        setShowManualEdit(true);
+        Alert.alert(
+          'OCR Extraction Notice',
+          'Recognized text from image, but could not detect standard FMCG line items automatically. Please review the extracted text below.'
+        );
+      } else {
+        navigation.navigate('ReviewInvoice', {
+          draft,
+          supplier,
+          invoiceImageUri: targetUri,
+        });
+      }
+    } catch (err: any) {
+      setShowManualEdit(true);
+      Alert.alert('OCR Error', 'Failed to scan image: ' + (err.message || 'Unknown OCR error'));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Quick test with the real Parle distributor bill text
+  const handleLoadRealParleBill = () => {
+    setExtractedRawText(SAMPLE_PARLE_BILL_TEXT.trim());
+    handleExecuteRealOCR(undefined, SAMPLE_PARLE_BILL_TEXT.trim());
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.viewfinderCard}>
-        <Text style={styles.cameraIcon}>📸</Text>
-        <Text style={styles.viewfinderTitle}>Distributor Invoice Scanner</Text>
-        <Text style={styles.viewfinderDesc}>
-          Align the distributor receipt within view. Ensures HSN, outer packs (PB/JAR), and rate are readable.
-        </Text>
-
-        {isProcessing ? (
-          <View style={styles.processingBlock}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.processingText}>🔍 Free On-Device OCR Running...</Text>
-            <Text style={styles.processingSubtext}>
-              Extracting HSN codes, pack multipliers & GST splits
-            </Text>
+      {/* Upload & Capture Card */}
+      <View style={styles.captureCard}>
+        {selectedImageUri ? (
+          <View style={styles.imagePreviewContainer}>
+            <Image source={{ uri: selectedImageUri }} style={styles.imagePreview} resizeMode="contain" />
+            <Text style={styles.imagePreviewBadge}>📸 Selected Bill Photo</Text>
           </View>
         ) : (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.captureBtn}
-              onPress={() => handleRunOCR()}
-            >
-              <Text style={styles.captureBtnText}>⚡ Scan Sample Parle Bill</Text>
+          <View style={styles.placeholderContainer}>
+            <Text style={styles.cameraIcon}>🧾</Text>
+            <Text style={styles.captureTitle}>Real Wholesaler Bill Scanner</Text>
+            <Text style={styles.captureDesc}>
+              Upload any real printed invoice photo (Parle, Britannia, ITC, Mandi receipt).
+              Our free on-device OCR extracts HSN, pack multipliers, unit rates, and GST splits.
+            </Text>
+          </View>
+        )}
+
+        {/* Real OCR Progress Indicator */}
+        {isProcessing ? (
+          <View style={styles.progressContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.progressStatus}>{ocrProgress.status || 'Scanning characters...'}</Text>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${Math.max(10, ocrProgress.progress)}%` }]} />
+            </View>
+            <Text style={styles.progressSubtext}>Powered by client-side Tesseract WASM (100% Free)</Text>
+          </View>
+        ) : (
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity style={styles.cameraBtn} onPress={handleTakePhoto}>
+              <Text style={styles.cameraBtnText}>📸 Take Photo with Camera</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.toggleTextBtn}
-              onPress={() => setShowManualText(!showManualText)}
-            >
-              <Text style={styles.toggleTextBtnText}>
-                {showManualText ? 'Hide Bill Text' : '📝 Paste Bill Text / Manual Review'}
-              </Text>
+            <TouchableOpacity style={styles.galleryBtn} onPress={handlePickFromGallery}>
+              <Text style={styles.galleryBtnText}>🖼️ Choose Bill from Gallery / Files</Text>
+            </TouchableOpacity>
+
+            {selectedImageUri ? (
+              <View style={styles.actionRow}>
+                <TouchableOpacity style={styles.rotateBtn} onPress={handleRotateImage}>
+                  <Text style={styles.rotateBtnText}>🔄 Rotate 90°</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.reScanBtn}
+                  onPress={() => handleExecuteRealOCR(selectedImageUri)}
+                >
+                  <Text style={styles.reScanBtnText}>⚡ Run OCR on Bill</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+
+            <TouchableOpacity style={styles.sampleBtn} onPress={handleLoadRealParleBill}>
+              <Text style={styles.sampleBtnText}>📑 Test with Real Parle Bill (15 Items)</Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
 
-      {showManualText && !isProcessing ? (
-        <View style={styles.textInputBlock}>
-          <Text style={styles.textInputLabel}>Bill Raw Text / OCR Preview</Text>
+      {/* Manual / Raw Text Editor (if OCR text needs inspection) */}
+      {(showManualEdit || extractedRawText) && !isProcessing ? (
+        <View style={styles.rawTextCard}>
+          <Text style={styles.rawTextHeader}>Extracted Raw OCR Text</Text>
+          <Text style={styles.rawTextSub}>
+            You can adjust any smudged characters or numbers and re-run the parser:
+          </Text>
           <TextInput
-            style={styles.textArea}
+            style={styles.rawTextArea}
             multiline
             numberOfLines={8}
-            value={billText}
-            onChangeText={setBillText}
-            placeholder="Paste text extracted from bill..."
+            value={extractedRawText}
+            onChangeText={setExtractedRawText}
+            placeholder="Extracted text will appear here..."
             placeholderTextColor={colors.textMuted}
           />
           <TouchableOpacity
-            style={styles.parseCustomBtn}
-            onPress={() => handleRunOCR(billText)}
+            style={styles.parseRawBtn}
+            onPress={() => handleExecuteRealOCR(undefined, extractedRawText)}
           >
-            <Text style={styles.parseCustomBtnText}>Run Parser on This Text</Text>
+            <Text style={styles.parseRawBtnText}>Parse Line Items from This Text ➔</Text>
           </TouchableOpacity>
         </View>
       ) : null}
@@ -111,75 +237,167 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingBottom: 60,
   },
-  viewfinderCard: {
+  captureCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    padding: 24,
+    padding: 20,
     alignItems: 'center',
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: colors.primaryBorder,
   },
+  placeholderContainer: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
   cameraIcon: {
     fontSize: 54,
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  viewfinderTitle: {
+  captureTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: colors.text,
   },
-  viewfinderDesc: {
+  captureDesc: {
     fontSize: 13,
     color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 18,
+    paddingHorizontal: 10,
   },
-  processingBlock: {
-    marginTop: 24,
+  imagePreviewContainer: {
+    width: '100%',
+    height: 240,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: '#0F172A',
+    marginBottom: 16,
+    position: 'relative',
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+  },
+  imagePreviewBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.8)',
+    color: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  progressContainer: {
+    width: '100%',
     alignItems: 'center',
+    paddingVertical: 20,
   },
-  processingText: {
-    fontSize: 15,
+  progressStatus: {
+    fontSize: 14,
     fontWeight: '700',
     color: colors.primaryDark,
     marginTop: 12,
   },
-  processingSubtext: {
-    fontSize: 12,
-    color: colors.textMuted,
-    marginTop: 4,
-  },
-  actionButtons: {
+  progressBarBg: {
     width: '100%',
-    marginTop: 24,
-    gap: 10,
+    height: 8,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 4,
+    marginTop: 10,
+    overflow: 'hidden',
   },
-  captureBtn: {
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 4,
+  },
+  progressSubtext: {
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 8,
+  },
+  buttonGroup: {
+    width: '100%',
+    gap: 10,
+    marginTop: 14,
+  },
+  cameraBtn: {
     backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
   },
-  captureBtnText: {
+  cameraBtnText: {
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 15,
   },
-  toggleTextBtn: {
+  galleryBtn: {
     backgroundColor: '#F1F5F9',
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  toggleTextBtnText: {
-    color: colors.textSecondary,
-    fontWeight: '600',
+  galleryBtnText: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  rotateBtn: {
+    flex: 1,
+    backgroundColor: '#E2E8F0',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  rotateBtnText: {
+    color: colors.text,
+    fontWeight: '700',
     fontSize: 13,
   },
-  textInputBlock: {
+  reScanBtn: {
+    flex: 2,
+    backgroundColor: '#0F172A',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  reScanBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  sampleBtn: {
+    backgroundColor: '#FEF3C7',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginTop: 4,
+  },
+  sampleBtnText: {
+    color: '#92400E',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  rawTextCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
@@ -187,13 +405,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  textInputLabel: {
-    fontSize: 13,
-    fontWeight: '700',
+  rawTextHeader: {
+    fontSize: 14,
+    fontWeight: '800',
     color: colors.text,
+  },
+  rawTextSub: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
     marginBottom: 8,
   },
-  textArea: {
+  rawTextArea: {
     backgroundColor: '#F8FAFC',
     borderRadius: 10,
     padding: 12,
@@ -205,14 +428,14 @@ const styles = StyleSheet.create({
     minHeight: 120,
     textAlignVertical: 'top',
   },
-  parseCustomBtn: {
+  parseRawBtn: {
     backgroundColor: colors.text,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
   },
-  parseCustomBtnText: {
+  parseRawBtnText: {
     color: '#FFFFFF',
     fontWeight: '700',
     fontSize: 13,

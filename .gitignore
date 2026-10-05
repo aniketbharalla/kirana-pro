@@ -26,6 +26,7 @@ web-build/
 # System files
 .DS_Store
 *.pem
+*.traineddata
 
 # Superpowers SDD scratch (ignored so worktrees/sdd don't get committed)
 .superpowers/
