@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Turborepo
+.turbo/
+
+# Build artifacts
+dist/
+.next/
+out/
+build/
+
+# Expo
+.expo/
+web-build/
+
+# Environment variables
+.env
+.env*.local
+
+# System files
+.DS_Store
+*.pem
+
+# Superpowers SDD scratch (ignored so worktrees/sdd don't get committed)
+.superpowers/
