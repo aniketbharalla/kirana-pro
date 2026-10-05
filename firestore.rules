@@ -25,6 +25,22 @@ service cloud.firestore {
         allow create: if isStoreAccess(storeId);
         allow update, delete: if false; // Immutable audit log
       }
+
+      // Suppliers directory
+      match /suppliers/{supplierId} {
+        allow read, write: if isStoreAccess(storeId);
+      }
+
+      // Purchases & Invoices
+      match /purchases/{purchaseId} {
+        allow read, create: if isStoreAccess(storeId);
+        allow update, delete: if isStoreOwner(storeId);
+      }
+
+      // Daily Galla sessions
+      match /galla/{sessionId} {
+        allow read, write: if isStoreAccess(storeId);
+      }
     }
     
     // Helper functions
