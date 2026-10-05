@@ -11,6 +11,9 @@ export const Sidebar: React.FC = () => {
     { href: '/', label: 'Overview', icon: '📊' },
     { href: '/bills', label: 'Sales & Invoices', icon: '🧾' },
     { href: '/khata', label: 'Customer Khata', icon: '📒' },
+    { href: '/purchases', label: 'Wholesale & Bill OCR', icon: '🚚' },
+    { href: '/suppliers', label: 'Wholesalers Directory', icon: '🏢' },
+    { href: '/galla', label: 'Daily Galla Cash', icon: '💰' },
     { href: '/products', label: 'Products & Catalog', icon: '📦' },
     { href: '/stock', label: 'Stock Movement Log', icon: '📋' },
   ];
