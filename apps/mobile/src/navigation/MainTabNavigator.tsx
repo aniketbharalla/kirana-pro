@@ -6,13 +6,15 @@ import { BillsNavigator } from './BillsNavigator';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ProductsNavigator } from './ProductsNavigator';
 import { TarajuScreen } from '../screens/taraju/TarajuScreen';
+import { PurchaseNavigator } from './PurchaseNavigator';
 import { colors } from '../theme';
 
 export type MainTabParamList = {
   Home: undefined;
   Products: undefined;
-  Taraju: undefined;
   Bills: undefined;
+  Purchases: undefined;
+  Taraju: undefined;
   Profile: undefined;
 };
 
@@ -21,7 +23,8 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 export const MainTabNavigator: React.FC<{
   ProductsComponent?: React.ComponentType<any>;
   TarajuComponent?: React.ComponentType<any>;
-}> = ({ ProductsComponent, TarajuComponent }) => {
+  PurchaseComponent?: React.ComponentType<any>;
+}> = ({ ProductsComponent, TarajuComponent, PurchaseComponent }) => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
@@ -80,6 +83,16 @@ export const MainTabNavigator: React.FC<{
           tabBarLabel: 'Bills',
           tabBarIcon: ({ color, focused }) => (
             <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🧾</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Purchases"
+        component={PurchaseComponent || PurchaseNavigator}
+        options={{
+          tabBarLabel: 'Wholesale',
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🚚</Text>
           ),
         }}
       />
