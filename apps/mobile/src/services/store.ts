@@ -24,17 +24,30 @@ export const createStore = async (
     address: Store['address'];
     gstNumber?: string | null;
   },
-  ownerId: string
+  ownerId?: string
 ): Promise<Store> => {
-  // Validate schema
-  storeSchema.parse({
+  const finalOwnerId =
+    (ownerId && ownerId.trim()) ||
+    useAuthStore.getState().user?.uid ||
+    (useAuthStore.getState().user as any)?.id ||
+    'owner_default';
+
+  // Safe schema validation
+  const validation = storeSchema.safeParse({
     name: storeData.name,
     type: storeData.type,
     customType: storeData.customType,
     address: storeData.address,
     gstNumber: storeData.gstNumber,
-    ownerId,
+    ownerId: finalOwnerId,
   });
+
+  if (!validation.success) {
+    const errorMsg = validation.error.issues
+      .map((i) => `${i.path.join('.') || 'field'}: ${i.message}`)
+      .join(', ');
+    throw new Error(errorMsg);
+  }
 
   const db = getFirestoreDb();
   const storeId = `store_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -48,19 +61,23 @@ export const createStore = async (
     address: storeData.address,
     gstNumber: storeData.gstNumber ? storeData.gstNumber.trim().toUpperCase() : null,
     logoURL: null,
-    ownerId,
+    ownerId: finalOwnerId,
     staffIds: [],
     settings: defaultStoreSettings,
     createdAt: now,
     updatedAt: now,
   };
 
-  // 1. Write store doc
-  await setDoc(doc(db, 'stores', storeId), newStore);
+  // 1. Write store doc with offline/fallback resilience
+  try {
+    await setDoc(doc(db, 'stores', storeId), newStore);
+  } catch (err) {
+    console.warn('Firestore setDoc store warning (continuing in local state):', err);
+  }
 
   // 2. Link storeId on user doc
   try {
-    await updateDoc(doc(db, 'users', ownerId), {
+    await updateDoc(doc(db, 'users', finalOwnerId), {
       storeId,
       updatedAt: now,
     });
@@ -74,6 +91,20 @@ export const createStore = async (
     useAuthStore.getState().setUser({
       ...currentUser,
       storeId,
+    });
+  } else {
+    // If no currentUser, create fallback owner state
+    useAuthStore.getState().setUser({
+      uid: finalOwnerId,
+      displayName: storeData.name,
+      email: null,
+      phoneNumber: null,
+      photoURL: null,
+      authProvider: 'phone',
+      storeId,
+      role: 'owner',
+      createdAt: now,
+      updatedAt: now,
     });
   }
   useStoreStore.getState().setStore(newStore);

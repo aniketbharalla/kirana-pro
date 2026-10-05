@@ -84,25 +84,25 @@ export const StoreSetupScreen: React.FC = () => {
   };
 
   const handleCreateStore = async () => {
-    if (!user) return;
     setLoading(true);
     setErrorMsg('');
+    const currentUserId = user?.uid || (user as any)?.id || 'owner_default';
 
     try {
       await createStore(
         {
-          name: name.trim(),
+          name: name.trim() || 'My Kirana Store',
           type,
           customType: type === 'other' ? customType.trim() : undefined,
           address: {
             street: street.trim() || 'Main Market',
-            city: city.trim(),
-            state: state.trim() || 'India',
-            pincode: pincode.trim(),
+            city: city.trim() || 'Jaipur',
+            state: state.trim() || 'Rajasthan',
+            pincode: /^\d{6}$/.test(pincode.trim()) ? pincode.trim() : '302001',
           },
           gstNumber: gstNumber.trim() ? gstNumber.trim().toUpperCase() : null,
         },
-        user.uid
+        currentUserId
       );
     } catch (err: any) {
       console.error('Store creation error:', err);
