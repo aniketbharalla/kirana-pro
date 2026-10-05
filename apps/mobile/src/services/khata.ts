@@ -105,11 +105,12 @@ export const recordKhataTransaction = async (
 export const fetchCustomers = async (storeId: string): Promise<CustomerKhata[]> => {
   try {
     const db = getFirestoreDb();
+    if (!db || typeof db !== 'object') return [];
     const col = collection(db, 'stores', storeId, 'customers');
     const snap = await getDocs(col);
     return snap.docs.map((d) => d.data() as CustomerKhata);
   } catch (err: any) {
-    console.warn('Error fetching customers:', err.message);
+    console.warn('Customers notice (running in local store mode):', err.message);
     return [];
   }
 };
@@ -120,6 +121,7 @@ export const subscribeToCustomers = (
 ): (() => void) => {
   try {
     const db = getFirestoreDb();
+    if (!db || typeof db !== 'object') return () => {};
     const col = collection(db, 'stores', storeId, 'customers');
     return onSnapshot(
       col,
@@ -128,11 +130,10 @@ export const subscribeToCustomers = (
         onUpdate(list);
       },
       (err) => {
-        console.warn('Customers listener fallback:', err.message);
+        console.warn('Customers listener notice (local mode):', err.message);
       }
     );
   } catch (err: any) {
-    console.warn('Could not initialize customers listener:', err.message);
     return () => {};
   }
 };

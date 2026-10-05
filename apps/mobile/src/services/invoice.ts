@@ -88,12 +88,13 @@ export const createInvoice = async (
 export const fetchInvoices = async (storeId: string): Promise<Invoice[]> => {
   try {
     const db = getFirestoreDb();
+    if (!db || typeof db !== 'object') return [];
     const invoicesCol = collection(db, 'stores', storeId, 'invoices');
     const q = query(invoicesCol, orderBy('createdAt', 'desc'), limit(50));
     const snap = await getDocs(q);
     return snap.docs.map((d) => d.data() as Invoice);
   } catch (err: any) {
-    console.warn('Error fetching invoices (returning local):', err.message);
+    console.warn('Invoices notice (returning local state):', err.message);
     return [];
   }
 };
@@ -104,6 +105,7 @@ export const subscribeToInvoices = (
 ): (() => void) => {
   try {
     const db = getFirestoreDb();
+    if (!db || typeof db !== 'object') return () => {};
     const invoicesCol = collection(db, 'stores', storeId, 'invoices');
     const q = query(invoicesCol, orderBy('createdAt', 'desc'), limit(50));
 
@@ -114,11 +116,10 @@ export const subscribeToInvoices = (
         onUpdate(list);
       },
       (err) => {
-        console.warn('Invoices listener fallback:', err.message);
+        console.warn('Invoices listener notice (local mode):', err.message);
       }
     );
   } catch (err: any) {
-    console.warn('Could not initialize invoices snapshot:', err.message);
     return () => {};
   }
 };
