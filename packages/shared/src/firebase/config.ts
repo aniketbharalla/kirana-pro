@@ -16,7 +16,7 @@ export const getFirebaseConfig = (): FirebaseEnvironmentConfig => ({
     process.env.FIREBASE_API_KEY ||
     process.env.EXPO_PUBLIC_FIREBASE_API_KEY ||
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-    'AIzaSyDemoKeyKiranaProLocalDev123456789',
+    'AIzaSyAQWMxfcCyD1k3fUFNV4rHkF15MmZVgxGU',
   authDomain:
     process.env.FIREBASE_AUTH_DOMAIN ||
     process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ||
@@ -36,12 +36,12 @@ export const getFirebaseConfig = (): FirebaseEnvironmentConfig => ({
     process.env.FIREBASE_MESSAGING_SENDER_ID ||
     process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
     process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
-    '123456789012',
+    '440171839586',
   appId:
     process.env.FIREBASE_APP_ID ||
     process.env.EXPO_PUBLIC_FIREBASE_APP_ID ||
     process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
-    '1:123456789012:web:demo1234567890',
+    '1:440171839586:web:e94944b9c14f0c2e95113b',
 });
 
 export const initializeFirebase = (customConfig?: FirebaseEnvironmentConfig): FirebaseApp => {
