@@ -140,15 +140,30 @@ export const signInWithGooglePopup = async (): Promise<UserProfile> => {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
 
-  if (typeof signInWithPopup === 'function') {
-    const result = await signInWithPopup(auth, provider);
+  // 1. Check if signInWithPopup is available directly or via browser-cjs
+  let popupFn: ((auth: any, provider: any) => Promise<any>) | null =
+    typeof signInWithPopup === 'function' ? signInWithPopup : null;
+
+  if (!popupFn) {
+    try {
+      const browserAuth = require('@firebase/auth/dist/browser-cjs/index.js');
+      if (typeof browserAuth.signInWithPopup === 'function') {
+        popupFn = browserAuth.signInWithPopup;
+      }
+    } catch {}
+  }
+
+  if (popupFn) {
+    const result = await popupFn(auth, provider);
     const profile = await createProfileFromFirebaseUser(result.user, 'google');
     useAuthStore.getState().setUser(profile);
     return profile;
   }
 
-  // On Native Mobile where browser popups are not supported
-  throw new Error('Google Sign-In popup is designed for Web/Desktop browser. On mobile devices, please use Phone Number (+91) OTP.');
+  // 2. Native Android / iOS mobile explanation
+  throw new Error(
+    'Native Google Sign-In requires registering your Android SHA-1 fingerprint in the Firebase Console (kirana-pro-edf3a). On Web, Google Sign-In works directly; on mobile, you can also sign in instantly using Phone (+91) OTP.'
+  );
 };
 
 export const signInWithGoogleIdToken = async (idToken: string): Promise<UserProfile> => {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "440171839586",
+    "project_id": "kirana-pro-edf3a",
+    "storage_bucket": "kirana-pro-edf3a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440171839586:android:5f27cf24031e8ef995113b",
+        "android_client_info": {
+          "package_name": "com.kiranapro.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADH1vM78-ziQfrAiSr_k5V3plNEnlP8Bk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
