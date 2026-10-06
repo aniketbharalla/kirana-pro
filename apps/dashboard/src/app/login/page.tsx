@@ -39,11 +39,11 @@ export default function LoginPage() {
     setInfoMsg('');
     try {
       await signInWithGoogle();
-      router.push('/');
+      // AuthContext will automatically redirect to '/' upon auth state update
     } catch (err: any) {
       console.error('Google Sign In Error:', err);
       if (err.code === 'auth/unauthorized-domain') {
-        setErrorMsg('Domain not authorized in Firebase Console. Add localhost to Authorized Domains.');
+        setErrorMsg('Domain not authorized in Firebase Console. Please access via http://localhost:3000 or http://127.0.0.1:3000 and refresh.');
       } else if (err.code === 'auth/popup-closed-by-user') {
         setErrorMsg('Sign-in cancelled. Please try again.');
       } else {
@@ -115,7 +115,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await verifyPhoneOtp(confirmationResultRef.current, cleanOtp);
-      router.push('/');
+      // AuthContext will automatically redirect to '/' upon auth state update
     } catch (err: any) {
       console.error('Phone OTP Verification Error:', err);
       if (err.code === 'auth/invalid-verification-code') {

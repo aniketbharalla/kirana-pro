@@ -37,7 +37,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const router = useRouter();
   const pathname = usePathname();
 
+  const loadingUidRef = React.useRef<string | null>(null);
+
   const loadProfileAndStore = async (fbUser: FirebaseUser) => {
+    if (loadingUidRef.current === fbUser.uid) return;
+    loadingUidRef.current = fbUser.uid;
+
     try {
       const db = getDb();
       const userRef = doc(db, 'users', fbUser.uid);
@@ -108,6 +113,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (err) {
       console.error('Error loading profile or store:', err);
+    } finally {
+      loadingUidRef.current = null;
     }
   };
 
@@ -117,28 +124,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  // 1. Subscribe to Firebase Auth ONCE on mount
   useEffect(() => {
     const auth = getDashboardAuth();
+    let isMounted = true;
+
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (!isMounted) return;
       setUser(fbUser);
       if (fbUser) {
         await loadProfileAndStore(fbUser);
-        setLoading(false);
-        if (pathname === '/login') {
-          router.replace('/');
-        }
       } else {
         setProfile(null);
         setStore(null);
+      }
+      if (isMounted) {
         setLoading(false);
-        if (pathname !== '/login') {
-          router.replace('/login');
-        }
       }
     });
 
-    return () => unsubscribe();
-  }, [pathname, router]);
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, []);
+
+  // 2. Route protection decoupled from auth listener lifecycle
+  useEffect(() => {
+    if (loading) return;
+
+    if (!user && pathname !== '/login') {
+      router.replace('/login');
+    } else if (user && pathname === '/login') {
+      router.replace('/');
+    }
+  }, [user, loading, pathname, router]);
 
   const handleSignOut = async () => {
     setLoading(true);

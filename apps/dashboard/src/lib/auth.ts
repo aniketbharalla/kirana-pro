@@ -63,13 +63,12 @@ export const syncUserProfileToFirestore = async (
 };
 
 // Real Google Sign-in with popup
-export const signInWithGoogle = async (): Promise<{ user: FirebaseUser; profile: UserProfile }> => {
+export const signInWithGoogle = async (): Promise<{ user: FirebaseUser }> => {
   const auth = getDashboardAuth();
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
   const result = await signInWithPopup(auth, provider);
-  const profile = await syncUserProfileToFirestore(result.user, 'google');
-  return { user: result.user, profile };
+  return { user: result.user };
 };
 
 // Get or initialize reusable RecaptchaVerifier for Phone OTP
@@ -124,10 +123,9 @@ export const sendPhoneOtp = async (
 export const verifyPhoneOtp = async (
   confirmationResult: ConfirmationResult,
   otpCode: string
-): Promise<{ user: FirebaseUser; profile: UserProfile }> => {
+): Promise<{ user: FirebaseUser }> => {
   const result = await confirmationResult.confirm(otpCode);
-  const profile = await syncUserProfileToFirestore(result.user, 'phone');
-  return { user: result.user, profile };
+  return { user: result.user };
 };
 
 export const signOutUser = async (): Promise<void> => {
