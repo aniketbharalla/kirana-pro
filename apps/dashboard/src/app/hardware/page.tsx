@@ -5,10 +5,12 @@ import {
   formatReceiptPlainText,
   PrinterWidth,
   PrinterConnectionType,
+  Invoice,
 } from '@kirana-pro/shared';
-import { DASHBOARD_INVOICES } from '../../lib/mockInvoices';
+import { useAuth } from '../../context/AuthContext';
 
 export default function HardwarePage() {
+  const { store } = useAuth();
   const [width, setWidth] = useState<PrinterWidth>('58mm');
   const [connection, setConnection] = useState<PrinterConnectionType>('system');
   const [printerName, setPrinterName] = useState('Everycom POS-58 Thermal');
@@ -16,15 +18,58 @@ export default function HardwarePage() {
   const [autoKickDrawer, setAutoKickDrawer] = useState(true);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
-  // Sample receipt preview text
+  // Dynamic store info from authenticated merchant
   const storeInfo = {
-    name: 'Sharma Kirana Store',
-    address: 'Shop 12, Main Mandi Market, Delhi',
+    name: store?.name || 'My Kirana Store',
+    address: store?.address?.street ? `${store.address.street}, ${store.address.city}` : 'Counter 1, Main Bazaar',
     phone: '9876543210',
-    gstin: '07AABCK1234F1Z5',
+    gstin: store?.gstNumber || '07AABCK1234F1Z5',
   };
 
-  const sampleInvoice = DASHBOARD_INVOICES[0];
+  const sampleInvoice: Invoice = {
+    id: 'test_inv_01',
+    invoiceNumber: `TEST-${Date.now().toString().slice(-4)}`,
+    storeId: store?.id || 'store',
+    items: [
+      {
+        productId: 'item_1',
+        name: 'Aashirvaad Atta 5kg',
+        unit: 'packet',
+        isLoose: false,
+        quantity: 1,
+        unitPrice: 250,
+        discount: 0,
+        gstRate: 0,
+        taxableAmount: 250,
+        gstAmount: 0,
+        totalAmount: 250,
+      },
+      {
+        productId: 'item_2',
+        name: 'Tata Salt 1kg',
+        unit: 'packet',
+        isLoose: false,
+        quantity: 2,
+        unitPrice: 28,
+        discount: 0,
+        gstRate: 0,
+        taxableAmount: 56,
+        gstAmount: 0,
+        totalAmount: 56,
+      },
+    ],
+    subtotal: 306,
+    discountTotal: 0,
+    taxTotal: 0,
+    grandTotal: 306,
+    paymentMode: 'cash',
+    paymentStatus: 'paid',
+    amountPaid: 306,
+    amountDue: 0,
+    createdBy: 'merchant',
+    createdAt: new Date().toISOString(),
+  };
+
   const receiptPreviewText = formatReceiptPlainText(sampleInvoice, storeInfo, width);
 
   // Trigger Test Print

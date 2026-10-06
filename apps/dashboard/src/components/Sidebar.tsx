@@ -3,9 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const { store, profile } = useAuth();
 
   const navLinks = [
     { href: '/', label: 'Overview', icon: '📊' },
@@ -63,10 +65,14 @@ export const Sidebar: React.FC = () => {
 
       {/* Footer Store Info */}
       <div style={styles.footerCard}>
-        <div style={styles.storeAvatar}>K</div>
+        <div style={styles.storeAvatar}>
+          {store?.name ? store.name.slice(0, 1).toUpperCase() : '🏪'}
+        </div>
         <div style={styles.storeDetails}>
-          <div style={styles.storeName}>Sharma Kirana</div>
-          <div style={styles.storeStatus}>🟢 Cloud Synced</div>
+          <div style={styles.storeName}>
+            {store?.name || (profile?.displayName ? `${profile.displayName}'s Store` : 'My Store')}
+          </div>
+          <div style={styles.storeStatus}>🟢 Firebase Live</div>
         </div>
       </div>
     </aside>

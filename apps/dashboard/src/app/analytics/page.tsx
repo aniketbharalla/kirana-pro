@@ -1,13 +1,52 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { DASHBOARD_INVOICES } from '../../lib/mockInvoices';
-import { INITIAL_DASHBOARD_PRODUCTS } from '../../lib/mockData';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Invoice, Product } from '@kirana-pro/shared';
+import { useAuth } from '../../context/AuthContext';
+import { subscribeStoreInvoices, subscribeStoreProducts } from '../../lib/storeService';
 
 export default function AnalyticsPage() {
+  const { store, storeId } = useAuth();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<'today' | '7days' | '30days' | 'all'>('7days');
 
-  // Compute metrics from invoices
+  useEffect(() => {
+    if (!storeId) return;
+
+    let unsubProducts = subscribeStoreProducts(storeId, (prods) => {
+      setProducts(prods);
+    });
+
+    let unsubInvoices = subscribeStoreInvoices(storeId, (invs) => {
+      setInvoices(invs);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubProducts();
+      unsubInvoices();
+    };
+  }, [storeId]);
+
+  // Filter invoices by selected date range
+  const filteredInvoices = useMemo(() => {
+    const now = new Date();
+    return invoices.filter((inv) => {
+      if (range === 'all') return true;
+      const invDate = new Date(inv.createdAt);
+      const diffMs = now.getTime() - invDate.getTime();
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+      if (range === 'today') return diffDays < 1;
+      if (range === '7days') return diffDays <= 7;
+      if (range === '30days') return diffDays <= 30;
+      return true;
+    });
+  }, [invoices, range]);
+
+  // Compute metrics from real store invoices
   const metrics = useMemo(() => {
     let revenue = 0;
     let cost = 0;
@@ -17,7 +56,7 @@ export default function AnalyticsPage() {
 
     const categoryMap: Record<string, { revenue: number; cost: number; qty: number }> = {};
 
-    DASHBOARD_INVOICES.forEach((inv) => {
+    filteredInvoices.forEach((inv) => {
       revenue += inv.grandTotal;
 
       if (inv.paymentMode === 'cash') cashSales += inv.grandTotal;
@@ -25,8 +64,8 @@ export default function AnalyticsPage() {
       else if (inv.paymentMode === 'credit') creditSales += inv.grandTotal;
 
       inv.items.forEach((item) => {
-        const prod = INITIAL_DASHBOARD_PRODUCTS.find((p) => p.id === item.productId);
-        const itemCost = (prod?.purchasePrice || item.unitPrice * 0.82) * item.quantity;
+        const prod = products.find((p) => p.id === item.productId);
+        const itemCost = (prod?.purchasePrice || item.unitPrice * 0.85) * item.quantity;
         cost += itemCost;
 
         const cat = prod?.category || 'other';
@@ -41,19 +80,21 @@ export default function AnalyticsPage() {
 
     const grossProfit = Math.max(0, revenue - cost);
     const marginPercent = revenue > 0 ? (grossProfit / revenue) * 100 : 0;
-    const aov = DASHBOARD_INVOICES.length > 0 ? revenue / DASHBOARD_INVOICES.length : 0;
+    const aov = filteredInvoices.length > 0 ? revenue / filteredInvoices.length : 0;
 
-    const categories = Object.entries(categoryMap).map(([name, data]) => {
-      const profit = data.revenue - data.cost;
-      const margin = data.revenue > 0 ? (profit / data.revenue) * 100 : 0;
-      return {
-        name,
-        revenue: data.revenue,
-        profit,
-        margin,
-        qty: data.qty,
-      };
-    }).sort((a, b) => b.revenue - a.revenue);
+    const categories = Object.entries(categoryMap)
+      .map(([name, data]) => {
+        const profit = data.revenue - data.cost;
+        const margin = data.revenue > 0 ? (profit / data.revenue) * 100 : 0;
+        return {
+          name,
+          revenue: data.revenue,
+          profit,
+          margin,
+          qty: data.qty,
+        };
+      })
+      .sort((a, b) => b.revenue - a.revenue);
 
     return {
       revenue,
@@ -66,20 +107,44 @@ export default function AnalyticsPage() {
       creditSales,
       categories,
     };
-  }, []);
+  }, [filteredInvoices, products]);
 
-  // Daily trend mock data for SVG bar chart
-  const dailyData = [
-    { day: 'Mon', date: 'Sep 29', rev: 5200, profit: 890 },
-    { day: 'Tue', date: 'Sep 30', rev: 6400, profit: 1120 },
-    { day: 'Wed', date: 'Oct 01', rev: 4900, profit: 840 },
-    { day: 'Thu', date: 'Oct 02', rev: 7800, profit: 1450 },
-    { day: 'Fri', date: 'Oct 03', rev: 8900, profit: 1680 },
-    { day: 'Sat', date: 'Oct 04', rev: 11500, profit: 2100 },
-    { day: 'Sun', date: 'Oct 05', rev: 13800, profit: 2540 },
-  ];
+  // Dynamic 7-day velocity computed from real invoices
+  const dailyData = useMemo(() => {
+    const days: { day: string; date: string; rev: number; profit: number }[] = [];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  const maxDailyRev = Math.max(...dailyData.map((d) => d.rev));
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateKey = d.toISOString().slice(0, 10);
+      const dayName = dayNames[d.getDay()];
+
+      let dayRev = 0;
+      let dayCost = 0;
+
+      invoices.forEach((inv) => {
+        if ((inv.createdAt || '').slice(0, 10) === dateKey) {
+          dayRev += inv.grandTotal;
+          inv.items.forEach((it) => {
+            const p = products.find((x) => x.id === it.productId);
+            dayCost += (p?.purchasePrice || it.unitPrice * 0.85) * it.quantity;
+          });
+        }
+      });
+
+      days.push({
+        day: dayName,
+        date: `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })}`,
+        rev: dayRev,
+        profit: Math.max(0, dayRev - dayCost),
+      });
+    }
+
+    return days;
+  }, [invoices, products]);
+
+  const maxDailyRev = Math.max(...dailyData.map((d) => d.rev), 100);
 
   return (
     <div style={styles.container}>
@@ -88,7 +153,7 @@ export default function AnalyticsPage() {
         <div>
           <div style={styles.badgeRow}>
             <span style={styles.analyticsBadge}>📈 BUSINESS INTELLIGENCE</span>
-            <span style={styles.storeBadge}>Sharma Kirana Back-Office</span>
+            <span style={styles.storeBadge}>{store?.name || 'My Kirana'}</span>
           </div>
           <h1 style={styles.title}>Dukaan Profit & Sales Analytics</h1>
           <p style={styles.subtitle}>
@@ -104,253 +169,304 @@ export default function AnalyticsPage() {
               style={{ ...styles.rangeBtn, ...(range === r ? styles.rangeBtnActive : {}) }}
               onClick={() => setRange(r)}
             >
-              {r === 'today' ? 'Today' : r === '7days' ? 'Last 7 Days' : r === '30days' ? 'Last 30 Days' : 'All Time'}
+              {r === 'today'
+                ? 'Today'
+                : r === '7days'
+                ? 'Last 7 Days'
+                : r === '30days'
+                ? 'Last 30 Days'
+                : 'All Time'}
             </button>
           ))}
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div style={styles.kpiGrid}>
-        <div style={styles.kpiCard}>
-          <span style={styles.kpiLabel}>TOTAL GROSS REVENUE</span>
-          <span style={styles.kpiVal}>₹{metrics.revenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-          <span style={styles.kpiSub}>Total counter billings</span>
+      {loading ? (
+        <div style={styles.loadingState}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>Calculating store analytics...</p>
         </div>
-
-        <div style={styles.kpiCard}>
-          <span style={styles.kpiLabel}>PURCHASE COST (COGS)</span>
-          <span style={styles.kpiVal}>₹{metrics.cost.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-          <span style={styles.kpiSub}>Wholesale goods cost</span>
-        </div>
-
-        <div style={{ ...styles.kpiCard, borderLeft: '4px solid #10B981' }}>
-          <span style={styles.kpiLabel}>NET GROSS PROFIT</span>
-          <span style={{ ...styles.kpiVal, color: '#047857' }}>
-            ₹{metrics.grossProfit.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </span>
-          <span style={styles.kpiSub}>Revenue minus COGS</span>
-        </div>
-
-        <div style={{ ...styles.kpiCard, borderLeft: '4px solid #3B82F6' }}>
-          <span style={styles.kpiLabel}>GROSS MARGIN %</span>
-          <span style={{ ...styles.kpiVal, color: '#1D4ED8' }}>
-            {metrics.marginPercent.toFixed(1)}%
-          </span>
-          <span style={styles.kpiSub}>Target: 15% - 20% healthy</span>
-        </div>
-
-        <div style={styles.kpiCard}>
-          <span style={styles.kpiLabel}>AVG BASKET VALUE</span>
-          <span style={styles.kpiVal}>₹{metrics.aov.toFixed(0)}</span>
-          <span style={styles.kpiSub}>Per customer transaction</span>
-        </div>
-      </div>
-
-      {/* Main Charts Two-Column Section */}
-      <div style={styles.chartRow}>
-        {/* Left: Daily Revenue & Profit Trend Bar Chart (SVG) */}
-        <div style={styles.chartCard}>
-          <div style={styles.chartHeader}>
-            <div>
-              <h2 style={styles.chartTitle}>7-Day Sales & Net Profit Velocity</h2>
-              <span style={styles.chartSub}>Green bar = Total Revenue • Purple bar = Gross Profit</span>
+      ) : (
+        <>
+          {/* KPI Cards Grid */}
+          <div style={styles.kpiGrid}>
+            <div style={styles.kpiCard}>
+              <span style={styles.kpiLabel}>TOTAL GROSS REVENUE</span>
+              <span style={styles.kpiVal}>
+                ₹{metrics.revenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </span>
+              <span style={styles.kpiSub}>Total counter billings</span>
             </div>
-            <div style={styles.legendRow}>
-              <div style={styles.legendItem}>
-                <span style={{ ...styles.legendDot, backgroundColor: '#10B981' }} />
-                <span>Revenue</span>
-              </div>
-              <div style={styles.legendItem}>
-                <span style={{ ...styles.legendDot, backgroundColor: '#8B5CF6' }} />
-                <span>Profit</span>
-              </div>
+
+            <div style={styles.kpiCard}>
+              <span style={styles.kpiLabel}>PURCHASE COST (COGS)</span>
+              <span style={styles.kpiVal}>
+                ₹{metrics.cost.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </span>
+              <span style={styles.kpiSub}>Wholesale goods cost</span>
+            </div>
+
+            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #10B981' }}>
+              <span style={styles.kpiLabel}>NET GROSS PROFIT</span>
+              <span style={{ ...styles.kpiVal, color: '#047857' }}>
+                ₹{metrics.grossProfit.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </span>
+              <span style={styles.kpiSub}>Revenue minus COGS</span>
+            </div>
+
+            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #3B82F6' }}>
+              <span style={styles.kpiLabel}>GROSS MARGIN %</span>
+              <span style={{ ...styles.kpiVal, color: '#1D4ED8' }}>
+                {metrics.marginPercent.toFixed(1)}%
+              </span>
+              <span style={styles.kpiSub}>Target: 15% - 20% healthy</span>
+            </div>
+
+            <div style={styles.kpiCard}>
+              <span style={styles.kpiLabel}>AVG BASKET VALUE</span>
+              <span style={styles.kpiVal}>₹{metrics.aov.toFixed(0)}</span>
+              <span style={styles.kpiSub}>Per customer transaction</span>
             </div>
           </div>
 
-          {/* SVG Bar Chart */}
-          <div style={styles.barChartContainer}>
-            {dailyData.map((d) => {
-              const revHeight = (d.rev / maxDailyRev) * 180;
-              const profitHeight = (d.profit / maxDailyRev) * 180;
-              return (
-                <div key={d.day} style={styles.barCol}>
-                  <div style={styles.barGroup}>
+          {/* Main Charts Two-Column Section */}
+          <div style={styles.chartRow}>
+            {/* Left: Daily Revenue & Profit Trend Bar Chart (SVG) */}
+            <div style={styles.chartCard}>
+              <div style={styles.chartHeader}>
+                <div>
+                  <h2 style={styles.chartTitle}>7-Day Sales & Net Profit Velocity</h2>
+                  <span style={styles.chartSub}>
+                    Green bar = Total Revenue • Purple bar = Gross Profit
+                  </span>
+                </div>
+                <div style={styles.legendRow}>
+                  <div style={styles.legendItem}>
+                    <span style={{ ...styles.legendDot, backgroundColor: '#10B981' }} />
+                    <span>Revenue</span>
+                  </div>
+                  <div style={styles.legendItem}>
+                    <span style={{ ...styles.legendDot, backgroundColor: '#8B5CF6' }} />
+                    <span>Profit</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* SVG Bar Chart */}
+              <div style={styles.barChartContainer}>
+                {dailyData.map((d) => {
+                  const revHeight = maxDailyRev > 0 ? (d.rev / maxDailyRev) * 180 : 0;
+                  const profitHeight = maxDailyRev > 0 ? (d.profit / maxDailyRev) * 180 : 0;
+                  return (
+                    <div key={d.day + d.date} style={styles.barCol}>
+                      <div style={styles.barGroup}>
+                        <div
+                          style={{
+                            ...styles.barRev,
+                            height: `${Math.max(4, revHeight)}px`,
+                          }}
+                          title={`Revenue: ₹${d.rev}`}
+                        />
+                        <div
+                          style={{
+                            ...styles.barProfit,
+                            height: `${Math.max(4, profitHeight)}px`,
+                          }}
+                          title={`Profit: ₹${d.profit}`}
+                        />
+                      </div>
+                      <span style={styles.barDay}>{d.day}</span>
+                      <span style={styles.barAmt}>
+                        {d.rev >= 1000 ? `₹${(d.rev / 1000).toFixed(1)}k` : `₹${d.rev}`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right: Payment Modes Distribution */}
+            <div style={styles.sideCard}>
+              <h2 style={styles.chartTitle}>Payment Method Split</h2>
+              <span style={styles.chartSub}>Digital UPI vs Cash vs Customer Khata</span>
+
+              <div style={styles.paymentMeterList}>
+                {/* Cash */}
+                <div style={styles.meterItem}>
+                  <div style={styles.meterInfo}>
+                    <span style={styles.meterLabel}>💵 Cash (नकद)</span>
+                    <span style={styles.meterVal}>
+                      ₹{metrics.cashSales.toFixed(0)} (
+                      {metrics.revenue > 0
+                        ? ((metrics.cashSales / metrics.revenue) * 100).toFixed(0)
+                        : 0}
+                      %)
+                    </span>
+                  </div>
+                  <div style={styles.meterTrack}>
                     <div
                       style={{
-                        ...styles.barRev,
-                        height: `${revHeight}px`,
+                        ...styles.meterFill,
+                        backgroundColor: '#10B981',
+                        width: `${
+                          metrics.revenue > 0 ? (metrics.cashSales / metrics.revenue) * 100 : 0
+                        }%`,
                       }}
-                      title={`Revenue: ₹${d.rev}`}
-                    />
-                    <div
-                      style={{
-                        ...styles.barProfit,
-                        height: `${profitHeight}px`,
-                      }}
-                      title={`Profit: ₹${d.profit}`}
                     />
                   </div>
-                  <span style={styles.barDay}>{d.day}</span>
-                  <span style={styles.barAmt}>₹{(d.rev / 1000).toFixed(1)}k</span>
                 </div>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* Right: Payment Modes Distribution */}
-        <div style={styles.sideCard}>
-          <h2 style={styles.chartTitle}>Payment Method Split</h2>
-          <span style={styles.chartSub}>Digital UPI vs Cash vs Customer Khata</span>
+                {/* UPI */}
+                <div style={styles.meterItem}>
+                  <div style={styles.meterInfo}>
+                    <span style={styles.meterLabel}>📲 UPI QR (डिजिटल)</span>
+                    <span style={styles.meterVal}>
+                      ₹{metrics.upiSales.toFixed(0)} (
+                      {metrics.revenue > 0
+                        ? ((metrics.upiSales / metrics.revenue) * 100).toFixed(0)
+                        : 0}
+                      %)
+                    </span>
+                  </div>
+                  <div style={styles.meterTrack}>
+                    <div
+                      style={{
+                        ...styles.meterFill,
+                        backgroundColor: '#3B82F6',
+                        width: `${
+                          metrics.revenue > 0 ? (metrics.upiSales / metrics.revenue) * 100 : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
 
-          <div style={styles.paymentMeterList}>
-            {/* Cash */}
-            <div style={styles.meterItem}>
-              <div style={styles.meterInfo}>
-                <span style={styles.meterLabel}>💵 Cash (नकद)</span>
-                <span style={styles.meterVal}>
-                  ₹{metrics.cashSales.toFixed(0)} (
-                  {metrics.revenue > 0 ? ((metrics.cashSales / metrics.revenue) * 100).toFixed(0) : 0}%)
-                </span>
+                {/* Khata */}
+                <div style={styles.meterItem}>
+                  <div style={styles.meterInfo}>
+                    <span style={styles.meterLabel}>📒 Khata (उधार)</span>
+                    <span style={styles.meterVal}>
+                      ₹{metrics.creditSales.toFixed(0)} (
+                      {metrics.revenue > 0
+                        ? ((metrics.creditSales / metrics.revenue) * 100).toFixed(0)
+                        : 0}
+                      %)
+                    </span>
+                  </div>
+                  <div style={styles.meterTrack}>
+                    <div
+                      style={{
+                        ...styles.meterFill,
+                        backgroundColor: '#EF4444',
+                        width: `${
+                          metrics.revenue > 0 ? (metrics.creditSales / metrics.revenue) * 100 : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div style={styles.meterTrack}>
-                <div
-                  style={{
-                    ...styles.meterFill,
-                    backgroundColor: '#10B981',
-                    width: `${metrics.revenue > 0 ? (metrics.cashSales / metrics.revenue) * 100 : 0}%`,
-                  }}
-                />
-              </div>
-            </div>
 
-            {/* UPI */}
-            <div style={styles.meterItem}>
-              <div style={styles.meterInfo}>
-                <span style={styles.meterLabel}>📲 UPI QR (डिजिटल)</span>
-                <span style={styles.meterVal}>
-                  ₹{metrics.upiSales.toFixed(0)} (
-                  {metrics.revenue > 0 ? ((metrics.upiSales / metrics.revenue) * 100).toFixed(0) : 0}%)
-                </span>
-              </div>
-              <div style={styles.meterTrack}>
-                <div
-                  style={{
-                    ...styles.meterFill,
-                    backgroundColor: '#3B82F6',
-                    width: `${metrics.revenue > 0 ? (metrics.upiSales / metrics.revenue) * 100 : 0}%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Khata */}
-            <div style={styles.meterItem}>
-              <div style={styles.meterInfo}>
-                <span style={styles.meterLabel}>📒 Khata (उधार)</span>
-                <span style={styles.meterVal}>
-                  ₹{metrics.creditSales.toFixed(0)} (
-                  {metrics.revenue > 0 ? ((metrics.creditSales / metrics.revenue) * 100).toFixed(0) : 0}%)
-                </span>
-              </div>
-              <div style={styles.meterTrack}>
-                <div
-                  style={{
-                    ...styles.meterFill,
-                    backgroundColor: '#EF4444',
-                    width: `${metrics.revenue > 0 ? (metrics.creditSales / metrics.revenue) * 100 : 0}%`,
-                  }}
-                />
+              <div style={styles.khataInsightBox}>
+                <span style={styles.insightIcon}>💡</span>
+                <p style={styles.insightText}>
+                  <strong>Khata Tip:</strong> Regular credit customers boost lifetime loyalty. Track
+                  due accounts in Khata tab for zero defaults.
+                </p>
               </div>
             </div>
           </div>
 
-          <div style={styles.khataInsightBox}>
-            <span style={styles.insightIcon}>💡</span>
-            <p style={styles.insightText}>
-              <strong>Khata Tip:</strong> 34% of your monthly sales come through loyal credit accounts. Reminders via WhatsApp help recover funds within 7 days.
-            </p>
-          </div>
-        </div>
-      </div>
+          {/* Category Performance Breakdown */}
+          <div style={styles.tableCard}>
+            <div style={styles.tableHeaderRow}>
+              <div>
+                <h2 style={styles.tableTitle}>Category Profitability Matrix</h2>
+                <span style={styles.tableSubtitle}>
+                  Which sections of your dukaan generate the highest margins and cash flow.
+                </span>
+              </div>
+            </div>
 
-      {/* Category Performance Breakdown */}
-      <div style={styles.tableCard}>
-        <div style={styles.tableHeaderRow}>
-          <div>
-            <h2 style={styles.tableTitle}>Category Profitability Matrix</h2>
-            <span style={styles.tableSubtitle}>
-              Which sections of your dukaan generate the highest margins and cash flow.
-            </span>
-          </div>
-        </div>
-
-        <div style={styles.tableWrapper}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>CATEGORY</th>
-                <th style={styles.th}>REVENUE (₹)</th>
-                <th style={styles.th}>MARGIN %</th>
-                <th style={styles.th}>GROSS PROFIT (₹)</th>
-                <th style={styles.th}>PROFIT SHARE</th>
-              </tr>
-            </thead>
-            <tbody>
-              {metrics.categories.map((c) => {
-                const profitShare = metrics.grossProfit > 0 ? (c.profit / metrics.grossProfit) * 100 : 0;
-                return (
-                  <tr key={c.name} style={styles.tr}>
-                    <td style={{ ...styles.td, fontWeight: 700, textTransform: 'capitalize' }}>
-                      {c.name.replace('-', ' ')}
-                    </td>
-                    <td style={styles.td}>₹{c.revenue.toFixed(2)}</td>
-                    <td style={styles.td}>
-                      <span
-                        style={{
-                          ...styles.marginBadge,
-                          backgroundColor: c.margin >= 18 ? '#DCFCE7' : c.margin >= 10 ? '#FEF3C7' : '#FEE2E2',
-                          color: c.margin >= 18 ? '#15803D' : c.margin >= 10 ? '#92400E' : '#B91C1C',
-                        }}
-                      >
-                        {c.margin.toFixed(1)}%
-                      </span>
-                    </td>
-                    <td style={{ ...styles.td, fontWeight: 800, color: '#047857' }}>
-                      ₹{c.profit.toFixed(2)}
-                    </td>
-                    <td style={styles.td}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={styles.miniTrack}>
-                          <div
-                            style={{
-                              ...styles.miniFill,
-                              width: `${Math.min(100, Math.max(0, profitShare))}%`,
-                            }}
-                          />
-                        </div>
-                        <span style={{ fontSize: '11px', color: '#64748B' }}>
-                          {profitShare.toFixed(0)}%
-                        </span>
-                      </div>
-                    </td>
+            <div style={styles.tableWrapper}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>CATEGORY</th>
+                    <th style={styles.th}>REVENUE (₹)</th>
+                    <th style={styles.th}>MARGIN %</th>
+                    <th style={styles.th}>GROSS PROFIT (₹)</th>
+                    <th style={styles.th}>PROFIT SHARE</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  {metrics.categories.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ ...styles.td, textAlign: 'center', padding: '36px' }}>
+                        No categorized sales recorded for this period yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    metrics.categories.map((c) => {
+                      const profitShare =
+                        metrics.grossProfit > 0 ? (c.profit / metrics.grossProfit) * 100 : 0;
+                      return (
+                        <tr key={c.name} style={styles.tr}>
+                          <td style={{ ...styles.td, fontWeight: 700, textTransform: 'capitalize' }}>
+                            {c.name.replace('-', ' ')}
+                          </td>
+                          <td style={styles.td}>₹{c.revenue.toFixed(2)}</td>
+                          <td style={styles.td}>
+                            <span
+                              style={{
+                                ...styles.marginBadge,
+                                backgroundColor:
+                                  c.margin >= 18 ? '#DCFCE7' : c.margin >= 10 ? '#FEF3C7' : '#FEE2E2',
+                                color:
+                                  c.margin >= 18 ? '#15803D' : c.margin >= 10 ? '#92400E' : '#B91C1C',
+                              }}
+                            >
+                              {c.margin.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td style={{ ...styles.td, fontWeight: 800, color: '#047857' }}>
+                            ₹{c.profit.toFixed(2)}
+                          </td>
+                          <td style={styles.td}>
+                            <div style={styles.shareBlock}>
+                              <div style={styles.shareTrack}>
+                                <div
+                                  style={{
+                                    ...styles.shareFill,
+                                    width: `${Math.min(100, Math.max(0, profitShare))}%`,
+                                  }}
+                                />
+                              </div>
+                              <span style={styles.shareText}>{profitShare.toFixed(1)}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
+    maxWidth: '1400px',
+    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
+    paddingBottom: '40px',
   },
   header: {
     display: 'flex',
@@ -368,16 +484,16 @@ const styles: Record<string, React.CSSProperties> = {
   analyticsBadge: {
     fontSize: '11px',
     fontWeight: 800,
-    color: '#1E40AF',
-    backgroundColor: '#EFF6FF',
+    letterSpacing: '0.5px',
+    color: '#7C3AED',
+    backgroundColor: '#F5F3FF',
     padding: '3px 8px',
     borderRadius: '6px',
-    letterSpacing: '0.5px',
   },
   storeBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#475569',
+    color: '#64748B',
     backgroundColor: '#F1F5F9',
     padding: '3px 8px',
     borderRadius: '6px',
@@ -386,8 +502,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '26px',
     fontWeight: 800,
     color: '#0F172A',
-    letterSpacing: '-0.5px',
     margin: 0,
+    letterSpacing: '-0.5px',
   },
   subtitle: {
     fontSize: '14px',
@@ -397,55 +513,78 @@ const styles: Record<string, React.CSSProperties> = {
   },
   rangeTabs: {
     display: 'flex',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
-    borderRadius: '10px',
+    backgroundColor: '#F1F5F9',
     padding: '4px',
+    borderRadius: '10px',
     gap: '4px',
   },
   rangeBtn: {
     border: 'none',
-    backgroundColor: 'transparent',
-    padding: '6px 12px',
-    borderRadius: '8px',
+    background: 'none',
+    padding: '6px 14px',
     fontSize: '12px',
-    fontWeight: 700,
+    fontWeight: 600,
     color: '#64748B',
+    borderRadius: '8px',
     cursor: 'pointer',
   },
   rangeBtnActive: {
-    backgroundColor: '#10B981',
-    color: '#FFFFFF',
+    backgroundColor: '#FFFFFF',
+    color: '#0F172A',
+    fontWeight: 700,
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+  },
+  loadingState: {
+    padding: '60px 20px',
+    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
+  },
+  spinner: {
+    width: '32px',
+    height: '32px',
+    border: '3px solid #E2E8F0',
+    borderTopColor: '#7C3AED',
+    borderRadius: '50%',
+    margin: '0 auto 12px',
+    animation: 'spin 0.8s linear infinite',
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#64748B',
+    margin: 0,
   },
   kpiGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '16px',
   },
   kpiCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
     border: '1px solid #E2E8F0',
-    padding: '18px',
+    borderRadius: '16px',
+    padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   kpiLabel: {
     fontSize: '11px',
     fontWeight: 800,
     color: '#64748B',
     letterSpacing: '0.5px',
+    marginBottom: '8px',
   },
   kpiVal: {
-    fontSize: '22px',
+    fontSize: '26px',
     fontWeight: 800,
     color: '#0F172A',
+    marginBottom: '4px',
   },
   kpiSub: {
-    fontSize: '11px',
+    fontSize: '12px',
     color: '#94A3B8',
-    marginTop: '2px',
   },
   chartRow: {
     display: 'grid',
@@ -454,17 +593,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
   chartCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
     border: '1px solid #E2E8F0',
+    borderRadius: '16px',
     padding: '24px',
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   chartHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px',
+    alignItems: 'flex-start',
+    marginBottom: '24px',
   },
   chartTitle: {
     fontSize: '16px',
@@ -476,14 +616,13 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
     color: '#64748B',
     marginTop: '2px',
+    display: 'block',
   },
   legendRow: {
     display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
+    gap: '16px',
     fontSize: '12px',
     color: '#475569',
-    fontWeight: 600,
   },
   legendItem: {
     display: 'flex',
@@ -497,61 +636,61 @@ const styles: Record<string, React.CSSProperties> = {
   },
   barChartContainer: {
     display: 'flex',
-    alignItems: 'flex-end',
     justifyContent: 'space-between',
-    height: '240px',
+    alignItems: 'flex-end',
+    height: '220px',
     paddingTop: '20px',
-    borderBottom: '2px solid #E2E8F0',
-    gap: '12px',
+    borderBottom: '1.5px solid #F1F5F9',
   },
   barCol: {
-    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '6px',
+    gap: '8px',
+    flex: 1,
   },
   barGroup: {
     display: 'flex',
-    alignItems: 'flex-end',
     gap: '4px',
+    alignItems: 'flex-end',
     height: '180px',
   },
   barRev: {
-    width: '16px',
+    width: '18px',
     backgroundColor: '#10B981',
     borderRadius: '4px 4px 0 0',
-    transition: 'all 0.2s ease',
+    transition: 'height 0.3s ease',
   },
   barProfit: {
-    width: '16px',
+    width: '18px',
     backgroundColor: '#8B5CF6',
     borderRadius: '4px 4px 0 0',
-    transition: 'all 0.2s ease',
+    transition: 'height 0.3s ease',
   },
   barDay: {
-    fontSize: '11px',
+    fontSize: '12px',
     fontWeight: 700,
     color: '#475569',
   },
   barAmt: {
     fontSize: '10px',
+    fontWeight: 600,
     color: '#94A3B8',
   },
   sideCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
     border: '1px solid #E2E8F0',
+    borderRadius: '16px',
     padding: '24px',
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   paymentMeterList: {
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
     marginTop: '20px',
-    flex: 1,
   },
   meterItem: {
     display: 'flex',
@@ -562,35 +701,36 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     fontSize: '12px',
+    fontWeight: 600,
   },
   meterLabel: {
-    fontWeight: 700,
     color: '#334155',
   },
   meterVal: {
-    fontWeight: 800,
     color: '#0F172A',
+    fontWeight: 700,
   },
   meterTrack: {
-    height: '10px',
+    height: '8px',
     backgroundColor: '#F1F5F9',
-    borderRadius: '6px',
+    borderRadius: '4px',
     overflow: 'hidden',
   },
   meterFill: {
     height: '100%',
-    borderRadius: '6px',
+    borderRadius: '4px',
   },
   khataInsightBox: {
     backgroundColor: '#FEF3C7',
     borderRadius: '12px',
-    padding: '12px',
+    padding: '14px',
     display: 'flex',
     gap: '10px',
-    marginTop: '16px',
+    alignItems: 'flex-start',
+    marginTop: '20px',
   },
   insightIcon: {
-    fontSize: '18px',
+    fontSize: '16px',
   },
   insightText: {
     fontSize: '12px',
@@ -600,13 +740,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   tableCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
     border: '1px solid #E2E8F0',
+    borderRadius: '16px',
+    padding: '24px',
     overflow: 'hidden',
   },
   tableHeaderRow: {
-    padding: '20px',
-    borderBottom: '1px solid #F1F5F9',
+    marginBottom: '18px',
   },
   tableTitle: {
     fontSize: '16px',
@@ -617,7 +757,8 @@ const styles: Record<string, React.CSSProperties> = {
   tableSubtitle: {
     fontSize: '12px',
     color: '#64748B',
-    marginTop: '2px',
+    marginTop: '4px',
+    display: 'block',
   },
   tableWrapper: {
     overflowX: 'auto',
@@ -625,41 +766,53 @@ const styles: Record<string, React.CSSProperties> = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    fontSize: '13px',
+    textAlign: 'left',
   },
   th: {
-    backgroundColor: '#F8FAFC',
-    color: '#475569',
-    fontWeight: 700,
+    padding: '12px 16px',
     fontSize: '11px',
+    fontWeight: 800,
+    color: '#64748B',
     letterSpacing: '0.5px',
-    padding: '12px 18px',
-    textAlign: 'left',
     borderBottom: '1px solid #E2E8F0',
+    backgroundColor: '#F8FAFC',
   },
   tr: {
     borderBottom: '1px solid #F1F5F9',
   },
   td: {
-    padding: '14px 18px',
+    padding: '14px 16px',
+    fontSize: '13px',
     color: '#334155',
   },
   marginBadge: {
     padding: '3px 8px',
     borderRadius: '6px',
-    fontWeight: 800,
     fontSize: '11px',
+    fontWeight: 800,
+    display: 'inline-block',
   },
-  miniTrack: {
-    width: '60px',
+  shareBlock: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  shareTrack: {
+    flex: 1,
     height: '6px',
-    backgroundColor: '#E2E8F0',
-    borderRadius: '4px',
+    backgroundColor: '#F1F5F9',
+    borderRadius: '3px',
     overflow: 'hidden',
   },
-  miniFill: {
+  shareFill: {
     height: '100%',
-    backgroundColor: '#10B981',
-    borderRadius: '4px',
+    backgroundColor: '#059669',
+    borderRadius: '3px',
+  },
+  shareText: {
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#64748B',
+    minWidth: '35px',
   },
 };

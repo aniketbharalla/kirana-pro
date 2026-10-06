@@ -1,15 +1,42 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { StatsGrid } from '../components/StatsGrid';
 import { ProductsTable } from '../components/ProductsTable';
 import { StockLog } from '../components/StockLog';
-import { INITIAL_DASHBOARD_PRODUCTS, INITIAL_DASHBOARD_MOVEMENTS } from '../lib/mockData';
+import { useAuth } from '../context/AuthContext';
+import { subscribeStoreProducts, subscribeStoreMovements } from '../lib/storeService';
+import { Product, StockMovement } from '@kirana-pro/shared';
 
 export default function DashboardOverviewPage() {
-  const [products] = useState(INITIAL_DASHBOARD_PRODUCTS);
-  const [movements] = useState(INITIAL_DASHBOARD_MOVEMENTS);
+  const { profile, store } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [movements, setMovements] = useState<StockMovement[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+
+  const storeId = store?.id || profile?.storeId || '';
+
+  useEffect(() => {
+    if (!storeId) {
+      setLoadingData(false);
+      return;
+    }
+
+    const unsubProducts = subscribeStoreProducts(storeId, (prods) => {
+      setProducts(prods);
+      setLoadingData(false);
+    });
+
+    const unsubMovements = subscribeStoreMovements(storeId, (moves) => {
+      setMovements(moves);
+    });
+
+    return () => {
+      unsubProducts();
+      unsubMovements();
+    };
+  }, [storeId]);
 
   const lowStockCount = products.filter(
     (p) => p.currentStock > 0 && p.currentStock <= p.minStockAlert
@@ -29,22 +56,24 @@ export default function DashboardOverviewPage() {
       <div style={styles.banner}>
         <div style={styles.bannerContent}>
           <div style={styles.pill}>✨ STORE COMMAND CENTER</div>
-          <h2 style={styles.bannerTitle}>Welcome to Kirana Pro Desktop</h2>
+          <h2 style={styles.bannerTitle}>
+            Welcome, {profile?.displayName || 'Store Owner'}!
+          </h2>
           <p style={styles.bannerSub}>
-            Real-time synchronization with your mobile store app. Manage your grocery catalog,
-            track inward restock movements, and monitor low stock items.
+            Real-time live synchronization with your store. Manage catalog, monitor inventory,
+            audit sales invoices, and track customer credit khata.
           </p>
         </div>
 
         <div style={styles.bannerActions}>
-          <Link href="/bills" style={styles.primaryBtn}>
-            🧾 View Sales & Bills
+          <Link href="/products" style={styles.primaryBtn}>
+            ➕ Add Product
+          </Link>
+          <Link href="/bills" style={styles.secondaryBtn}>
+            🧾 Sales & Invoices
           </Link>
           <Link href="/khata" style={styles.secondaryBtn}>
-            📒 Customer Khata →
-          </Link>
-          <Link href="/products" style={styles.secondaryBtn}>
-            📦 Manage Catalog
+            📒 Customer Khata
           </Link>
         </div>
       </div>
@@ -57,75 +86,57 @@ export default function DashboardOverviewPage() {
         looseCount={looseCount}
       />
 
-      {/* Back-Office Quick Launch Grid */}
-      <div style={styles.quickLaunchGrid}>
-        <Link href="/gst" style={styles.quickCard}>
-          <div style={{ ...styles.quickIconBg, backgroundColor: '#FEF3C7' }}>🏛️</div>
-          <div>
-            <div style={styles.quickTitle}>GST & GSTR-1 Portal</div>
-            <div style={styles.quickSub}>Portal JSON, HSN summary & CA CSV</div>
-          </div>
-        </Link>
-
-        <Link href="/analytics" style={styles.quickCard}>
-          <div style={{ ...styles.quickIconBg, backgroundColor: '#EFF6FF' }}>📈</div>
-          <div>
-            <div style={styles.quickTitle}>Profit & Margins</div>
-            <div style={styles.quickSub}>Gross profit, revenue trend & KPIs</div>
-          </div>
-        </Link>
-
-        <Link href="/reorder" style={styles.quickCard}>
-          <div style={{ ...styles.quickIconBg, backgroundColor: '#FEE2E2' }}>🔄</div>
-          <div>
-            <div style={styles.quickTitle}>Smart Reorder</div>
-            <div style={styles.quickSub}>Stockout forecast & WhatsApp PO</div>
-          </div>
-        </Link>
-
-        <Link href="/staff" style={styles.quickCard}>
-          <div style={{ ...styles.quickIconBg, backgroundColor: '#DCFCE7' }}>🧑‍💼</div>
-          <div>
-            <div style={styles.quickTitle}>Shift & Cashier Register</div>
-            <div style={styles.quickSub}>Counter cash reconciliation & floats</div>
-          </div>
-        </Link>
-
-        <Link href="/hardware" style={styles.quickCard}>
-          <div style={{ ...styles.quickIconBg, backgroundColor: '#F3E8FF' }}>🖨️</div>
-          <div>
-            <div style={styles.quickTitle}>Hardware & Printers</div>
-            <div style={styles.quickSub}>58mm/80mm roll, cut & drawer kick</div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Catalog & Stock Dual Section */}
-      <div style={styles.sectionHeaderRow}>
-        <div>
-          <h3 style={styles.sectionTitle}>Product Inventory</h3>
-          <p style={styles.sectionSub}>Quick view of current stock and price per unit</p>
+      {/* Live Data or Empty State */}
+      {loadingData ? (
+        <div style={styles.loadingBox}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>Fetching live store inventory from Firebase...</p>
         </div>
-        <Link href="/products" style={styles.linkText}>
-          View all {products.length} products →
-        </Link>
-      </div>
-
-      <div style={{ marginBottom: '32px' }}>
-        <ProductsTable products={products.slice(0, 5)} />
-      </div>
-
-      <div style={styles.sectionHeaderRow}>
-        <div>
-          <h3 style={styles.sectionTitle}>Recent Stock Audit Log</h3>
-          <p style={styles.sectionSub}>Immutable chronological inward and outward movements</p>
+      ) : products.length === 0 ? (
+        <div style={styles.emptyCard}>
+          <div style={styles.emptyIcon}>📦</div>
+          <h3 style={styles.emptyTitle}>Your Catalog is Ready for Products</h3>
+          <p style={styles.emptyDesc}>
+            No items have been added to this store yet. Start adding items to track stock, scan
+            barcodes, and print customer bills.
+          </p>
+          <div style={styles.emptyActions}>
+            <Link href="/products" style={styles.addBtn}>
+              ➕ Add First Product
+            </Link>
+          </div>
         </div>
-        <Link href="/stock" style={styles.linkText}>
-          View full stock ledger →
-        </Link>
-      </div>
+      ) : (
+        <div style={styles.contentGrid}>
+          {/* Main Products List Preview */}
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <div>
+                <h3 style={styles.sectionTitle}>Catalog Inventory</h3>
+                <p style={styles.sectionSub}>Latest items synchronized with cloud database</p>
+              </div>
+              <Link href="/products" style={styles.linkMore}>
+                View All Catalog →
+              </Link>
+            </div>
+            <ProductsTable products={products.slice(0, 8)} />
+          </div>
 
-      <StockLog movements={movements} productMap={productMap} />
+          {/* Recent Stock Audit Movements */}
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <div>
+                <h3 style={styles.sectionTitle}>Stock Movement Ledger</h3>
+                <p style={styles.sectionSub}>Live audit trail of restocks and sales</p>
+              </div>
+              <Link href="/stock" style={styles.linkMore}>
+                Full Ledger →
+              </Link>
+            </div>
+            <StockLog movements={movements.slice(0, 8)} productMap={productMap} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -134,126 +145,168 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     maxWidth: '1300px',
     margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
   },
   banner: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '20px',
+    backgroundColor: '#064E3B',
+    backgroundImage: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
+    borderRadius: '16px',
     padding: '28px 32px',
-    marginBottom: '28px',
+    color: '#FFFFFF',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '20px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   bannerContent: {
-    flex: 1,
-    minWidth: '280px',
+    maxWidth: '640px',
   },
   pill: {
     display: 'inline-block',
     fontSize: '11px',
     fontWeight: 800,
-    color: '#065F46',
-    backgroundColor: '#ECFDF5',
-    padding: '3px 10px',
-    borderRadius: '6px',
-    marginBottom: '8px',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    color: '#A7F3D0',
+    padding: '4px 10px',
+    borderRadius: '20px',
     letterSpacing: '0.5px',
+    marginBottom: '8px',
   },
   bannerTitle: {
-    fontSize: '22px',
+    fontSize: '24px',
     fontWeight: 800,
-    color: '#0F172A',
-    marginBottom: '6px',
+    margin: '0 0 6px 0',
   },
   bannerSub: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#D1FAE5',
+    margin: 0,
     lineHeight: 1.5,
-    maxWidth: '600px',
   },
   bannerActions: {
     display: 'flex',
     gap: '12px',
+    flexWrap: 'wrap',
   },
   primaryBtn: {
     backgroundColor: '#10B981',
     color: '#FFFFFF',
+    padding: '10px 18px',
+    borderRadius: '10px',
+    fontSize: '13px',
     fontWeight: 700,
-    fontSize: '14px',
-    padding: '12px 20px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)',
+    textDecoration: 'none',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
   },
   secondaryBtn: {
-    backgroundColor: '#F8FAFC',
-    color: '#334155',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    color: '#FFFFFF',
+    padding: '10px 16px',
+    borderRadius: '10px',
+    fontSize: '13px',
     fontWeight: 600,
-    fontSize: '14px',
-    padding: '12px 20px',
-    borderRadius: '12px',
+    textDecoration: 'none',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+  },
+  loadingBox: {
+    padding: '60px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
     border: '1px solid #E2E8F0',
   },
-  sectionHeaderRow: {
+  spinner: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    border: '3px solid #E2E8F0',
+    borderTopColor: '#10B981',
+    animation: 'spin 0.8s linear infinite',
+  },
+  loadingText: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#64748B',
+  },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
+    padding: '48px 32px',
+    textAlign: 'center',
+    border: '1px solid #E2E8F0',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: '48px',
+    marginBottom: '12px',
+  },
+  emptyTitle: {
+    fontSize: '18px',
+    fontWeight: 800,
+    color: '#0F172A',
+    marginBottom: '6px',
+  },
+  emptyDesc: {
+    fontSize: '14px',
+    color: '#64748B',
+    maxWidth: '480px',
+    lineHeight: 1.5,
+    marginBottom: '20px',
+  },
+  emptyActions: {
+    display: 'flex',
+    gap: '12px',
+  },
+  addBtn: {
+    backgroundColor: '#10B981',
+    color: '#FFFFFF',
+    padding: '10px 20px',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontWeight: 700,
+    textDecoration: 'none',
+  },
+  contentGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+  },
+  sectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
+    padding: '24px',
+  },
+  sectionHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: '14px',
-    marginTop: '10px',
+    alignItems: 'center',
+    marginBottom: '20px',
   },
   sectionTitle: {
     fontSize: '18px',
     fontWeight: 800,
     color: '#0F172A',
+    margin: '0 0 4px 0',
   },
   sectionSub: {
     fontSize: '13px',
     color: '#64748B',
-    marginTop: '2px',
+    margin: 0,
   },
-  linkText: {
+  linkMore: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#10B981',
-  },
-  quickLaunchGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: '16px',
-    margin: '24px 0 32px 0',
-  },
-  quickCard: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
-    padding: '16px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
+    color: '#059669',
     textDecoration: 'none',
-    transition: 'all 0.15s ease',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-  },
-  quickIconBg: {
-    width: '42px',
-    height: '42px',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '20px',
-  },
-  quickTitle: {
-    fontSize: '13px',
-    fontWeight: 800,
-    color: '#0F172A',
-  },
-  quickSub: {
-    fontSize: '11px',
-    color: '#64748B',
-    marginTop: '2px',
   },
 };

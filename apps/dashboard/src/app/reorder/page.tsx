@@ -1,13 +1,25 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { INITIAL_DASHBOARD_PRODUCTS } from '../../lib/mockData';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Product } from '@kirana-pro/shared';
+import { useAuth } from '../../context/AuthContext';
+import { subscribeStoreProducts } from '../../lib/storeService';
 
 export default function SmartReorderPage() {
-  const [products] = useState<Product[]>(INITIAL_DASHBOARD_PRODUCTS);
+  const { store, storeId } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all_alerts' | 'out_of_stock' | 'low_stock'>('all_alerts');
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!storeId) return;
+    const unsubscribe = subscribeStoreProducts(storeId, (data) => {
+      setProducts(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [storeId]);
 
   // Compute reorder items
   const reorderItems = useMemo(() => {
@@ -37,9 +49,14 @@ export default function SmartReorderPage() {
 
   // Generate WhatsApp PO Text
   const handleCopyWhatsAppPo = () => {
+    if (reorderItems.length === 0) {
+      alert('No items currently need reordering.');
+      return;
+    }
+    const storeName = store?.name || 'My Kirana Store';
     const lines = [
       `*🛒 PURCHASE ORDER (खरीद ऑर्डर)*`,
-      `*Store:* Sharma Kirana Store`,
+      `*Store:* ${storeName}`,
       `*Date:* ${new Date().toLocaleDateString('en-IN')}`,
       `--------------------------------`,
       ...reorderItems.map(
@@ -82,137 +99,168 @@ export default function SmartReorderPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div style={styles.kpiGrid}>
-        <div style={{ ...styles.kpiCard, borderLeft: '4px solid #EF4444' }}>
-          <span style={styles.kpiLabel}>ITEMS NEEDING REORDER</span>
-          <span style={{ ...styles.kpiVal, color: '#DC2626' }}>{reorderItems.length} Products</span>
-          <span style={styles.kpiSub}>Stock at or below minimum threshold</span>
+      {loading ? (
+        <div style={styles.loadingState}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>Checking inventory thresholds...</p>
         </div>
+      ) : (
+        <>
+          {/* KPI Cards */}
+          <div style={styles.kpiGrid}>
+            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #EF4444' }}>
+              <span style={styles.kpiLabel}>ITEMS NEEDING REORDER</span>
+              <span style={{ ...styles.kpiVal, color: '#DC2626' }}>{reorderItems.length} Products</span>
+              <span style={styles.kpiSub}>Stock at or below minimum threshold</span>
+            </div>
 
-        <div style={styles.kpiCard}>
-          <span style={styles.kpiLabel}>OUT OF STOCK (CRITICAL)</span>
-          <span style={{ ...styles.kpiVal, color: outOfStockCount > 0 ? '#B91C1C' : '#0F172A' }}>
-            {outOfStockCount} Items
-          </span>
-          <span style={styles.kpiSub}>Immediate stockout crisis</span>
-        </div>
+            <div style={styles.kpiCard}>
+              <span style={styles.kpiLabel}>OUT OF STOCK (CRITICAL)</span>
+              <span style={{ ...styles.kpiVal, color: outOfStockCount > 0 ? '#B91C1C' : '#0F172A' }}>
+                {outOfStockCount} Items
+              </span>
+              <span style={styles.kpiSub}>Immediate stockout crisis</span>
+            </div>
 
-        <div style={{ ...styles.kpiCard, borderLeft: '4px solid #10B981' }}>
-          <span style={styles.kpiLabel}>ESTIMATED REORDER BUDGET</span>
-          <span style={{ ...styles.kpiVal, color: '#047857' }}>
-            ₹{totalBudgetNeeded.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </span>
-          <span style={styles.kpiSub}>Wholesale replenishment cost</span>
-        </div>
+            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #10B981' }}>
+              <span style={styles.kpiLabel}>ESTIMATED REORDER BUDGET</span>
+              <span style={{ ...styles.kpiVal, color: '#047857' }}>
+                ₹{totalBudgetNeeded.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+              </span>
+              <span style={styles.kpiSub}>Wholesale replenishment cost</span>
+            </div>
 
-        <div style={styles.kpiCard}>
-          <span style={styles.kpiLabel}>ORDER RUN-RATE</span>
-          <span style={styles.kpiVal}>14 Days</span>
-          <span style={styles.kpiSub}>Estimated inventory cover after reorder</span>
-        </div>
-      </div>
-
-      {/* Filter Tabs */}
-      <div style={styles.filterRow}>
-        <button
-          style={{ ...styles.filterBtn, ...(filter === 'all_alerts' ? styles.filterBtnActive : {}) }}
-          onClick={() => setFilter('all_alerts')}
-        >
-          🚨 All Alerts ({reorderItems.length})
-        </button>
-        <button
-          style={{ ...styles.filterBtn, ...(filter === 'out_of_stock' ? styles.filterBtnActive : {}) }}
-          onClick={() => setFilter('out_of_stock')}
-        >
-          🔴 Out of Stock ({outOfStockCount})
-        </button>
-        <button
-          style={{ ...styles.filterBtn, ...(filter === 'low_stock' ? styles.filterBtnActive : {}) }}
-          onClick={() => setFilter('low_stock')}
-        >
-          🟡 Low Stock ({reorderItems.length - outOfStockCount})
-        </button>
-      </div>
-
-      {/* Reorder Table */}
-      <div style={styles.tableCard}>
-        <div style={styles.tableHeaderRow}>
-          <div>
-            <h2 style={styles.tableTitle}>Recommended Replenishment Orders</h2>
-            <span style={styles.tableSubtitle}>
-              Quantities calculated automatically based on min alert buffer safety margins.
-            </span>
+            <div style={styles.kpiCard}>
+              <span style={styles.kpiLabel}>TOTAL STORE SKUS</span>
+              <span style={styles.kpiVal}>{products.length} Items</span>
+              <span style={styles.kpiSub}>Active items in store catalog</span>
+            </div>
           </div>
-        </div>
 
-        {filteredItems.length === 0 ? (
-          <div style={styles.emptyState}>No products match the selected filter.</div>
-        ) : (
-          <div style={styles.tableWrapper}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>PRODUCT NAME</th>
-                  <th style={styles.th}>HINDI NAME</th>
-                  <th style={styles.th}>CATEGORY</th>
-                  <th style={styles.th}>CURRENT STOCK</th>
-                  <th style={styles.th}>MIN ALERT</th>
-                  <th style={styles.th}>SUGGESTED REORDER</th>
-                  <th style={styles.th}>WHOLESALE RATE (₹)</th>
-                  <th style={styles.th}>EST. BUDGET (₹)</th>
-                  <th style={styles.th}>STATUS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item) => (
-                  <tr key={item.id} style={styles.tr}>
-                    <td style={{ ...styles.td, fontWeight: 700 }}>{item.name}</td>
-                    <td style={{ ...styles.td, color: '#64748B' }}>{item.nameHindi || '—'}</td>
-                    <td style={{ ...styles.td, textTransform: 'capitalize' }}>
-                      {item.category.replace('-', ' ')}
-                    </td>
-                    <td style={styles.td}>
-                      <span
-                        style={{
-                          fontWeight: 800,
-                          color: item.isOut ? '#DC2626' : '#D97706',
-                        }}
-                      >
-                        {item.currentStock} {item.unit}
-                      </span>
-                    </td>
-                    <td style={styles.td}>{item.minStockAlert} {item.unit}</td>
-                    <td style={{ ...styles.td, fontWeight: 800, color: '#10B981' }}>
-                      +{item.suggestedQty} {item.unit}
-                    </td>
-                    <td style={styles.td}>₹{item.purchasePrice}</td>
-                    <td style={{ ...styles.td, fontWeight: 800, color: '#0F172A' }}>
-                      ₹{item.estCost.toLocaleString('en-IN')}
-                    </td>
-                    <td style={styles.td}>
-                      {item.isOut ? (
-                        <span style={styles.outBadge}>Out of Stock</span>
-                      ) : (
-                        <span style={styles.lowBadge}>Low Stock</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Filter Tabs */}
+          <div style={styles.filterRow}>
+            <button
+              style={{
+                ...styles.filterBtn,
+                ...(filter === 'all_alerts' ? styles.filterBtnActive : {}),
+              }}
+              onClick={() => setFilter('all_alerts')}
+            >
+              🚨 All Alerts ({reorderItems.length})
+            </button>
+            <button
+              style={{
+                ...styles.filterBtn,
+                ...(filter === 'out_of_stock' ? styles.filterBtnActive : {}),
+              }}
+              onClick={() => setFilter('out_of_stock')}
+            >
+              🔴 Out of Stock ({outOfStockCount})
+            </button>
+            <button
+              style={{
+                ...styles.filterBtn,
+                ...(filter === 'low_stock' ? styles.filterBtnActive : {}),
+              }}
+              onClick={() => setFilter('low_stock')}
+            >
+              🟡 Low Stock ({Math.max(0, reorderItems.length - outOfStockCount)})
+            </button>
           </div>
-        )}
-      </div>
+
+          {/* Reorder Table */}
+          <div style={styles.tableCard}>
+            <div style={styles.tableHeaderRow}>
+              <div>
+                <h2 style={styles.tableTitle}>Recommended Replenishment Orders</h2>
+                <span style={styles.tableSubtitle}>
+                  Quantities calculated automatically based on min alert buffer safety margins.
+                </span>
+              </div>
+            </div>
+
+            {filteredItems.length === 0 ? (
+              <div style={styles.emptyState}>
+                <div style={{ fontSize: '36px', marginBottom: '8px' }}>🎉</div>
+                <h4 style={{ margin: '0 0 4px 0', color: '#0F172A', fontSize: '16px' }}>
+                  All Inventory Levels Are Healthy
+                </h4>
+                <p style={{ margin: 0, color: '#64748B', fontSize: '13px' }}>
+                  No items require replenishment for the selected filter at this moment.
+                </p>
+              </div>
+            ) : (
+              <div style={styles.tableWrapper}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>PRODUCT NAME</th>
+                      <th style={styles.th}>HINDI NAME</th>
+                      <th style={styles.th}>CATEGORY</th>
+                      <th style={styles.th}>CURRENT STOCK</th>
+                      <th style={styles.th}>MIN ALERT</th>
+                      <th style={styles.th}>SUGGESTED REORDER</th>
+                      <th style={styles.th}>WHOLESALE RATE (₹)</th>
+                      <th style={styles.th}>EST. BUDGET (₹)</th>
+                      <th style={styles.th}>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredItems.map((item) => (
+                      <tr key={item.id} style={styles.tr}>
+                        <td style={{ ...styles.td, fontWeight: 700 }}>{item.name}</td>
+                        <td style={{ ...styles.td, color: '#64748B' }}>{item.nameHindi || '—'}</td>
+                        <td style={{ ...styles.td, textTransform: 'capitalize' }}>
+                          {item.category.replace('-', ' ')}
+                        </td>
+                        <td style={styles.td}>
+                          <span
+                            style={{
+                              fontWeight: 800,
+                              color: item.isOut ? '#DC2626' : '#D97706',
+                            }}
+                          >
+                            {item.currentStock} {item.unit}
+                          </span>
+                        </td>
+                        <td style={styles.td}>
+                          {item.minStockAlert} {item.unit}
+                        </td>
+                        <td style={{ ...styles.td, fontWeight: 800, color: '#10B981' }}>
+                          +{item.suggestedQty} {item.unit}
+                        </td>
+                        <td style={styles.td}>₹{item.purchasePrice}</td>
+                        <td style={{ ...styles.td, fontWeight: 800, color: '#0F172A' }}>
+                          ₹{item.estCost.toLocaleString('en-IN')}
+                        </td>
+                        <td style={styles.td}>
+                          {item.isOut ? (
+                            <span style={styles.outBadge}>Out of Stock</span>
+                          ) : (
+                            <span style={styles.lowBadge}>Low Stock</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
+    maxWidth: '1400px',
+    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
+    paddingBottom: '40px',
   },
   header: {
     display: 'flex',
@@ -230,17 +278,17 @@ const styles: Record<string, React.CSSProperties> = {
   reorderBadge: {
     fontSize: '11px',
     fontWeight: 800,
-    color: '#065F46',
-    backgroundColor: '#ECFDF5',
+    letterSpacing: '0.5px',
+    color: '#D97706',
+    backgroundColor: '#FEF3C7',
     padding: '3px 8px',
     borderRadius: '6px',
-    letterSpacing: '0.5px',
   },
   alertBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#991B1B',
-    backgroundColor: '#FEE2E2',
+    color: '#0F172A',
+    backgroundColor: '#F1F5F9',
     padding: '3px 8px',
     borderRadius: '6px',
   },
@@ -248,8 +296,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '26px',
     fontWeight: 800,
     color: '#0F172A',
-    letterSpacing: '-0.5px',
     margin: 0,
+    letterSpacing: '-0.5px',
   },
   subtitle: {
     fontSize: '14px',
@@ -259,19 +307,39 @@ const styles: Record<string, React.CSSProperties> = {
   },
   headerActions: {
     display: 'flex',
-    alignItems: 'center',
     gap: '12px',
   },
   btnPrimary: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#2563EB',
+    color: '#FFFFFF',
     border: 'none',
     borderRadius: '10px',
-    padding: '12px 20px',
+    padding: '10px 18px',
     fontSize: '13px',
-    fontWeight: 800,
-    color: '#FFFFFF',
+    fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)',
+    boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+  },
+  loadingState: {
+    padding: '60px 20px',
+    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
+  },
+  spinner: {
+    width: '32px',
+    height: '32px',
+    border: '3px solid #E2E8F0',
+    borderTopColor: '#2563EB',
+    borderRadius: '50%',
+    margin: '0 auto 12px',
+    animation: 'spin 0.8s linear infinite',
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#64748B',
+    margin: 0,
   },
   kpiGrid: {
     display: 'grid',
@@ -280,28 +348,29 @@ const styles: Record<string, React.CSSProperties> = {
   },
   kpiCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
     border: '1px solid #E2E8F0',
-    padding: '18px',
+    borderRadius: '16px',
+    padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   kpiLabel: {
     fontSize: '11px',
     fontWeight: 800,
     color: '#64748B',
     letterSpacing: '0.5px',
+    marginBottom: '8px',
   },
   kpiVal: {
-    fontSize: '22px',
+    fontSize: '26px',
     fontWeight: 800,
     color: '#0F172A',
+    marginBottom: '4px',
   },
   kpiSub: {
-    fontSize: '11px',
+    fontSize: '12px',
     color: '#94A3B8',
-    marginTop: '2px',
   },
   filterRow: {
     display: 'flex',
@@ -309,28 +378,28 @@ const styles: Record<string, React.CSSProperties> = {
   },
   filterBtn: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
+    border: '1.5px solid #E2E8F0',
     borderRadius: '10px',
     padding: '8px 16px',
-    fontSize: '13px',
-    fontWeight: 700,
+    fontSize: '12px',
+    fontWeight: 600,
     color: '#475569',
     cursor: 'pointer',
   },
   filterBtnActive: {
-    backgroundColor: '#10B981',
-    borderColor: '#10B981',
+    backgroundColor: '#0F172A',
     color: '#FFFFFF',
+    borderColor: '#0F172A',
+    fontWeight: 700,
   },
   tableCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
     border: '1px solid #E2E8F0',
-    overflow: 'hidden',
+    borderRadius: '16px',
+    padding: '24px',
   },
   tableHeaderRow: {
-    padding: '20px',
-    borderBottom: '1px solid #F1F5F9',
+    marginBottom: '18px',
   },
   tableTitle: {
     fontSize: '16px',
@@ -341,7 +410,8 @@ const styles: Record<string, React.CSSProperties> = {
   tableSubtitle: {
     fontSize: '12px',
     color: '#64748B',
-    marginTop: '2px',
+    marginTop: '4px',
+    display: 'block',
   },
   tableWrapper: {
     overflowX: 'auto',
@@ -349,45 +419,43 @@ const styles: Record<string, React.CSSProperties> = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    fontSize: '13px',
+    textAlign: 'left',
   },
   th: {
-    backgroundColor: '#F8FAFC',
-    color: '#475569',
-    fontWeight: 700,
+    padding: '12px 16px',
     fontSize: '11px',
+    fontWeight: 800,
+    color: '#64748B',
     letterSpacing: '0.5px',
-    padding: '12px 18px',
-    textAlign: 'left',
     borderBottom: '1px solid #E2E8F0',
+    backgroundColor: '#F8FAFC',
   },
   tr: {
     borderBottom: '1px solid #F1F5F9',
   },
   td: {
-    padding: '14px 18px',
+    padding: '14px 16px',
+    fontSize: '13px',
     color: '#334155',
   },
   outBadge: {
     backgroundColor: '#FEE2E2',
-    color: '#DC2626',
+    color: '#B91C1C',
     padding: '3px 8px',
     borderRadius: '6px',
-    fontWeight: 800,
     fontSize: '11px',
+    fontWeight: 800,
   },
   lowBadge: {
     backgroundColor: '#FEF3C7',
-    color: '#D97706',
+    color: '#92400E',
     padding: '3px 8px',
     borderRadius: '6px',
-    fontWeight: 800,
     fontSize: '11px',
+    fontWeight: 800,
   },
   emptyState: {
-    padding: '40px',
+    padding: '48px 20px',
     textAlign: 'center',
-    color: '#94A3B8',
-    fontSize: '14px',
   },
 };

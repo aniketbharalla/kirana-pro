@@ -1,84 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PurchaseInvoice, PurchaseInvoiceDraft } from '@kirana-pro/shared';
 import { BillUploadModal } from '../../components/purchases/BillUploadModal';
-
-const STARTER_PURCHASES: PurchaseInvoice[] = [
-  {
-    id: 'purch_01',
-    storeId: 'demo_store_1',
-    supplierId: 'sup_1',
-    supplierName: 'N R ENTERPRISES (Parle Distributor)',
-    invoiceNo: 'NR/2026/0892',
-    invoiceDate: 1728120000000,
-    items: [
-      {
-        productId: 'prod_1',
-        productName: '20-20 Classic Butter 14.44g',
-        quantity: 2,
-        totalQty: 24,
-        uom: 'PB',
-        uomMapped: 'packet',
-        rate: 4.25,
-        grossAmt: 102.04,
-        discount: 0,
-        taxableAmt: 102.04,
-        cgstRate: 2.5,
-        cgstAmt: 2.55,
-        sgstRate: 2.5,
-        sgstAmt: 2.55,
-        totalAmt: 107.14,
-        isNewProduct: false,
-        confidence: 90,
-      },
-      {
-        productId: 'prod_2',
-        productName: 'Parle-G Gold 1kg',
-        quantity: 1,
-        totalQty: 1,
-        uom: 'BOX',
-        uomMapped: 'box',
-        rate: 100,
-        grossAmt: 100,
-        discount: 0,
-        taxableAmt: 100,
-        cgstRate: 2.5,
-        cgstAmt: 2.5,
-        sgstRate: 2.5,
-        sgstAmt: 2.5,
-        totalAmt: 105,
-        isNewProduct: false,
-        confidence: 95,
-      },
-    ],
-    subtotal: 202.04,
-    totalDiscount: 0,
-    totalCGST: 5.05,
-    totalSGST: 5.05,
-    totalTax: 10.1,
-    roundOff: 0,
-    netPayable: 212.14,
-    paymentStatus: 'Unpaid',
-    paidAmt: 0,
-    createdBy: 'owner',
-    createdAt: 1728120000000,
-  },
-];
+import { useAuth } from '../../context/AuthContext';
+import { subscribeStorePurchases, saveStorePurchase } from '../../lib/storeService';
 
 export default function PurchasesPage() {
-  const [purchases, setPurchases] = useState<PurchaseInvoice[]>(STARTER_PURCHASES);
+  const { storeId, user } = useAuth();
+  const [purchases, setPurchases] = useState<PurchaseInvoice[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!storeId) return;
+    const unsubscribe = subscribeStorePurchases(storeId, (data) => {
+      setPurchases(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [storeId]);
 
   const totalInwarded = purchases.reduce((sum, p) => sum + p.netPayable, 0);
   const totalPending = purchases
     .filter((p) => p.paymentStatus !== 'Paid')
     .reduce((sum, p) => sum + (p.netPayable - p.paidAmt), 0);
 
-  const handleConfirmInwarding = (draft: PurchaseInvoiceDraft) => {
+  const handleConfirmInwarding = async (draft: PurchaseInvoiceDraft) => {
+    if (!storeId) return;
     const newInvoice: PurchaseInvoice = {
       id: `purch_${Date.now()}`,
-      storeId: 'demo_store_1',
+      storeId,
       supplierId: 'sup_1',
       supplierName: draft.supplierName || 'Wholesaler Agency',
       invoiceNo: draft.invoiceNo || `INV/${Date.now().toString().slice(-4)}`,
@@ -93,10 +45,11 @@ export default function PurchasesPage() {
       netPayable: draft.netPayable,
       paymentStatus: 'Unpaid',
       paidAmt: 0,
-      createdBy: 'owner',
+      createdBy: user?.displayName || 'Store Owner',
       createdAt: Date.now(),
     };
-    setPurchases([newInvoice, ...purchases]);
+
+    await saveStorePurchase(storeId, newInvoice);
   };
 
   return (
@@ -104,6 +57,10 @@ export default function PurchasesPage() {
       {/* Header */}
       <div style={styles.header}>
         <div>
+          <div style={styles.badgeRow}>
+            <span style={styles.badge}>📦 INWARD PROCUREMENT</span>
+            <span style={styles.countBadge}>{purchases.length} Invoices</span>
+          </div>
           <h1 style={styles.title}>Wholesale Purchases & Bill OCR</h1>
           <p style={styles.subtitle}>
             Inward stock from distributor invoices with free OCR line-item extraction.
@@ -114,73 +71,95 @@ export default function PurchasesPage() {
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div style={styles.statsRow}>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}>Total Inwarded Bills</div>
-          <div style={styles.statValue}>{purchases.length}</div>
+      {loading ? (
+        <div style={styles.loadingState}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>Syncing purchase invoices...</p>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}>Total Inwarded Value</div>
-          <div style={{ ...styles.statValue, color: '#0F172A' }}>
-            ₹{totalInwarded.toFixed(2)}
+      ) : (
+        <>
+          {/* Stats Cards */}
+          <div style={styles.statsRow}>
+            <div style={styles.statCard}>
+              <div style={styles.statLabel}>Total Inwarded Bills</div>
+              <div style={styles.statValue}>{purchases.length}</div>
+            </div>
+            <div style={styles.statCard}>
+              <div style={styles.statLabel}>Total Inwarded Value</div>
+              <div style={{ ...styles.statValue, color: '#0F172A' }}>
+                ₹{totalInwarded.toFixed(2)}
+              </div>
+            </div>
+            <div style={styles.statCard}>
+              <div style={styles.statLabel}>Payable to Wholesalers</div>
+              <div style={{ ...styles.statValue, color: '#EF4444' }}>
+                ₹{totalPending.toFixed(2)}
+              </div>
+            </div>
           </div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}>Payable to Wholesalers</div>
-          <div style={{ ...styles.statValue, color: '#EF4444' }}>
-            ₹{totalPending.toFixed(2)}
-          </div>
-        </div>
-      </div>
 
-      {/* Purchases Table */}
-      <div style={styles.card}>
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.thRow}>
-              <th style={styles.th}>Bill No</th>
-              <th style={styles.th}>Wholesaler / Agency</th>
-              <th style={styles.th}>Date</th>
-              <th style={styles.th}>Items Count</th>
-              <th style={styles.th}>Total Tax</th>
-              <th style={styles.th}>Net Payable</th>
-              <th style={styles.th}>Payment Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {purchases.map((p) => (
-              <tr key={p.id} style={styles.tr}>
-                <td style={{ ...styles.td, fontWeight: '700', color: '#059669' }}>
-                  {p.invoiceNo}
-                </td>
-                <td style={{ ...styles.td, fontWeight: '600' }}>{p.supplierName}</td>
-                <td style={styles.td}>
-                  {new Date(p.invoiceDate).toLocaleDateString('en-IN')}
-                </td>
-                <td style={styles.td}>{p.items.length} items</td>
-                <td style={styles.td}>₹{p.totalTax.toFixed(2)}</td>
-                <td style={{ ...styles.td, fontWeight: '800', color: '#0F172A' }}>
-                  ₹{p.netPayable.toFixed(2)}
-                </td>
-                <td style={styles.td}>
-                  <span
-                    style={{
-                      ...styles.statusBadge,
-                      backgroundColor:
-                        p.paymentStatus === 'Paid' ? '#ECFDF5' : '#FEF2F2',
-                      color:
-                        p.paymentStatus === 'Paid' ? '#065F46' : '#991B1B',
-                    }}
-                  >
-                    {p.paymentStatus}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          {/* Purchases Table or Empty State */}
+          {purchases.length === 0 ? (
+            <div style={styles.emptyCard}>
+              <div style={styles.emptyIcon}>📄</div>
+              <h3 style={styles.emptyTitle}>No Purchase Invoices Uploaded Yet</h3>
+              <p style={styles.emptySubtitle}>
+                Digitize paper invoices from your suppliers and distributors. Line items will be automatically extracted into your inventory.
+              </p>
+              <button style={styles.scanBtn} onClick={() => setIsModalOpen(true)}>
+                📷 Upload First Distributor Bill
+              </button>
+            </div>
+          ) : (
+            <div style={styles.card}>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.thRow}>
+                    <th style={styles.th}>Bill No</th>
+                    <th style={styles.th}>Wholesaler / Agency</th>
+                    <th style={styles.th}>Date</th>
+                    <th style={styles.th}>Items Count</th>
+                    <th style={styles.th}>Total Tax</th>
+                    <th style={styles.th}>Net Payable</th>
+                    <th style={styles.th}>Payment Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {purchases.map((p) => (
+                    <tr key={p.id} style={styles.tr}>
+                      <td style={{ ...styles.td, fontWeight: '700', color: '#059669' }}>
+                        {p.invoiceNo}
+                      </td>
+                      <td style={{ ...styles.td, fontWeight: '600' }}>{p.supplierName}</td>
+                      <td style={styles.td}>
+                        {new Date(p.invoiceDate).toLocaleDateString('en-IN')}
+                      </td>
+                      <td style={styles.td}>{p.items.length} items</td>
+                      <td style={styles.td}>₹{p.totalTax.toFixed(2)}</td>
+                      <td style={{ ...styles.td, fontWeight: '800', color: '#0F172A' }}>
+                        ₹{p.netPayable.toFixed(2)}
+                      </td>
+                      <td style={styles.td}>
+                        <span
+                          style={{
+                            ...styles.statusBadge,
+                            backgroundColor:
+                              p.paymentStatus === 'Paid' ? '#ECFDF5' : '#FEF2F2',
+                            color:
+                              p.paymentStatus === 'Paid' ? '#065F46' : '#991B1B',
+                          }}
+                        >
+                          {p.paymentStatus}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
 
       {/* Bill Upload Modal */}
       <BillUploadModal
@@ -194,73 +173,147 @@ export default function PurchasesPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: '32px',
-    backgroundColor: '#F8FAFC',
-    minHeight: '100vh',
+    maxWidth: '1400px',
+    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+    paddingBottom: '40px',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: '16px',
+  },
+  badgeRow: {
+    display: 'flex',
     alignItems: 'center',
-    marginBottom: '24px',
+    gap: '8px',
+    marginBottom: '6px',
+  },
+  badge: {
+    fontSize: '11px',
+    fontWeight: 800,
+    letterSpacing: '0.5px',
+    color: '#059669',
+    backgroundColor: '#ECFDF5',
+    padding: '3px 8px',
+    borderRadius: '6px',
+  },
+  countBadge: {
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#64748B',
+    backgroundColor: '#F1F5F9',
+    padding: '3px 8px',
+    borderRadius: '6px',
   },
   title: {
-    fontSize: '24px',
-    fontWeight: '800',
+    fontSize: '26px',
+    fontWeight: 800,
     color: '#0F172A',
     margin: 0,
+    letterSpacing: '-0.5px',
   },
   subtitle: {
     fontSize: '14px',
     color: '#64748B',
     marginTop: '4px',
+    margin: 0,
   },
   scanBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#059669',
     color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: '14px',
-    padding: '12px 20px',
-    borderRadius: '10px',
     border: 'none',
+    borderRadius: '10px',
+    padding: '10px 18px',
+    fontSize: '13px',
+    fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)',
+  },
+  loadingState: {
+    padding: '60px 20px',
+    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
+  },
+  spinner: {
+    width: '32px',
+    height: '32px',
+    border: '3px solid #E2E8F0',
+    borderTopColor: '#059669',
+    borderRadius: '50%',
+    margin: '0 auto 12px',
+    animation: 'spin 0.8s linear infinite',
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#64748B',
+    margin: 0,
   },
   statsRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '16px',
-    marginBottom: '24px',
   },
   statCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
-    padding: '20px',
     border: '1px solid #E2E8F0',
+    borderRadius: '16px',
+    padding: '20px',
   },
   statLabel: {
-    fontSize: '12px',
-    fontWeight: '600',
+    fontSize: '11px',
+    fontWeight: 800,
     color: '#64748B',
-    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginBottom: '8px',
   },
   statValue: {
     fontSize: '24px',
-    fontWeight: '800',
+    fontWeight: 800,
     color: '#0F172A',
-    marginTop: '6px',
+  },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px dashed #CBD5E1',
+    borderRadius: '16px',
+    padding: '60px 24px',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: '44px',
+    marginBottom: '12px',
+  },
+  emptyTitle: {
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#0F172A',
+    margin: '0 0 6px 0',
+  },
+  emptySubtitle: {
+    fontSize: '14px',
+    color: '#64748B',
+    maxWidth: '460px',
+    margin: '0 auto 20px',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
     border: '1px solid #E2E8F0',
+    borderRadius: '16px',
     overflow: 'hidden',
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
     textAlign: 'left',
-    fontSize: '13px',
   },
   thRow: {
     backgroundColor: '#F8FAFC',
@@ -268,21 +321,24 @@ const styles: Record<string, React.CSSProperties> = {
   },
   th: {
     padding: '12px 16px',
-    fontWeight: '700',
-    color: '#475569',
+    fontSize: '11px',
+    fontWeight: 800,
+    color: '#64748B',
+    letterSpacing: '0.5px',
   },
   tr: {
     borderBottom: '1px solid #F1F5F9',
   },
   td: {
     padding: '14px 16px',
+    fontSize: '13px',
     color: '#334155',
   },
   statusBadge: {
-    padding: '4px 10px',
+    display: 'inline-block',
+    padding: '3px 8px',
     borderRadius: '6px',
     fontSize: '11px',
-    fontWeight: '700',
-    textTransform: 'uppercase',
+    fontWeight: 700,
   },
 };

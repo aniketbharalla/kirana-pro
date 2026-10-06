@@ -5,9 +5,10 @@ import { Product, PRODUCT_CATEGORIES } from '@kirana-pro/shared';
 
 export interface ProductsTableProps {
   products: Product[];
+  onDeleteProduct?: (id: string) => void;
 }
 
-export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
+export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDeleteProduct }) => {
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState<string>('all');
 
@@ -66,6 +67,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
               <th style={styles.th}>PURCHASE PRICE</th>
               <th style={styles.th}>CURRENT STOCK</th>
               <th style={styles.th}>GST</th>
+              {onDeleteProduct && <th style={styles.th}>ACTIONS</th>}
             </tr>
           </thead>
           <tbody>
@@ -131,6 +133,21 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products }) => {
                       </span>
                     </td>
                     <td style={styles.td}>{item.gstRate}%</td>
+                    {onDeleteProduct && (
+                      <td style={styles.td}>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Delete "${item.name}" from catalog?`)) {
+                              onDeleteProduct(item.id);
+                            }
+                          }}
+                          style={styles.deleteBtn}
+                          title="Delete Product"
+                        >
+                          🗑️
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })
@@ -286,5 +303,14 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'center',
     color: '#94A3B8',
     fontSize: '14px',
+  },
+  deleteBtn: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '16px',
+    padding: '6px',
+    borderRadius: '6px',
+    transition: 'opacity 0.2s',
   },
 };

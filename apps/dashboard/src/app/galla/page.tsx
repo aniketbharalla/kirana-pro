@@ -1,55 +1,38 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DailyGallaSession } from '@kirana-pro/shared';
-
-const STARTER_GALLA_SESSIONS: DailyGallaSession[] = [
-  {
-    id: 'galla_2026-10-05',
-    storeId: 'demo_store_1',
-    date: '2026-10-05',
-    openedAt: 1728100800000,
-    closedAt: 1728154800000,
-    openingCash: 2000,
-    systemSalesCash: 8450,
-    systemSalesUPI: 14200,
-    systemSalesUdhar: 1200,
-    systemUdharRepaid: 800,
-    expenses: 150,
-    expectedClosingCash: 11100, // 2000 + 8450 + 800 - 150
-    actualClosingCash: 11100,
-    cashDifference: 0,
-    status: 'CLOSED',
-    notes: 'Clean day closing, zero mismatch.',
-  },
-  {
-    id: 'galla_2026-10-04',
-    storeId: 'demo_store_1',
-    date: '2026-10-04',
-    openedAt: 1728014400000,
-    closedAt: 1728068400000,
-    openingCash: 2000,
-    systemSalesCash: 7200,
-    systemSalesUPI: 11000,
-    systemSalesUdhar: 1500,
-    systemUdharRepaid: 500,
-    expenses: 200,
-    expectedClosingCash: 9500,
-    actualClosingCash: 9480,
-    cashDifference: -20,
-    status: 'CLOSED',
-    notes: '₹20 shortage due to coin change difference.',
-  },
-];
+import { useAuth } from '../../context/AuthContext';
+import { subscribeStoreGalla } from '../../lib/storeService';
 
 export default function GallaPage() {
-  const sessions = STARTER_GALLA_SESSIONS;
+  const { storeId } = useAuth();
+  const [sessions, setSessions] = useState<DailyGallaSession[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!storeId) return;
+    const unsubscribe = subscribeStoreGalla(storeId, (data) => {
+      setSessions(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [storeId]);
+
+  const latestSession = sessions[0];
+  const totalDifference = sessions.reduce((sum, s) => sum + (s.cashDifference ?? 0), 0);
+  const matchedCount = sessions.filter((s) => (s.cashDifference ?? 0) === 0).length;
+  const matchRate = sessions.length > 0 ? ((matchedCount / sessions.length) * 100).toFixed(1) : '100.0';
 
   return (
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
         <div>
+          <div style={styles.badgeRow}>
+            <span style={styles.badge}>💰 CASH RECONCILIATION</span>
+            <span style={styles.countBadge}>{sessions.length} Audited Days</span>
+          </div>
           <h1 style={styles.title}>Daily Galla & Drawer Reconciliation</h1>
           <p style={styles.subtitle}>
             Audit morning opening cash, sales cash flow, and night closing drawer differences.
@@ -57,154 +40,259 @@ export default function GallaPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div style={styles.statsRow}>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}>Today's Expected Drawer Cash</div>
-          <div style={{ ...styles.statValue, color: '#059669' }}>₹11,100.00</div>
+      {loading ? (
+        <div style={styles.loadingState}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>Syncing cash drawer sessions...</p>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}>Drawer Discrepancy (30 Days)</div>
-          <div style={{ ...styles.statValue, color: '#D97706' }}>-₹20.00</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}>Audit Match Rate</div>
-          <div style={styles.statValue}>99.8%</div>
-        </div>
-      </div>
+      ) : (
+        <>
+          {/* Stats Cards */}
+          <div style={styles.statsRow}>
+            <div style={styles.statCard}>
+              <div style={styles.statLabel}>Latest Expected Drawer Cash</div>
+              <div style={{ ...styles.statValue, color: '#059669' }}>
+                ₹{latestSession ? latestSession.expectedClosingCash.toFixed(2) : '0.00'}
+              </div>
+            </div>
+            <div style={styles.statCard}>
+              <div style={styles.statLabel}>Cumulative Discrepancy</div>
+              <div
+                style={{
+                  ...styles.statValue,
+                  color: totalDifference === 0 ? '#0F172A' : totalDifference < 0 ? '#DC2626' : '#2563EB',
+                }}
+              >
+                {totalDifference >= 0 ? `+₹${totalDifference.toFixed(2)}` : `-₹${Math.abs(totalDifference).toFixed(2)}`}
+              </div>
+            </div>
+            <div style={styles.statCard}>
+              <div style={styles.statLabel}>Drawer Audit Match Rate</div>
+              <div style={styles.statValue}>{matchRate}%</div>
+            </div>
+          </div>
 
-      {/* Sessions Table */}
-      <div style={styles.card}>
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.thRow}>
-              <th style={styles.th}>Date</th>
-              <th style={styles.th}>Opening Cash</th>
-              <th style={styles.th}>Cash Sales</th>
-              <th style={styles.th}>UPI (Bank)</th>
-              <th style={styles.th}>Udhar Repaid</th>
-              <th style={styles.th}>Expenses</th>
-              <th style={styles.th}>Expected Drawer</th>
-              <th style={styles.th}>Actual Counted</th>
-              <th style={styles.th}>Difference</th>
-              <th style={styles.th}>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sessions.map((s) => (
-              <tr key={s.id} style={styles.tr}>
-                <td style={{ ...styles.td, fontWeight: '700', color: '#0F172A' }}>
-                  {s.date}
-                </td>
-                <td style={styles.td}>₹{s.openingCash.toFixed(2)}</td>
-                <td style={{ ...styles.td, color: '#059669', fontWeight: '600' }}>
-                  +₹{s.systemSalesCash.toFixed(2)}
-                </td>
-                <td style={styles.td}>₹{s.systemSalesUPI.toFixed(2)}</td>
-                <td style={{ ...styles.td, color: '#059669' }}>
-                  +₹{s.systemUdharRepaid.toFixed(2)}
-                </td>
-                <td style={{ ...styles.td, color: '#EF4444' }}>
-                  -₹{s.expenses.toFixed(2)}
-                </td>
-                <td style={{ ...styles.td, fontWeight: '700' }}>
-                  ₹{s.expectedClosingCash.toFixed(2)}
-                </td>
-                <td style={{ ...styles.td, fontWeight: '700' }}>
-                  ₹{(s.actualClosingCash ?? 0).toFixed(2)}
-                </td>
-                <td style={styles.td}>
-                  <span
-                    style={{
-                      ...styles.diffBadge,
-                      backgroundColor:
-                        (s.cashDifference ?? 0) === 0
-                          ? '#ECFDF5'
-                          : (s.cashDifference ?? 0) > 0
-                          ? '#F0FDF4'
-                          : '#FEF2F2',
-                      color:
-                        (s.cashDifference ?? 0) === 0
-                          ? '#065F46'
-                          : (s.cashDifference ?? 0) > 0
-                          ? '#15803D'
-                          : '#B91C1C',
-                    }}
-                  >
-                    {(s.cashDifference ?? 0) === 0
-                      ? '✓ Exact Match'
-                      : (s.cashDifference ?? 0) > 0
-                      ? `+₹${(s.cashDifference ?? 0).toFixed(2)}`
-                      : `-₹${Math.abs(s.cashDifference ?? 0).toFixed(2)}`}
-                  </span>
-                </td>
-                <td style={{ ...styles.td, color: '#64748B', fontSize: '12px' }}>
-                  {s.notes || '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          {/* Sessions Table or Empty State */}
+          {sessions.length === 0 ? (
+            <div style={styles.emptyCard}>
+              <div style={styles.emptyIcon}>💰</div>
+              <h3 style={styles.emptyTitle}>No Daily Galla Closings Yet</h3>
+              <p style={styles.emptySubtitle}>
+                When your cashier or store manager finishes a shift and logs closing cash in the POS drawer, daily tallies will appear here.
+              </p>
+            </div>
+          ) : (
+            <div style={styles.card}>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.thRow}>
+                    <th style={styles.th}>Date</th>
+                    <th style={styles.th}>Opening Cash</th>
+                    <th style={styles.th}>Cash Sales</th>
+                    <th style={styles.th}>UPI (Bank)</th>
+                    <th style={styles.th}>Udhar Repaid</th>
+                    <th style={styles.th}>Expenses</th>
+                    <th style={styles.th}>Expected Drawer</th>
+                    <th style={styles.th}>Actual Counted</th>
+                    <th style={styles.th}>Difference</th>
+                    <th style={styles.th}>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions.map((s) => (
+                    <tr key={s.id} style={styles.tr}>
+                      <td style={{ ...styles.td, fontWeight: '700', color: '#0F172A' }}>
+                        {s.date}
+                      </td>
+                      <td style={styles.td}>₹{s.openingCash.toFixed(2)}</td>
+                      <td style={{ ...styles.td, color: '#059669', fontWeight: '600' }}>
+                        +₹{s.systemSalesCash.toFixed(2)}
+                      </td>
+                      <td style={styles.td}>₹{s.systemSalesUPI.toFixed(2)}</td>
+                      <td style={{ ...styles.td, color: '#059669' }}>
+                        +₹{s.systemUdharRepaid.toFixed(2)}
+                      </td>
+                      <td style={{ ...styles.td, color: '#EF4444' }}>
+                        -₹{s.expenses.toFixed(2)}
+                      </td>
+                      <td style={{ ...styles.td, fontWeight: '700' }}>
+                        ₹{s.expectedClosingCash.toFixed(2)}
+                      </td>
+                      <td style={{ ...styles.td, fontWeight: '700' }}>
+                        ₹{(s.actualClosingCash ?? 0).toFixed(2)}
+                      </td>
+                      <td style={styles.td}>
+                        <span
+                          style={{
+                            ...styles.diffBadge,
+                            backgroundColor:
+                              (s.cashDifference ?? 0) === 0
+                                ? '#ECFDF5'
+                                : (s.cashDifference ?? 0) > 0
+                                ? '#F0FDF4'
+                                : '#FEF2F2',
+                            color:
+                              (s.cashDifference ?? 0) === 0
+                                ? '#065F46'
+                                : (s.cashDifference ?? 0) > 0
+                                ? '#15803D'
+                                : '#B91C1C',
+                          }}
+                        >
+                          {(s.cashDifference ?? 0) === 0
+                            ? '✓ Exact Match'
+                            : (s.cashDifference ?? 0) > 0
+                            ? `+₹${(s.cashDifference ?? 0).toFixed(2)}`
+                            : `-₹${Math.abs(s.cashDifference ?? 0).toFixed(2)}`}
+                        </span>
+                      </td>
+                      <td style={{ ...styles.td, color: '#64748B', fontSize: '12px' }}>
+                        {s.notes || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: '32px',
-    backgroundColor: '#F8FAFC',
-    minHeight: '100vh',
+    maxWidth: '1400px',
+    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+    paddingBottom: '40px',
   },
   header: {
-    marginBottom: '24px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+    gap: '16px',
+  },
+  badgeRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '6px',
+  },
+  badge: {
+    fontSize: '11px',
+    fontWeight: 800,
+    letterSpacing: '0.5px',
+    color: '#059669',
+    backgroundColor: '#ECFDF5',
+    padding: '3px 8px',
+    borderRadius: '6px',
+  },
+  countBadge: {
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#64748B',
+    backgroundColor: '#F1F5F9',
+    padding: '3px 8px',
+    borderRadius: '6px',
   },
   title: {
-    fontSize: '24px',
-    fontWeight: '800',
+    fontSize: '26px',
+    fontWeight: 800,
     color: '#0F172A',
     margin: 0,
+    letterSpacing: '-0.5px',
   },
   subtitle: {
     fontSize: '14px',
     color: '#64748B',
     marginTop: '4px',
+    margin: 0,
+  },
+  loadingState: {
+    padding: '60px 20px',
+    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
+  },
+  spinner: {
+    width: '32px',
+    height: '32px',
+    border: '3px solid #E2E8F0',
+    borderTopColor: '#059669',
+    borderRadius: '50%',
+    margin: '0 auto 12px',
+    animation: 'spin 0.8s linear infinite',
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#64748B',
+    margin: 0,
   },
   statsRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '16px',
-    marginBottom: '24px',
   },
   statCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
-    padding: '20px',
     border: '1px solid #E2E8F0',
+    borderRadius: '16px',
+    padding: '20px',
   },
   statLabel: {
-    fontSize: '12px',
-    fontWeight: '600',
+    fontSize: '11px',
+    fontWeight: 800,
     color: '#64748B',
-    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    marginBottom: '8px',
   },
   statValue: {
     fontSize: '24px',
-    fontWeight: '800',
+    fontWeight: 800,
     color: '#0F172A',
-    marginTop: '6px',
+  },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px dashed #CBD5E1',
+    borderRadius: '16px',
+    padding: '60px 24px',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: '44px',
+    marginBottom: '12px',
+  },
+  emptyTitle: {
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#0F172A',
+    margin: '0 0 6px 0',
+  },
+  emptySubtitle: {
+    fontSize: '14px',
+    color: '#64748B',
+    maxWidth: '460px',
+    margin: '0 auto',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
     border: '1px solid #E2E8F0',
+    borderRadius: '16px',
     overflow: 'hidden',
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
     textAlign: 'left',
-    fontSize: '13px',
   },
   thRow: {
     backgroundColor: '#F8FAFC',
@@ -212,20 +300,24 @@ const styles: Record<string, React.CSSProperties> = {
   },
   th: {
     padding: '12px 16px',
-    fontWeight: '700',
-    color: '#475569',
+    fontSize: '11px',
+    fontWeight: 800,
+    color: '#64748B',
+    letterSpacing: '0.5px',
   },
   tr: {
     borderBottom: '1px solid #F1F5F9',
   },
   td: {
     padding: '14px 16px',
+    fontSize: '13px',
     color: '#334155',
   },
   diffBadge: {
-    padding: '4px 8px',
+    display: 'inline-block',
+    padding: '3px 8px',
     borderRadius: '6px',
-    fontSize: '12px',
-    fontWeight: '700',
+    fontSize: '11px',
+    fontWeight: 700,
   },
 };

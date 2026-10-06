@@ -26,6 +26,7 @@ export const syncUserProfileToFirestore = async (
   }
 
   const now = new Date().toISOString();
+  const storeId = `store_${fbUser.uid}`;
   const newProfile: UserProfile = {
     uid: fbUser.uid,
     displayName: fbUser.displayName || (provider === 'phone' ? 'Dukaan Owner' : 'Kirana User'),
@@ -33,7 +34,7 @@ export const syncUserProfileToFirestore = async (
     phoneNumber: fbUser.phoneNumber || null,
     photoURL: fbUser.photoURL || null,
     authProvider: provider,
-    storeId: 'demo_store_1',
+    storeId,
     role: 'owner',
     createdAt: now,
     updatedAt: now,
@@ -41,6 +42,19 @@ export const syncUserProfileToFirestore = async (
 
   try {
     await setDoc(userRef, newProfile, { merge: true });
+    // Also ensure store record exists
+    const storeRef = doc(db, 'stores', storeId);
+    const storeSnap = await getDoc(storeRef);
+    if (!storeSnap.exists()) {
+      await setDoc(storeRef, {
+        id: storeId,
+        name: fbUser.displayName ? `${fbUser.displayName}'s Kirana` : 'My Kirana Store',
+        ownerName: fbUser.displayName || 'Owner',
+        phone: fbUser.phoneNumber || '',
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
   } catch (err) {
     console.warn('Firestore setDoc profile warning:', err);
   }
@@ -101,17 +115,4 @@ export const signOutUser = async (): Promise<void> => {
 export const subscribeToAuth = (callback: (user: FirebaseUser | null) => void) => {
   const auth = getDashboardAuth();
   return onAuthStateChanged(auth, callback);
-};
-
-export const MOCK_DASHBOARD_USER: UserProfile = {
-  uid: 'owner_demo_1',
-  displayName: 'Chacha Ji (Sharma Kirana)',
-  email: 'chacha@kiranapro.in',
-  phoneNumber: '+919876543210',
-  photoURL: null,
-  authProvider: 'google',
-  storeId: 'demo_store_1',
-  role: 'owner',
-  createdAt: '2026-10-05T00:00:00.000Z',
-  updatedAt: '2026-10-05T00:00:00.000Z',
 };

@@ -1,67 +1,178 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KhataTable } from '../../components/KhataTable';
 import { CustomerKhata } from '@kirana-pro/shared';
-
-const STARTER_CUSTOMERS: CustomerKhata[] = [
-  {
-    id: 'cust_1',
-    storeId: 'demo_store_1',
-    name: 'Ramesh Sharma (Pandit Ji)',
-    phoneNumber: '9876543210',
-    address: 'Near Shiv Mandir, Ward 4',
-    currentBalance: 420,
-    createdAt: '2026-10-01T08:00:00.000Z',
-    updatedAt: '2026-10-05T09:00:00.000Z',
-  },
-  {
-    id: 'cust_2',
-    storeId: 'demo_store_1',
-    name: 'Gupta Ji Chai Wala',
-    phoneNumber: '9123456780',
-    address: 'Main Chowk Corner',
-    currentBalance: 780,
-    createdAt: '2026-10-02T10:00:00.000Z',
-    updatedAt: '2026-10-05T10:30:00.000Z',
-  },
-  {
-    id: 'cust_3',
-    storeId: 'demo_store_1',
-    name: 'Sunil Tailor',
-    phoneNumber: '9988776655',
-    address: 'Shop #12, Market',
-    currentBalance: 150,
-    createdAt: '2026-10-03T11:00:00.000Z',
-    updatedAt: '2026-10-04T12:00:00.000Z',
-  },
-  {
-    id: 'cust_4',
-    storeId: 'demo_store_1',
-    name: 'Mishra Ji Teacher',
-    phoneNumber: '9871122334',
-    address: 'Adarsh Colony',
-    currentBalance: 0,
-    createdAt: '2026-10-04T14:00:00.000Z',
-    updatedAt: '2026-10-05T08:00:00.000Z',
-  },
-];
+import { useAuth } from '../../context/AuthContext';
+import { subscribeStoreCustomers, saveStoreCustomer } from '../../lib/storeService';
 
 export default function KhataPage() {
-  const [customers] = useState<CustomerKhata[]>(STARTER_CUSTOMERS);
+  const { storeId } = useAuth();
+  const [customers, setCustomers] = useState<CustomerKhata[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const [newCust, setNewCust] = useState({
+    name: '',
+    phoneNumber: '',
+    address: '',
+    initialBalance: '0',
+  });
+
+  useEffect(() => {
+    if (!storeId) return;
+    const unsubscribe = subscribeStoreCustomers(storeId, (data) => {
+      setCustomers(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [storeId]);
+
+  const handleAddCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeId || !newCust.name || !newCust.phoneNumber) return;
+    setSaving(true);
+
+    try {
+      const initBal = parseFloat(newCust.initialBalance) || 0;
+      const cust: CustomerKhata = {
+        id: `cust_${Date.now()}`,
+        storeId,
+        name: newCust.name.trim(),
+        phoneNumber: newCust.phoneNumber.trim(),
+        address: newCust.address.trim() || undefined,
+        currentBalance: initBal,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await saveStoreCustomer(storeId, cust);
+      setShowAddModal(false);
+      setNewCust({
+        name: '',
+        phoneNumber: '',
+        address: '',
+        initialBalance: '0',
+      });
+    } catch (err: any) {
+      alert(`Failed to add customer: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
+          <div style={styles.badgeRow}>
+            <span style={styles.badge}>📒 UDHAR LEDGER</span>
+            <span style={styles.countBadge}>{customers.length} Accounts</span>
+          </div>
           <h1 style={styles.title}>Customer Khata (उधार बहीखाता)</h1>
           <p style={styles.subtitle}>
             Manage regular customer credit balances, payment logs, and recovery reminders
           </p>
         </div>
+
+        <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
+          ➕ Add Khata Customer
+        </button>
       </div>
 
-      <KhataTable customers={customers} />
+      {loading ? (
+        <div style={styles.loadingState}>
+          <div style={styles.spinner} />
+          <p style={styles.loadingText}>Syncing khata ledger from cloud...</p>
+        </div>
+      ) : customers.length === 0 ? (
+        <div style={styles.emptyCard}>
+          <div style={styles.emptyIcon}>📒</div>
+          <h3 style={styles.emptyTitle}>No Khata Customers Yet</h3>
+          <p style={styles.emptySubtitle}>
+            Add regular customers to keep track of store credits (उधार), partial payments, and WhatsApp reminders.
+          </p>
+          <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
+            ➕ Add First Khata Account
+          </button>
+        </div>
+      ) : (
+        <KhataTable customers={customers} />
+      )}
+
+      {/* Add Customer Modal */}
+      {showAddModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalHeader}>
+              <h2 style={styles.modalTitle}>➕ Add Customer to Khata</h2>
+              <button style={styles.closeBtn} onClick={() => setShowAddModal(false)}>
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCustomer} style={styles.form}>
+              <div style={styles.field}>
+                <label style={styles.label}>Customer Full Name *</label>
+                <input
+                  required
+                  style={styles.input}
+                  placeholder="e.g. Ramesh Sharma (Pandit Ji)"
+                  value={newCust.name}
+                  onChange={(e) => setNewCust({ ...newCust, name: e.target.value })}
+                />
+              </div>
+
+              <div style={styles.field}>
+                <label style={styles.label}>Mobile Number *</label>
+                <input
+                  required
+                  style={styles.input}
+                  placeholder="e.g. 9876543210"
+                  value={newCust.phoneNumber}
+                  onChange={(e) => setNewCust({ ...newCust, phoneNumber: e.target.value })}
+                />
+              </div>
+
+              <div style={styles.field}>
+                <label style={styles.label}>House Address / Colony</label>
+                <input
+                  style={styles.input}
+                  placeholder="e.g. Near Shiv Mandir, Ward 4"
+                  value={newCust.address}
+                  onChange={(e) => setNewCust({ ...newCust, address: e.target.value })}
+                />
+              </div>
+
+              <div style={styles.field}>
+                <label style={styles.label}>Opening Due Balance (₹)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  style={styles.input}
+                  placeholder="0.00"
+                  value={newCust.initialBalance}
+                  onChange={(e) => setNewCust({ ...newCust, initialBalance: e.target.value })}
+                />
+              </div>
+
+              <div style={styles.modalActions}>
+                <button
+                  type="button"
+                  style={styles.btnSecondary}
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" disabled={saving} style={styles.btnPrimary}>
+                  {saving ? 'Saving...' : '💾 Save Khata Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -71,11 +182,38 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
+    maxWidth: '1400px',
+    margin: '0 auto',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '16px',
+  },
+  badgeRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '6px',
+  },
+  badge: {
+    fontSize: '11px',
+    fontWeight: 800,
+    letterSpacing: '0.5px',
+    color: '#D97706',
+    backgroundColor: '#FEF3C7',
+    padding: '3px 8px',
+    borderRadius: '6px',
+  },
+  countBadge: {
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#64748B',
+    backgroundColor: '#F1F5F9',
+    padding: '3px 8px',
+    borderRadius: '6px',
   },
   title: {
     fontSize: '26px',
@@ -89,5 +227,142 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#64748B',
     marginTop: '4px',
     margin: 0,
+  },
+  btnPrimary: {
+    backgroundColor: '#D97706',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '10px 18px',
+    fontSize: '13px',
+    fontWeight: 700,
+    cursor: 'pointer',
+    boxShadow: '0 2px 4px rgba(217, 119, 6, 0.2)',
+  },
+  btnSecondary: {
+    backgroundColor: '#FFFFFF',
+    color: '#334155',
+    border: '1.5px solid #E2E8F0',
+    borderRadius: '10px',
+    padding: '10px 16px',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  loadingState: {
+    padding: '60px 20px',
+    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
+  },
+  spinner: {
+    width: '32px',
+    height: '32px',
+    border: '3px solid #E2E8F0',
+    borderTopColor: '#D97706',
+    borderRadius: '50%',
+    margin: '0 auto 12px',
+    animation: 'spin 0.8s linear infinite',
+  },
+  loadingText: {
+    fontSize: '14px',
+    color: '#64748B',
+    margin: 0,
+  },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px dashed #CBD5E1',
+    borderRadius: '16px',
+    padding: '60px 24px',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: '44px',
+    marginBottom: '12px',
+  },
+  emptyTitle: {
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#0F172A',
+    margin: '0 0 6px 0',
+  },
+  emptySubtitle: {
+    fontSize: '14px',
+    color: '#64748B',
+    maxWidth: '460px',
+    margin: '0 auto 20px',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(4px)',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: '20px',
+    padding: '28px',
+    width: '92%',
+    maxWidth: '480px',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  modalTitle: {
+    fontSize: '18px',
+    fontWeight: 800,
+    color: '#0F172A',
+    margin: 0,
+  },
+  closeBtn: {
+    background: 'none',
+    border: 'none',
+    fontSize: '18px',
+    cursor: 'pointer',
+    color: '#64748B',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px',
+  },
+  field: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  label: {
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#334155',
+  },
+  input: {
+    border: '1.5px solid #CBD5E1',
+    borderRadius: '10px',
+    padding: '10px 14px',
+    fontSize: '13px',
+    color: '#0F172A',
+    outline: 'none',
+  },
+  modalActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px',
+    marginTop: '10px',
   },
 };

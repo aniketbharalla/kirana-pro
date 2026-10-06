@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { DASHBOARD_INVOICES } from '../../lib/mockInvoices';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   generateGSTTaxSummary,
   generateGSTR1JSON,
@@ -9,15 +8,29 @@ import {
   isValidGSTIN,
   Invoice,
 } from '@kirana-pro/shared';
+import { useAuth } from '../../context/AuthContext';
+import { subscribeStoreInvoices } from '../../lib/storeService';
 
 export default function GSTCenterPage() {
-  const [invoices] = useState<Invoice[]>(DASHBOARD_INVOICES);
-  const [selectedMonth, setSelectedMonth] = useState('10');
-  const [selectedYear, setSelectedYear] = useState('2026');
+  const { store, storeId } = useAuth();
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(String(now.getMonth() + 1).padStart(2, '0'));
+  const [selectedYear, setSelectedYear] = useState(String(now.getFullYear()));
   const [activeTab, setActiveTab] = useState<'b2b' | 'b2c' | 'hsn' | 'json'>('b2b');
 
-  const storeGstin = '07AABCK1234F1Z5';
+  const storeGstin = store?.gstNumber || 'Unregistered / Composition';
   const fp = `${selectedMonth}${selectedYear}`;
+
+  useEffect(() => {
+    if (!storeId) return;
+    const unsubscribe = subscribeStoreInvoices(storeId, (data) => {
+      setInvoices(data);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [storeId]);
 
   // Filter invoices by month
   const filteredInvoices = useMemo(() => {
@@ -45,11 +58,11 @@ export default function GSTCenterPage() {
   // Generate Official GSTR-1 JSON
   const gstr1Json = useMemo(() => {
     return generateGSTR1JSON(
-      { gstin: storeGstin, stateCode: '07' },
+      { gstin: store?.gstNumber || '07AAAAA0000A1Z5', stateCode: '07' },
       filteredInvoices,
       fp
     );
-  }, [filteredInvoices, storeGstin, fp]);
+  }, [filteredInvoices, store?.gstNumber, fp]);
 
   // Handle Download JSON
   const handleDownloadJson = () => {
