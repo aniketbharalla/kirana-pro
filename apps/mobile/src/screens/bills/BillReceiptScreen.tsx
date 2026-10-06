@@ -13,6 +13,8 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Invoice, formatWhatsAppReceipt } from '@kirana-pro/shared';
 import { useStoreStore } from '../../store/storeStore';
+import { useHardwareStore } from '../../store/hardwareStore';
+import { printInvoiceReceipt } from '../../services/printerService';
 
 export const BillReceiptScreen: React.FC = () => {
   const route = useRoute<any>();
@@ -65,11 +67,21 @@ export const BillReceiptScreen: React.FC = () => {
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    const settings = useHardwareStore.getState().getPrinterSettings();
+    const result = await printInvoiceReceipt(
+      invoice,
+      {
+        name: storeName,
+        address: storeAddress,
+        phone: storePhone,
+        gstin: store?.gstNumber,
+      },
+      settings
+    );
     Alert.alert(
-      'Thermal Printer 🖨️',
-      `Sending formatted 58mm ESC/POS bill #${invoice.invoiceNumber} to thermal printer...`,
-      [{ text: 'OK' }]
+      result.success ? 'Receipt Printed 🖨️' : 'Print Notice',
+      result.message
     );
   };
 

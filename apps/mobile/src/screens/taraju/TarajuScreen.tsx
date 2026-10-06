@@ -13,6 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useProductStore } from '../../store/productStore';
 import { useCartStore } from '../../store/cartStore';
+import { useHardwareStore } from '../../store/hardwareStore';
 import { calculateWeight, calculatePrice, Product } from '@kirana-pro/shared';
 import { QuickAmountButtons } from '../../components/taraju/QuickAmountButtons';
 import { CalculationResult } from '../../components/taraju/CalculationResult';
@@ -31,6 +32,7 @@ export const TarajuScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { getLooseProducts } = useProductStore();
   const looseProducts = getLooseProducts();
+  const { isScaleConnected, scaleWeight, isScaleStable, isSimulatedScale } = useHardwareStore();
 
   const [mode, setMode] = useState<'amount_to_weight' | 'weight_to_price'>('amount_to_weight');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -92,6 +94,47 @@ export const TarajuScreen: React.FC = () => {
             Instant price-to-weight & weight-to-price calculator
           </Text>
         </View>
+
+        {/* Live Digital Scale Banner */}
+        {(isScaleConnected || isSimulatedScale) && (
+          <View style={styles.liveScaleBanner}>
+            <View style={styles.liveScaleInfo}>
+              <View style={styles.liveScaleStatusRow}>
+                <Text style={styles.liveScaleDot}>🟢</Text>
+                <Text style={styles.liveScaleTitle}>DIGITAL SCALE (लाइव तराजू)</Text>
+                <View
+                  style={[
+                    styles.scalePill,
+                    isScaleStable ? styles.scalePillStable : styles.scalePillUnstable,
+                  ]}
+                >
+                  <Text style={styles.scalePillText}>
+                    {isScaleStable ? 'STABLE' : 'UNSTABLE'}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.liveScaleWeight}>
+                {scaleWeight.toFixed(3)}{' '}
+                <Text style={styles.liveScaleKg}>kg</Text>
+                <Text style={styles.liveScaleGrams}>
+                  {' '}({Math.round(scaleWeight * 1000)} g)
+                </Text>
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.applyScaleBtn}
+              activeOpacity={0.85}
+              onPress={() => {
+                const grams = Math.round(scaleWeight * 1000);
+                setMode('weight_to_price');
+                setInputValue(String(grams));
+              }}
+            >
+              <Text style={styles.applyScaleBtnText}>Apply Weight ➔</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Loose Items Horizontal Picker */}
         <Text style={styles.sectionHeader}>SELECT LOOSE ITEM</Text>
@@ -520,5 +563,79 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     color: '#10B981',
+  },
+  liveScaleBanner: {
+    backgroundColor: '#0F172A',
+    borderRadius: 16,
+    padding: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  liveScaleInfo: {
+    flex: 1,
+  },
+  liveScaleStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  liveScaleDot: {
+    fontSize: 10,
+  },
+  liveScaleTitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.5,
+  },
+  scalePill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  scalePillStable: {
+    backgroundColor: '#166534',
+  },
+  scalePillUnstable: {
+    backgroundColor: '#854D0E',
+  },
+  scalePillText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  liveScaleWeight: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#38BDF8',
+  },
+  liveScaleKg: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#94A3B8',
+  },
+  liveScaleGrams: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  applyScaleBtn: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  applyScaleBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
 });

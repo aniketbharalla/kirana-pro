@@ -14,6 +14,8 @@ import { useCartStore } from '../../store/cartStore';
 import { useAuthStore } from '../../store/authStore';
 import { useStoreStore } from '../../store/storeStore';
 import { useStaffStore } from '../../store/staffStore';
+import { useHardwareStore } from '../../store/hardwareStore';
+import { kickCashDrawer } from '../../services/printerService';
 import { UpiQrView } from './UpiQrView';
 import { createInvoice } from '../../services/invoice';
 import { fetchCustomers, createCustomer } from '../../services/khata';
@@ -156,6 +158,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
       // Record in current cashier counter shift
       recordShiftSale(totals.grandTotal, paymentMode);
+
+      // Trigger automatic cash drawer kick on cash payments
+      const hwSettings = useHardwareStore.getState().getPrinterSettings();
+      if (paymentMode === 'cash' && hwSettings.autoKickDrawer) {
+        kickCashDrawer(hwSettings).catch(() => {});
+      }
 
       clearCart();
       setLoading(false);

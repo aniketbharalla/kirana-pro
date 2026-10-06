@@ -11,6 +11,7 @@ export * from './types/purchase';
 export * from './types/galla';
 export * from './types/gst';
 export * from './types/staff';
+export * from './types/hardware';
 
 // Constants
 export * from './constants/categories';
@@ -30,6 +31,8 @@ export * from './firebase/config';
 export * from './utils/taraju';
 export * from './utils/gst';
 export * from './utils/gstr1';
+export * from './utils/escpos';
+export * from './utils/scaleParser';
 export * from './utils/upi';
 export * from './utils/receipt';
 export * from './utils/invoiceOCR';

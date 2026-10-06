@@ -5,6 +5,7 @@ import { DailyGallaScreen } from '../galla/DailyGallaScreen';
 import { GSTReportScreen } from '../gst/GSTReportScreen';
 import { CounterShiftScreen } from '../staff/CounterShiftScreen';
 import { StaffManagementScreen } from '../staff/StaffManagementScreen';
+import { PrinterSettingsScreen } from '../hardware/PrinterSettingsScreen';
 import { colors } from '../../theme';
 import { getPendingSyncSummary, syncAllToCloud, PendingSyncSummary } from '../../services/localStore';
 
@@ -14,6 +15,7 @@ export const ProfileScreen: React.FC = () => {
   const [showGSTModal, setShowGSTModal] = useState(false);
   const [showCounterModal, setShowCounterModal] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
+  const [showHardwareModal, setShowHardwareModal] = useState(false);
   const effectiveStoreId = user?.storeId || 'demo_store_1';
 
   const [syncing, setSyncing] = useState(false);
@@ -257,6 +259,25 @@ export const ProfileScreen: React.FC = () => {
             </View>
             <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
           </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          {/* Hardware & Thermal Printer */}
+          <TouchableOpacity
+            style={styles.gallaTile}
+            onPress={() => setShowHardwareModal(true)}
+          >
+            <View style={[styles.gallaIconBg, { backgroundColor: '#F3E8FF' }]}>
+              <Text style={{ fontSize: 24 }}>🖨️</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.gallaTileTitle}>Hardware & Printers (हार्डवेयर व तराजू)</Text>
+              <Text style={styles.gallaTileSubtitle}>
+                58mm/80mm thermal receipt printer, drawer kick & digital scale
+              </Text>
+            </View>
+            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Modal for Daily Galla */}
@@ -320,6 +341,22 @@ export const ProfileScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
             <StaffManagementScreen />
+          </View>
+        )}
+
+        {/* Modal for Hardware & Printer Settings */}
+        {showHardwareModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Hardware & Printer Settings</Text>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setShowHardwareModal(false)}
+              >
+                <Text style={styles.modalCloseText}>✕ Close</Text>
+              </TouchableOpacity>
+            </View>
+            <PrinterSettingsScreen />
           </View>
         )}
 
