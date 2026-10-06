@@ -24,6 +24,7 @@ import {
   generateInvoiceNumber,
   isValidGSTIN,
 } from '@kirana-pro/shared';
+import { colors } from '../../theme';
 
 export interface CheckoutModalProps {
   visible: boolean;
