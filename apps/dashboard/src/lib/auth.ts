@@ -72,14 +72,14 @@ export const signInWithGoogle = async (): Promise<{ user: FirebaseUser; profile:
   return { user: result.user, profile };
 };
 
-// Initialize RecaptchaVerifier for Phone OTP
-export const setupRecaptcha = (containerId: string): RecaptchaVerifier => {
+// Get or initialize reusable RecaptchaVerifier for Phone OTP
+export const getOrCreateRecaptcha = (containerId: string): RecaptchaVerifier => {
   const auth = getDashboardAuth();
-  if (typeof window !== 'undefined') {
-    const el = document.getElementById(containerId);
-    if (el) el.innerHTML = '';
+  if (typeof window !== 'undefined' && (window as any).recaptchaVerifier) {
+    return (window as any).recaptchaVerifier;
   }
-  return new RecaptchaVerifier(auth, containerId, {
+
+  const verifier = new RecaptchaVerifier(auth, containerId, {
     size: 'invisible',
     callback: () => {
       // reCAPTCHA solved
@@ -88,6 +88,25 @@ export const setupRecaptcha = (containerId: string): RecaptchaVerifier => {
       console.warn('reCAPTCHA expired');
     },
   });
+
+  if (typeof window !== 'undefined') {
+    (window as any).recaptchaVerifier = verifier;
+  }
+  return verifier;
+};
+
+// Reset reCAPTCHA widget safely on error or change
+export const resetRecaptcha = (containerId: string = 'recaptcha-container'): void => {
+  if (typeof window !== 'undefined') {
+    if ((window as any).recaptchaVerifier) {
+      try {
+        (window as any).recaptchaVerifier.clear();
+      } catch {}
+      delete (window as any).recaptchaVerifier;
+    }
+    const el = document.getElementById(containerId);
+    if (el) el.innerHTML = '';
+  }
 };
 
 // Real Phone OTP Send

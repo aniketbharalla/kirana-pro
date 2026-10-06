@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   signInWithGoogle,
-  setupRecaptcha,
+  getOrCreateRecaptcha,
+  resetRecaptcha,
   sendPhoneOtp,
   verifyPhoneOtp,
 } from '../../lib/auth';
@@ -26,12 +27,8 @@ export default function LoginPage() {
   // Cleanup RecaptchaVerifier on unmount
   useEffect(() => {
     return () => {
-      if (recaptchaVerifierRef.current) {
-        try {
-          recaptchaVerifierRef.current.clear();
-          recaptchaVerifierRef.current = null;
-        } catch {}
-      }
+      resetRecaptcha('recaptcha-container');
+      recaptchaVerifierRef.current = null;
     };
   }, []);
 
@@ -69,14 +66,8 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      if (recaptchaVerifierRef.current) {
-        try {
-          recaptchaVerifierRef.current.clear();
-        } catch {}
-      }
-      const verifier = setupRecaptcha('recaptcha-container');
+      const verifier = getOrCreateRecaptcha('recaptcha-container');
       recaptchaVerifierRef.current = verifier;
-      await verifier.render();
 
       const confirmation = await sendPhoneOtp(cleanPhone, verifier);
       confirmationResultRef.current = confirmation;
@@ -84,12 +75,9 @@ export default function LoginPage() {
       setInfoMsg(`OTP sent to +91 ${cleanPhone}. Please check your SMS.`);
     } catch (err: any) {
       console.error('Phone OTP Send Error:', err);
-      if (recaptchaVerifierRef.current) {
-        try {
-          recaptchaVerifierRef.current.clear();
-          recaptchaVerifierRef.current = null;
-        } catch {}
-      }
+      resetRecaptcha('recaptcha-container');
+      recaptchaVerifierRef.current = null;
+
       if (err.code === 'auth/internal-error') {
         setErrorMsg(
           'Firebase returned auth/internal-error. Ensure "Phone" sign-in provider is enabled in Firebase Console (Authentication > Sign-in method > Phone). Alternatively, sign in using Google Sign-In!'
