@@ -23,20 +23,13 @@ export default function LoginPage() {
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
   const confirmationResultRef = useRef<ConfirmationResult | null>(null);
 
-  // Initialize RecaptchaVerifier on mount
+  // Cleanup RecaptchaVerifier on unmount
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined' && !recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current = setupRecaptcha('recaptcha-container');
-      }
-    } catch (err: any) {
-      console.warn('Recaptcha init notice:', err);
-    }
-
     return () => {
       if (recaptchaVerifierRef.current) {
         try {
           recaptchaVerifierRef.current.clear();
+          recaptchaVerifierRef.current = null;
         } catch {}
       }
     };
@@ -76,20 +69,37 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      if (!recaptchaVerifierRef.current) {
-        recaptchaVerifierRef.current = setupRecaptcha('recaptcha-container');
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+        } catch {}
       }
+      const verifier = setupRecaptcha('recaptcha-container');
+      recaptchaVerifierRef.current = verifier;
+      await verifier.render();
 
-      const confirmation = await sendPhoneOtp(cleanPhone, recaptchaVerifierRef.current);
+      const confirmation = await sendPhoneOtp(cleanPhone, verifier);
       confirmationResultRef.current = confirmation;
       setIsOtpSent(true);
       setInfoMsg(`OTP sent to +91 ${cleanPhone}. Please check your SMS.`);
     } catch (err: any) {
       console.error('Phone OTP Send Error:', err);
-      if (err.code === 'auth/invalid-phone-number') {
+      if (recaptchaVerifierRef.current) {
+        try {
+          recaptchaVerifierRef.current.clear();
+          recaptchaVerifierRef.current = null;
+        } catch {}
+      }
+      if (err.code === 'auth/internal-error') {
+        setErrorMsg(
+          'Firebase returned auth/internal-error. Ensure "Phone" sign-in provider is enabled in Firebase Console (Authentication > Sign-in method > Phone). Alternatively, sign in using Google Sign-In!'
+        );
+      } else if (err.code === 'auth/invalid-phone-number') {
         setErrorMsg('Invalid phone number format.');
       } else if (err.code === 'auth/too-many-requests') {
         setErrorMsg('Too many OTP attempts. Please wait a moment or use Google Sign-In.');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setErrorMsg('Phone provider is not enabled in Firebase Console. Please enable Phone under Authentication > Sign-in method.');
       } else {
         setErrorMsg(err.message || 'Failed to send OTP. Please check connection and try again.');
       }
@@ -196,9 +206,6 @@ export default function LoginPage() {
                   />
                 </div>
 
-                {/* Hidden Invisible Recaptcha Container */}
-                <div id="recaptcha-container"></div>
-
                 <button
                   style={styles.submitBtn}
                   onClick={handleSendPhoneOtp}
@@ -274,6 +281,9 @@ export default function LoginPage() {
         )}
 
 
+
+        {/* Permanent reCAPTCHA widget container */}
+        <div id="recaptcha-container"></div>
 
         <p style={styles.footerText}>
           Secure Authentication powered by Firebase Project <code style={styles.codeText}>kirana-pro-edf3a</code>

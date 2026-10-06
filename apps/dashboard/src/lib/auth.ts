@@ -75,6 +75,10 @@ export const signInWithGoogle = async (): Promise<{ user: FirebaseUser; profile:
 // Initialize RecaptchaVerifier for Phone OTP
 export const setupRecaptcha = (containerId: string): RecaptchaVerifier => {
   const auth = getDashboardAuth();
+  if (typeof window !== 'undefined') {
+    const el = document.getElementById(containerId);
+    if (el) el.innerHTML = '';
+  }
   return new RecaptchaVerifier(auth, containerId, {
     size: 'invisible',
     callback: () => {
