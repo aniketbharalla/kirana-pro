@@ -21,17 +21,17 @@ export const getFirebaseConfig = (): FirebaseEnvironmentConfig => ({
     process.env.FIREBASE_AUTH_DOMAIN ||
     process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ||
     process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-    'kirana-pro-demo.firebaseapp.com',
+    'kirana-pro-edf3a.firebaseapp.com',
   projectId:
     process.env.FIREBASE_PROJECT_ID ||
     process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ||
     process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-    'kirana-pro-demo',
+    'kirana-pro-edf3a',
   storageBucket:
     process.env.FIREBASE_STORAGE_BUCKET ||
     process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ||
     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-    'kirana-pro-demo.appspot.com',
+    'kirana-pro-edf3a.firebasestorage.app',
   messagingSenderId:
     process.env.FIREBASE_MESSAGING_SENDER_ID ||
     process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||

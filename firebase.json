@@ -5,5 +5,16 @@
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Kirana Pro",
+        "authorizedRedirectUris": [
+          "https://kirana-pro-edf3a.firebaseapp.com/__/auth/handler",
+          "http://localhost"
+        ]
+      }
+    }
   }
 }

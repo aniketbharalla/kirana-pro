@@ -1,11 +1,29 @@
-import React from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Text, TouchableOpacity, SafeAreaView, StatusBar, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
+import { signInWithGooglePopup } from '../../services/auth';
 
 export const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsGoogleLoading(true);
+      await signInWithGooglePopup();
+      // On success, useAuthStore updates and root navigator automatically switches to MainTabs
+    } catch (err: any) {
+      console.error('Google Sign-In failed:', err);
+      // If popup was cancelled or failed
+      if (err.code !== 'auth/popup-closed-by-user') {
+        Alert.alert('Sign-In Error', err.message || 'Unable to sign in with Google. Please try again.');
+      }
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -61,14 +79,16 @@ export const WelcomeScreen: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.googleButton}
+            style={[styles.googleButton, isGoogleLoading && { opacity: 0.7 }]}
             activeOpacity={0.88}
-            onPress={() => {
-              // Navigation or Google Sign In trigger
-              navigation.navigate('PhoneLogin');
-            }}
+            disabled={isGoogleLoading}
+            onPress={handleGoogleSignIn}
           >
-            <Text style={styles.googleButtonText}>🌐 Continue with Google</Text>
+            {isGoogleLoading ? (
+              <ActivityIndicator color="#10B981" />
+            ) : (
+              <Text style={styles.googleButtonText}>🌐 Continue with Google</Text>
+            )}
           </TouchableOpacity>
 
           <Text style={styles.disclaimerText}>

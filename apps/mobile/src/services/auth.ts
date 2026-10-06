@@ -7,6 +7,8 @@ import {
   ApplicationVerifier,
   GoogleAuthProvider,
   signInWithCredential,
+  signInWithPopup,
+  RecaptchaVerifier,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getFirebaseAuth, getFirestoreDb, UserProfile } from '@kirana-pro/shared';
@@ -58,12 +60,34 @@ export const createProfileFromFirebaseUser = async (
   return newProfile;
 };
 
+export const setupRecaptchaVerifier = (
+  containerId: string = 'recaptcha-container'
+): ApplicationVerifier => {
+  const auth = getFirebaseAuth();
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    if (!document.getElementById(containerId)) {
+      const div = document.createElement('div');
+      div.id = containerId;
+      document.body.appendChild(div);
+    }
+    return new RecaptchaVerifier(auth, containerId, {
+      size: 'invisible',
+      callback: () => {},
+      'expired-callback': () => {
+        console.warn('reCAPTCHA expired');
+      },
+    });
+  }
+  return {} as ApplicationVerifier;
+};
+
 export const sendPhoneOTP = async (
   phoneNumber: string,
   appVerifier: ApplicationVerifier
 ): Promise<ConfirmationResult> => {
   const auth = getFirebaseAuth();
-  return signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+  const formatted = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
+  return signInWithPhoneNumber(auth, formatted, appVerifier);
 };
 
 export const verifyOTP = async (
@@ -72,6 +96,16 @@ export const verifyOTP = async (
 ): Promise<UserProfile> => {
   const result = await confirmationResult.confirm(code);
   const profile = await createProfileFromFirebaseUser(result.user, 'phone');
+  useAuthStore.getState().setUser(profile);
+  return profile;
+};
+
+export const signInWithGooglePopup = async (): Promise<UserProfile> => {
+  const auth = getFirebaseAuth();
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  const result = await signInWithPopup(auth, provider);
+  const profile = await createProfileFromFirebaseUser(result.user, 'google');
   useAuthStore.getState().setUser(profile);
   return profile;
 };
