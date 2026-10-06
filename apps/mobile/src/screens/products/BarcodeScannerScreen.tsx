@@ -280,16 +280,18 @@ export const BarcodeScannerScreen: React.FC = () => {
 
   // Action: Increment Stock on Existing Item
   const handleConfirmStockUpdate = async () => {
-    if (!existingProduct || !user?.storeId) return;
+    if (!existingProduct) return;
+    const effectiveStoreId = user?.storeId || 'demo_store_1';
+    const effectiveUserId = user?.uid || 'user_1';
     setUpdatingStock(true);
 
     try {
-      await recordStockMovement(user.storeId, existingProduct.id, {
+      await recordStockMovement(effectiveStoreId, existingProduct.id, {
         type: 'in',
         quantity: stockIncrement,
         reason: 'purchase',
         note: `Restocked +${stockIncrement} ${existingProduct.unit}`,
-        performedBy: user.uid,
+        performedBy: effectiveUserId,
       });
 
       Alert.alert(
@@ -310,7 +312,9 @@ export const BarcodeScannerScreen: React.FC = () => {
 
   // Action: Add Item pre-filled from Open Food Facts with Buying & Selling Price
   const handleConfirmAddOpenFoodProduct = async () => {
-    if (!openFoodProduct || !user?.storeId) return;
+    if (!openFoodProduct) return;
+    const effectiveStoreId = user?.storeId || 'demo_store_1';
+    const effectiveUserId = user?.uid || 'user_1';
 
     const sPrice = parseFloat(newSellingPrice);
     if (isNaN(sPrice) || sPrice <= 0) {
@@ -324,7 +328,7 @@ export const BarcodeScannerScreen: React.FC = () => {
 
     try {
       await addProduct(
-        user.storeId,
+        effectiveStoreId,
         {
           name: openFoodProduct.name,
           category: 'snacks-namkeen',
@@ -337,10 +341,13 @@ export const BarcodeScannerScreen: React.FC = () => {
           pricePerUnit: sPrice,
           currentStock: initStock,
           minStockAlert: 5,
-          imageURL: openFoodProduct.imageUrl || null,
+          imageURL:
+            openFoodProduct.imageUrl && openFoodProduct.imageUrl.startsWith('http')
+              ? openFoodProduct.imageUrl
+              : null,
           isActive: true,
         },
-        user.uid
+        effectiveUserId
       );
 
       const { profit, margin } = calculateProfit(newSellingPrice, newPurchasePrice);
@@ -360,7 +367,9 @@ export const BarcodeScannerScreen: React.FC = () => {
 
   // Action: Save Unrecognized Custom Barcode Product
   const handleConfirmAddCustomProduct = async () => {
-    if (!manualAddBarcode || !user?.storeId) return;
+    if (!manualAddBarcode) return;
+    const effectiveStoreId = user?.storeId || 'demo_store_1';
+    const effectiveUserId = user?.uid || 'user_1';
 
     if (!customName.trim()) {
       Alert.alert('Product Name Required', 'Please enter a name for this product.');
@@ -379,7 +388,7 @@ export const BarcodeScannerScreen: React.FC = () => {
 
     try {
       await addProduct(
-        user.storeId,
+        effectiveStoreId,
         {
           name: customName.trim(),
           category: customCategory,
@@ -395,7 +404,7 @@ export const BarcodeScannerScreen: React.FC = () => {
           imageURL: null,
           isActive: true,
         },
-        user.uid
+        effectiveUserId
       );
 
       const { profit, margin } = calculateProfit(customSellingPrice, customPurchasePrice);

@@ -80,15 +80,13 @@ export const AddProductScreen: React.FC = () => {
     const initialStock = currentStock.trim() ? parseFloat(currentStock) : 0;
     const alertLevel = minStockAlert.trim() ? parseFloat(minStockAlert) : 5;
 
-    if (!user?.storeId) {
-      setErrorMsg('No active store detected. Please set up store first.');
-      return;
-    }
+    const effectiveStoreId = user?.storeId || 'demo_store_1';
+    const effectiveUserId = user?.uid || 'user_1';
 
     setLoading(true);
     try {
       await addProduct(
-        user.storeId,
+        effectiveStoreId,
         {
           name: name.trim(),
           nameHindi: nameHindi.trim() || undefined,
@@ -105,13 +103,13 @@ export const AddProductScreen: React.FC = () => {
           imageURL: null,
           isActive: true,
         },
-        user.uid
+        effectiveUserId
       );
 
       navigation.goBack();
     } catch (err: any) {
       console.error('Add product error:', err);
-      setErrorMsg(err.message || 'Failed to save product');
+      setErrorMsg(err.message || 'Failed to save product locally');
       setLoading(false);
     }
   };

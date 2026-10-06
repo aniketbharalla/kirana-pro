@@ -1,12 +1,65 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal, ActivityIndicator } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
 import { DailyGallaScreen } from '../galla/DailyGallaScreen';
 import { colors } from '../../theme';
+import { getPendingSyncSummary, syncAllToCloud, PendingSyncSummary } from '../../services/localStore';
 
 export const ProfileScreen: React.FC = () => {
   const { user, clearUser } = useAuthStore();
   const [showGallaModal, setShowGallaModal] = useState(false);
+  const effectiveStoreId = user?.storeId || 'demo_store_1';
+
+  const [syncing, setSyncing] = useState(false);
+  const [pendingSummary, setPendingSummary] = useState<PendingSyncSummary>({
+    total: 0,
+    products: 0,
+    invoices: 0,
+    stockMoves: 0,
+  });
+
+  const loadPendingCount = async () => {
+    try {
+      const summary = await getPendingSyncSummary(effectiveStoreId);
+      setPendingSummary(summary);
+    } catch {}
+  };
+
+  useEffect(() => {
+    loadPendingCount();
+    const interval = setInterval(loadPendingCount, 3000);
+    return () => clearInterval(interval);
+  }, [effectiveStoreId]);
+
+  const handleSyncToCloud = async () => {
+    setSyncing(true);
+    try {
+      const result = await syncAllToCloud(effectiveStoreId);
+      await loadPendingCount();
+      if (result.success) {
+        if (result.syncedCount === 0) {
+          Alert.alert(
+            'All Synced! 🟢',
+            'All products, bills, and stock records are up-to-date with the cloud.'
+          );
+        } else {
+          Alert.alert(
+            'Cloud Sync Successful! ☁️',
+            `Uploaded to cloud:\n• ${result.details.products} Products\n• ${result.details.invoices} Bills\n• ${result.details.stockMoves} Stock Movements`
+          );
+        }
+      } else {
+        Alert.alert(
+          'Sync Notice ⚠️',
+          result.error || 'Could not sync to cloud. Data is safely stored locally on your device.'
+        );
+      }
+    } catch (err: any) {
+      Alert.alert('Sync Error', err.message || 'Network error. Data remains safely on phone.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleSignOut = () => {
     clearUser();
@@ -38,6 +91,65 @@ export const ProfileScreen: React.FC = () => {
             <Text style={styles.bannerTitle}>Kirana Pro Free Tier</Text>
             <Text style={styles.bannerSub}>100% Free Forever • Zero Subscription</Text>
           </View>
+        </View>
+
+        {/* Cloud Data Sync Section (Local-first with manual cloud push) */}
+        <View style={styles.syncCard}>
+          <View style={styles.syncHeaderRow}>
+            <View>
+              <Text style={styles.syncCardTitle}>☁️ Cloud Sync (क्लाउड सिंक)</Text>
+              <Text style={styles.syncCardSub}>
+                Data is saved locally first. Tap below to upload to cloud.
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.syncBadge,
+                pendingSummary.total > 0 ? styles.syncBadgePending : styles.syncBadgeSuccess,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.syncBadgeText,
+                  pendingSummary.total > 0
+                    ? styles.syncBadgeTextPending
+                    : styles.syncBadgeTextSuccess,
+                ]}
+              >
+                {pendingSummary.total > 0
+                  ? `🟡 ${pendingSummary.total} Local Items`
+                  : '🟢 All Synced'}
+              </Text>
+            </View>
+          </View>
+
+          {pendingSummary.total > 0 ? (
+            <View style={styles.breakdownBox}>
+              <Text style={styles.breakdownText}>
+                Pending Sync: {pendingSummary.products} Products • {pendingSummary.invoices} Bills •{' '}
+                {pendingSummary.stockMoves} Stock Updates
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.syncedBox}>
+              <Text style={styles.syncedText}>
+                ✓ Dukaan data is safely synced with the cloud.
+              </Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.syncButton, syncing && styles.syncButtonDisabled]}
+            activeOpacity={0.85}
+            onPress={handleSyncToCloud}
+            disabled={syncing}
+          >
+            {syncing ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Text style={styles.syncButtonText}>☁️ Sync with Cloud (क्लाउड से सिंक करें)</Text>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Store Information */}
@@ -323,5 +435,106 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: colors.textSecondary,
+  },
+  syncCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  syncHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  syncCardTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  syncCardSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    maxWidth: 210,
+  },
+  syncBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  syncBadgePending: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  syncBadgeSuccess: {
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+  },
+  syncBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  syncBadgeTextPending: {
+    color: '#B45309',
+  },
+  syncBadgeTextSuccess: {
+    color: '#15803D',
+  },
+  breakdownBox: {
+    backgroundColor: '#FFFBEB',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FEF3C7',
+    marginBottom: 14,
+  },
+  breakdownText: {
+    fontSize: 12,
+    color: '#92400E',
+    fontWeight: '600',
+  },
+  syncedBox: {
+    backgroundColor: '#F0FDF4',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#DCFCE7',
+    marginBottom: 14,
+  },
+  syncedText: {
+    fontSize: 12,
+    color: '#166534',
+    fontWeight: '600',
+  },
+  syncButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  syncButtonDisabled: {
+    opacity: 0.6,
+  },
+  syncButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

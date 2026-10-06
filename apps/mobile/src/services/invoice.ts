@@ -6,8 +6,6 @@ import {
   onSnapshot,
   orderBy,
   query,
-  runTransaction,
-  setDoc,
 } from 'firebase/firestore';
 import {
   getFirestoreDb,
@@ -18,17 +16,22 @@ import {
 } from '@kirana-pro/shared';
 import { recordStockMovement } from './stock';
 import { recordKhataTransaction } from './khata';
+import { enqueuePendingInvoice } from './localStore';
+import { useProductStore } from '../store/productStore';
 
 export const createInvoice = async (
   storeId: string,
   data: Omit<Invoice, 'id' | 'createdAt'>,
   userId: string
 ): Promise<Invoice> => {
+  const effectiveStoreId = storeId || 'demo_store_1';
+  const effectiveUserId = userId || 'user_1';
+
   // Validate schema
   invoiceSchema.parse({
     ...data,
-    storeId,
-    createdBy: userId,
+    storeId: effectiveStoreId,
+    createdBy: effectiveUserId,
   });
 
   const now = new Date().toISOString();
@@ -37,64 +40,76 @@ export const createInvoice = async (
   const finalInvoice: Invoice = {
     ...data,
     id: invoiceId,
-    storeId,
+    storeId: effectiveStoreId,
     createdAt: now,
-    createdBy: userId,
+    createdBy: effectiveUserId,
   };
 
-  try {
-    const db = getFirestoreDb();
-    const invoiceRef = doc(db, 'stores', storeId, 'invoices', invoiceId);
-    await setDoc(invoiceRef, finalInvoice);
-
-    // Atomically decrement stock for all sold items
-    for (const item of data.items) {
+  // 1. Deduct stock from local Zustand store immediately for each item sold
+  //    This ensures stock is updated in real-time even without network connection.
+  for (const item of data.items) {
+    try {
+      await recordStockMovement(effectiveStoreId, item.productId, {
+        type: 'out',
+        quantity: item.quantity,
+        reason: 'sale',
+        note: `Sold on invoice ${data.invoiceNumber}`,
+        performedBy: effectiveUserId,
+      });
+    } catch (stockErr: any) {
+      // If insufficient stock was thrown, adjust remaining stock to 0 so billing succeeds
       try {
-        await recordStockMovement(storeId, item.productId, {
-          type: 'out',
-          quantity: item.quantity,
-          reason: 'sale',
-          note: `Sold on invoice ${data.invoiceNumber}`,
-          performedBy: userId,
-        });
-      } catch (stockErr) {
-        console.warn(`Could not update stock for product ${item.productId}:`, stockErr);
+        const { products } = useProductStore.getState();
+        const prod = products.find((p) => p.id === item.productId);
+        if (prod && prod.currentStock > 0) {
+          await recordStockMovement(effectiveStoreId, item.productId, {
+            type: 'out',
+            quantity: prod.currentStock,
+            reason: 'sale',
+            note: `Sold on invoice ${data.invoiceNumber} (cleared remaining stock)`,
+            performedBy: effectiveUserId,
+          });
+        }
+      } catch (fallbackErr) {
+        console.warn(`Stock fallback warning for product ${item.productId}:`, fallbackErr);
       }
     }
+  }
 
-    // If Udhar / Credit checkout, record debit in customer khata
-    if (data.paymentMode === 'credit' && data.customer?.id && data.amountDue > 0) {
-      try {
-        await recordKhataTransaction(
-          storeId,
-          data.customer.id,
-          'debit',
-          data.amountDue,
-          `Udhar purchase on ${data.invoiceNumber}`,
-          userId,
-          invoiceId
-        );
-      } catch (khataErr) {
-        console.warn('Could not record khata ledger entry:', khataErr);
-      }
+  // 2. Save invoice locally for cloud sync
+  await enqueuePendingInvoice(effectiveStoreId, finalInvoice).catch(() => {});
+
+  // 3. Record Khata ledger if credit payment
+  if (data.paymentMode === 'credit' && data.customer?.id && data.amountDue > 0) {
+    try {
+      await recordKhataTransaction(
+        effectiveStoreId,
+        data.customer.id,
+        'debit',
+        data.amountDue,
+        `Udhar purchase on ${data.invoiceNumber}`,
+        effectiveUserId,
+        invoiceId
+      );
+    } catch (khataErr) {
+      console.warn('Khata ledger entry will sync later:', khataErr);
     }
-  } catch (err: any) {
-    console.warn('Firestore offline / local invoice fallback:', err.message);
   }
 
   return finalInvoice;
 };
 
 export const fetchInvoices = async (storeId: string): Promise<Invoice[]> => {
+  const effectiveStoreId = storeId || 'demo_store_1';
   try {
     const db = getFirestoreDb();
     if (!db || typeof db !== 'object') return [];
-    const invoicesCol = collection(db, 'stores', storeId, 'invoices');
+    const invoicesCol = collection(db, 'stores', effectiveStoreId, 'invoices');
     const q = query(invoicesCol, orderBy('createdAt', 'desc'), limit(50));
     const snap = await getDocs(q);
     return snap.docs.map((d) => d.data() as Invoice);
   } catch (err: any) {
-    console.warn('Invoices notice (returning local state):', err.message);
+    console.warn('Invoices notice (offline mode):', err.message);
     return [];
   }
 };
@@ -103,23 +118,27 @@ export const subscribeToInvoices = (
   storeId: string,
   onUpdate: (invoices: Invoice[]) => void
 ): (() => void) => {
+  const effectiveStoreId = storeId || 'demo_store_1';
   try {
     const db = getFirestoreDb();
-    if (!db || typeof db !== 'object') return () => {};
-    const invoicesCol = collection(db, 'stores', storeId, 'invoices');
+    if (!db || typeof db !== 'object') {
+      return () => {};
+    }
+    const invoicesCol = collection(db, 'stores', effectiveStoreId, 'invoices');
     const q = query(invoicesCol, orderBy('createdAt', 'desc'), limit(50));
 
     return onSnapshot(
       q,
       (snap) => {
-        const list = snap.docs.map((d) => d.data() as Invoice);
-        onUpdate(list);
+        const invoices = snap.docs.map((d) => d.data() as Invoice);
+        onUpdate(invoices);
       },
       (err) => {
-        console.warn('Invoices listener notice (local mode):', err.message);
+        console.warn('Realtime invoices listener notice (offline mode):', err.message);
       }
     );
   } catch (err: any) {
+    console.warn('Invoices listener skipped (offline mode):', err.message);
     return () => {};
   }
 };
