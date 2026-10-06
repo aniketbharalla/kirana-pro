@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../store/authStore';
 import { useProductStore } from '../../store/productStore';
 import { StatCard } from '../../components/common/StatCard';
+import { CounterHeaderPill } from '../../components/staff/CounterHeaderPill';
 import { colors } from '../../theme';
 
 export interface HomeScreenProps {
@@ -50,20 +51,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Top Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>Namaste 🙏</Text>
-            <Text style={styles.storeName}>
+            <Text style={styles.storeName} numberOfLines={1}>
               {user?.displayName ? `${user.displayName}'s Dukaan` : 'Sharma Kirana Store'}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.scannerBadge}
-            activeOpacity={0.8}
-            onPress={handleGoToScanner}
-          >
-            <Text style={styles.scannerEmoji}>📷</Text>
-            <Text style={styles.scannerBadgeText}>Scan</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <CounterHeaderPill />
+            <TouchableOpacity
+              style={styles.scannerBadge}
+              activeOpacity={0.8}
+              onPress={handleGoToScanner}
+            >
+              <Text style={styles.scannerEmoji}>📷</Text>
+              <Text style={styles.scannerBadgeText}>Scan</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Hero Card / Taraju Spotlight Banner */}

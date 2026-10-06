@@ -13,6 +13,7 @@ import {
 import { useCartStore } from '../../store/cartStore';
 import { useAuthStore } from '../../store/authStore';
 import { useStoreStore } from '../../store/storeStore';
+import { useStaffStore } from '../../store/staffStore';
 import { UpiQrView } from './UpiQrView';
 import { createInvoice } from '../../services/invoice';
 import { fetchCustomers, createCustomer } from '../../services/khata';
@@ -21,6 +22,7 @@ import {
   Invoice,
   PaymentMode,
   generateInvoiceNumber,
+  isValidGSTIN,
 } from '@kirana-pro/shared';
 
 export interface CheckoutModalProps {
@@ -46,6 +48,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('cash');
   const [cashTendered, setCashTendered] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  // B2B Tax invoice state
+  const [isB2B, setIsB2B] = useState(false);
+  const [buyerGstin, setBuyerGstin] = useState('');
 
   // Khata customer state
   const [customers, setCustomers] = useState<CustomerKhata[]>([]);
@@ -114,6 +120,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         return;
       }
 
+      if (isB2B && buyerGstin.trim() && !isValidGSTIN(buyerGstin.trim())) {
+        Alert.alert('Invalid GSTIN', 'Please enter a valid 15-character GSTIN (e.g. 07AABCK1234F1Z5).');
+        setLoading(false);
+        return;
+      }
+
+      const { activeStaff, counterNumber, recordShiftSale } = useStaffStore.getState();
+
       const invoiceData: Omit<Invoice, 'id' | 'createdAt'> = {
         invoiceNumber,
         storeId,
@@ -127,12 +141,21 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         amountPaid: paymentMode === 'credit' ? 0 : totals.grandTotal,
         amountDue: paymentMode === 'credit' ? totals.grandTotal : 0,
         customer: finalCustomer,
+        customerGstin: isB2B && buyerGstin.trim() ? buyerGstin.trim().toUpperCase() : undefined,
+        isB2B,
+        counterNumber: counterNumber || 1,
+        staffId: activeStaff?.id,
+        staffName: activeStaff?.name,
         cashTendered: paymentMode === 'cash' ? tenderedAmount : undefined,
         changeDue: paymentMode === 'cash' ? changeDue : undefined,
         createdBy: user?.uid || 'demo_owner',
       };
 
       const finalInvoice = await createInvoice(storeId, invoiceData, user?.uid || 'demo_owner');
+
+      // Record in current cashier counter shift
+      recordShiftSale(totals.grandTotal, paymentMode);
+
       clearCart();
       setLoading(false);
       onClose();
@@ -170,6 +193,36 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <Text style={styles.amountBannerLabel}>TOTAL PAYABLE</Text>
             <Text style={styles.amountBannerVal}>₹{grandTotal}</Text>
           </View>
+
+          {/* B2B Tax Invoice Toggle */}
+          <TouchableOpacity
+            style={[styles.b2bToggleRow, isB2B && styles.b2bToggleRowActive]}
+            activeOpacity={0.8}
+            onPress={() => setIsB2B(!isB2B)}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={{ fontSize: 16 }}>🏛️</Text>
+              <Text style={styles.b2bToggleText}>B2B Tax Invoice (व्यापार बिल / GST)</Text>
+            </View>
+            <View style={[styles.checkbox, isB2B && styles.checkboxActive]}>
+              <Text style={styles.checkboxCheck}>{isB2B ? '✓' : ''}</Text>
+            </View>
+          </TouchableOpacity>
+
+          {isB2B && (
+            <View style={styles.gstinInputBox}>
+              <Text style={styles.gstinLabel}>BUYER GSTIN (15 DIGITS)</Text>
+              <TextInput
+                style={styles.gstinInput}
+                placeholder="e.g. 07AABCK1234F1Z5"
+                placeholderTextColor="#94A3B8"
+                value={buyerGstin}
+                onChangeText={setBuyerGstin}
+                autoCapitalize="characters"
+                maxLength={15}
+              />
+            </View>
+          )}
 
           {/* Payment Mode Selector Tabs */}
           <View style={styles.modeTabs}>
@@ -607,5 +660,70 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '800',
+  },
+  b2bToggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 10,
+  },
+  b2bToggleRowActive: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FDE68A',
+  },
+  b2bToggleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#94A3B8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  checkboxCheck: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  gstinInputBox: {
+    backgroundColor: '#FFFBEB',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: 12,
+  },
+  gstinLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#92400E',
+    marginBottom: 6,
+    letterSpacing: 0.5,
+  },
+  gstinInput: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FCD34D',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
   },
 });

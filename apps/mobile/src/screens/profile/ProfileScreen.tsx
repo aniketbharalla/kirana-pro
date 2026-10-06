@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal, ActivityIndicator } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
 import { DailyGallaScreen } from '../galla/DailyGallaScreen';
+import { GSTReportScreen } from '../gst/GSTReportScreen';
+import { CounterShiftScreen } from '../staff/CounterShiftScreen';
+import { StaffManagementScreen } from '../staff/StaffManagementScreen';
 import { colors } from '../../theme';
 import { getPendingSyncSummary, syncAllToCloud, PendingSyncSummary } from '../../services/localStore';
 
 export const ProfileScreen: React.FC = () => {
   const { user, clearUser } = useAuthStore();
   const [showGallaModal, setShowGallaModal] = useState(false);
+  const [showGSTModal, setShowGSTModal] = useState(false);
+  const [showCounterModal, setShowCounterModal] = useState(false);
+  const [showStaffModal, setShowStaffModal] = useState(false);
   const effectiveStoreId = user?.storeId || 'demo_store_1';
 
   const [syncing, setSyncing] = useState(false);
@@ -194,6 +200,63 @@ export const ProfileScreen: React.FC = () => {
             </View>
             <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
           </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          {/* GST Reports & Tax Filing */}
+          <TouchableOpacity
+            style={styles.gallaTile}
+            onPress={() => setShowGSTModal(true)}
+          >
+            <View style={[styles.gallaIconBg, { backgroundColor: '#FEF3C7' }]}>
+              <Text style={{ fontSize: 24 }}>🏛️</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.gallaTileTitle}>GST Reports & GSTR-1 (जीएसटी रिपोर्ट)</Text>
+              <Text style={styles.gallaTileSubtitle}>
+                GSTR-1 JSON return export, HSN summary & CA accountant reports
+              </Text>
+            </View>
+            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          {/* Counter Shifts & Register */}
+          <TouchableOpacity
+            style={styles.gallaTile}
+            onPress={() => setShowCounterModal(true)}
+          >
+            <View style={[styles.gallaIconBg, { backgroundColor: '#DCFCE7' }]}>
+              <Text style={{ fontSize: 24 }}>🏁</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.gallaTileTitle}>Counter Shifts & Register (काउंटर व शिफ्ट)</Text>
+              <Text style={styles.gallaTileSubtitle}>
+                Opening drawer float, cashier sales tally & shift handover
+              </Text>
+            </View>
+            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          {/* Staff & Cashier PINs */}
+          <TouchableOpacity
+            style={styles.gallaTile}
+            onPress={() => setShowStaffModal(true)}
+          >
+            <View style={[styles.gallaIconBg, { backgroundColor: '#EFF6FF' }]}>
+              <Text style={{ fontSize: 24 }}>🧑‍💼</Text>
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.gallaTileTitle}>Staff & Cashier PINs (स्टाफ व पिन)</Text>
+              <Text style={styles.gallaTileSubtitle}>
+                4-digit login PINs, staff directory & role permissions
+              </Text>
+            </View>
+            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Modal for Daily Galla */}
@@ -209,6 +272,54 @@ export const ProfileScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
             <DailyGallaScreen />
+          </View>
+        )}
+
+        {/* Modal for GST Reports */}
+        {showGSTModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>GST Reports & Returns</Text>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setShowGSTModal(false)}
+              >
+                <Text style={styles.modalCloseText}>✕ Close</Text>
+              </TouchableOpacity>
+            </View>
+            <GSTReportScreen />
+          </View>
+        )}
+
+        {/* Modal for Counter Shift */}
+        {showCounterModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Counter Shift Register</Text>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setShowCounterModal(false)}
+              >
+                <Text style={styles.modalCloseText}>✕ Close</Text>
+              </TouchableOpacity>
+            </View>
+            <CounterShiftScreen />
+          </View>
+        )}
+
+        {/* Modal for Staff Management */}
+        {showStaffModal && (
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Staff & Cashiers</Text>
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={() => setShowStaffModal(false)}
+              >
+                <Text style={styles.modalCloseText}>✕ Close</Text>
+              </TouchableOpacity>
+            </View>
+            <StaffManagementScreen />
           </View>
         )}
 
