@@ -57,6 +57,49 @@ export default function DashboardOverviewPage() {
         looseCount={looseCount}
       />
 
+      {/* Back-Office Quick Launch Grid */}
+      <div style={styles.quickLaunchGrid}>
+        <Link href="/gst" style={styles.quickCard}>
+          <div style={{ ...styles.quickIconBg, backgroundColor: '#FEF3C7' }}>🏛️</div>
+          <div>
+            <div style={styles.quickTitle}>GST & GSTR-1 Portal</div>
+            <div style={styles.quickSub}>Portal JSON, HSN summary & CA CSV</div>
+          </div>
+        </Link>
+
+        <Link href="/analytics" style={styles.quickCard}>
+          <div style={{ ...styles.quickIconBg, backgroundColor: '#EFF6FF' }}>📈</div>
+          <div>
+            <div style={styles.quickTitle}>Profit & Margins</div>
+            <div style={styles.quickSub}>Gross profit, revenue trend & KPIs</div>
+          </div>
+        </Link>
+
+        <Link href="/reorder" style={styles.quickCard}>
+          <div style={{ ...styles.quickIconBg, backgroundColor: '#FEE2E2' }}>🔄</div>
+          <div>
+            <div style={styles.quickTitle}>Smart Reorder</div>
+            <div style={styles.quickSub}>Stockout forecast & WhatsApp PO</div>
+          </div>
+        </Link>
+
+        <Link href="/staff" style={styles.quickCard}>
+          <div style={{ ...styles.quickIconBg, backgroundColor: '#DCFCE7' }}>🧑‍💼</div>
+          <div>
+            <div style={styles.quickTitle}>Shift & Cashier Register</div>
+            <div style={styles.quickSub}>Counter cash reconciliation & floats</div>
+          </div>
+        </Link>
+
+        <Link href="/hardware" style={styles.quickCard}>
+          <div style={{ ...styles.quickIconBg, backgroundColor: '#F3E8FF' }}>🖨️</div>
+          <div>
+            <div style={styles.quickTitle}>Hardware & Printers</div>
+            <div style={styles.quickSub}>58mm/80mm roll, cut & drawer kick</div>
+          </div>
+        </Link>
+      </div>
+
       {/* Catalog & Stock Dual Section */}
       <div style={styles.sectionHeaderRow}>
         <div>
@@ -175,5 +218,42 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     fontWeight: 700,
     color: '#10B981',
+  },
+  quickLaunchGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: '16px',
+    margin: '24px 0 32px 0',
+  },
+  quickCard: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #E2E8F0',
+    borderRadius: '16px',
+    padding: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    textDecoration: 'none',
+    transition: 'all 0.15s ease',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
+  },
+  quickIconBg: {
+    width: '42px',
+    height: '42px',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '20px',
+  },
+  quickTitle: {
+    fontSize: '13px',
+    fontWeight: 800,
+    color: '#0F172A',
+  },
+  quickSub: {
+    fontSize: '11px',
+    color: '#64748B',
+    marginTop: '2px',
   },
 };

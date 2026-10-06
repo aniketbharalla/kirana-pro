@@ -11,11 +11,16 @@ export const Sidebar: React.FC = () => {
     { href: '/', label: 'Overview', icon: '📊' },
     { href: '/bills', label: 'Sales & Invoices', icon: '🧾' },
     { href: '/khata', label: 'Customer Khata', icon: '📒' },
-    { href: '/purchases', label: 'Wholesale & Bill OCR', icon: '🚚' },
+    { href: '/products', label: 'Products & Catalog', icon: '📦' },
+    { href: '/reorder', label: 'Smart Reorder', icon: '🔄' },
+    { href: '/stock', label: 'Stock Movement Log', icon: '📋' },
+    { href: '/purchases', label: 'Wholesale & OCR', icon: '🚚' },
     { href: '/suppliers', label: 'Wholesalers Directory', icon: '🏢' },
     { href: '/galla', label: 'Daily Galla Cash', icon: '💰' },
-    { href: '/products', label: 'Products & Catalog', icon: '📦' },
-    { href: '/stock', label: 'Stock Movement Log', icon: '📋' },
+    { href: '/staff', label: 'Staff & Shift Register', icon: '🧑‍💼' },
+    { href: '/gst', label: 'GST & Tax Returns', icon: '🏛️' },
+    { href: '/analytics', label: 'Profit & Analytics', icon: '📈' },
+    { href: '/hardware', label: 'Hardware & Printers', icon: '🖨️' },
   ];
 
   return (
@@ -135,6 +140,8 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     gap: '6px',
     flex: 1,
+    overflowY: 'auto',
+    paddingRight: '4px',
   },
   navItem: {
     display: 'flex',
