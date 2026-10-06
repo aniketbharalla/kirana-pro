@@ -1,29 +1,85 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isStoreAccess(storeId) {
+      return isAuthenticated() && (
+        storeId == ('store_' + request.auth.uid) ||
+        storeId == ('store_' + request.auth.uid[0:10]) ||
+        (
+          exists(/databases/$(database)/documents/stores/$(storeId)) &&
+          (
+            get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid ||
+            (
+              'staffIds' in get(/databases/$(database)/documents/stores/$(storeId)).data &&
+              request.auth.uid in get(/databases/$(database)/documents/stores/$(storeId)).data.staffIds
+            )
+          )
+        )
+      );
+    }
+
+    function isStoreOwner(storeId) {
+      return isAuthenticated() && (
+        storeId == ('store_' + request.auth.uid) ||
+        storeId == ('store_' + request.auth.uid[0:10]) ||
+        (
+          exists(/databases/$(database)/documents/stores/$(storeId)) &&
+          get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid
+        )
+      );
+    }
+
     // User profiles — users can only read/write their own
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
-    
-    // Stores — only owner and staff can access
+
+    // Stores — owner can create and manage, staff can read
     match /stores/{storeId} {
       allow read: if isStoreAccess(storeId);
-      allow write: if isStoreOwner(storeId);
-      
-      // Products — store members can read, create, update; only owner can delete
+      allow create: if isAuthenticated() && (
+        request.resource.data.ownerId == request.auth.uid ||
+        storeId == ('store_' + request.auth.uid) ||
+        storeId == ('store_' + request.auth.uid[0:10])
+      );
+      allow update, delete: if isStoreOwner(storeId);
+
+      // Products — store members can read, create, update; owner can delete
       match /products/{productId} {
-        allow read: if isStoreAccess(storeId);
-        allow create, update: if isStoreAccess(storeId);
+        allow read, create, update: if isStoreAccess(storeId);
         allow delete: if isStoreOwner(storeId);
       }
-      
-      // Stock movements — store members can read and create; immutable audit log
+
+      // Invoices (bills)
+      match /invoices/{invoiceId} {
+        allow read, create, update: if isStoreAccess(storeId);
+        allow delete: if isStoreOwner(storeId);
+      }
+
+      // Khata customers
+      match /customers/{customerId} {
+        allow read, create, update: if isStoreAccess(storeId);
+        allow delete: if isStoreOwner(storeId);
+      }
+
+      // Stock movements (support both snake_case and camelCase)
+      match /stock_movements/{movementId} {
+        allow read, create: if isStoreAccess(storeId);
+        allow update, delete: if isStoreOwner(storeId);
+      }
       match /stockMovements/{movementId} {
-        allow read: if isStoreAccess(storeId);
-        allow create: if isStoreAccess(storeId);
-        allow update, delete: if false; // Immutable audit log
+        allow read, create: if isStoreAccess(storeId);
+        allow update, delete: if isStoreOwner(storeId);
       }
 
       // Suppliers directory
@@ -37,23 +93,19 @@ service cloud.firestore {
         allow update, delete: if isStoreOwner(storeId);
       }
 
-      // Daily Galla sessions
+      // Staff directory
+      match /staff/{staffId} {
+        allow read: if isStoreAccess(storeId);
+        allow write: if isStoreOwner(storeId);
+      }
+
+      // Daily Galla sessions (support both galla_sessions and galla)
+      match /galla_sessions/{sessionId} {
+        allow read, write: if isStoreAccess(storeId);
+      }
       match /galla/{sessionId} {
         allow read, write: if isStoreAccess(storeId);
       }
-    }
-    
-    // Helper functions
-    function isStoreAccess(storeId) {
-      return request.auth != null && (
-        get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid ||
-        request.auth.uid in get(/databases/$(database)/documents/stores/$(storeId)).data.staffIds
-      );
-    }
-    
-    function isStoreOwner(storeId) {
-      return request.auth != null &&
-        get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
     }
   }
 }
