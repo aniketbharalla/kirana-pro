@@ -9,10 +9,45 @@ import {
   signInWithCredential,
   signInWithPopup,
   RecaptchaVerifier,
+  initializeAuth,
+  getReactNativePersistence,
+  getAuth,
+  Auth,
 } from 'firebase/auth';
+import { Platform } from 'react-native';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { getFirebaseAuth, getFirestoreDb, UserProfile } from '@kirana-pro/shared';
+import {
+  getFirebaseAuth,
+  setFirebaseAuth,
+  getFirestoreDb,
+  initializeFirebase,
+  UserProfile,
+} from '@kirana-pro/shared';
 import { useAuthStore } from '../store/authStore';
+
+// Initialize React Native Auth with AsyncStorage persistence (eliminates console warning)
+export const setupMobileAuthPersistence = (): Auth => {
+  const app = initializeFirebase();
+  try {
+    if (Platform.OS !== 'web' && typeof getReactNativePersistence === 'function') {
+      const persistence = getReactNativePersistence(ReactNativeAsyncStorage);
+      const auth = initializeAuth(app, { persistence });
+      setFirebaseAuth(auth);
+      return auth;
+    }
+  } catch {
+    // If initializeAuth was already called, fall back to getAuth
+  }
+  const auth = getAuth(app);
+  setFirebaseAuth(auth);
+  return auth;
+};
+
+// Ensure persistence is set up at startup
+try {
+  setupMobileAuthPersistence();
+} catch {}
 
 export const getUserDocRef = (uid: string) => {
   const db = getFirestoreDb();
@@ -104,10 +139,16 @@ export const signInWithGooglePopup = async (): Promise<UserProfile> => {
   const auth = getFirebaseAuth();
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  const result = await signInWithPopup(auth, provider);
-  const profile = await createProfileFromFirebaseUser(result.user, 'google');
-  useAuthStore.getState().setUser(profile);
-  return profile;
+
+  if (typeof signInWithPopup === 'function') {
+    const result = await signInWithPopup(auth, provider);
+    const profile = await createProfileFromFirebaseUser(result.user, 'google');
+    useAuthStore.getState().setUser(profile);
+    return profile;
+  }
+
+  // On Native Mobile where browser popups are not supported
+  throw new Error('Google Sign-In popup is designed for Web/Desktop browser. On mobile devices, please use Phone Number (+91) OTP.');
 };
 
 export const signInWithGoogleIdToken = async (idToken: string): Promise<UserProfile> => {

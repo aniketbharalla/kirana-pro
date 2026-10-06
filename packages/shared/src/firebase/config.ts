@@ -57,7 +57,16 @@ export const getFirestoreDb = (app?: FirebaseApp): Firestore => {
   return getFirestore(currentApp);
 };
 
+let customAuthInstance: Auth | null = null;
+
+export const setFirebaseAuth = (auth: Auth): void => {
+  customAuthInstance = auth;
+};
+
 export const getFirebaseAuth = (app?: FirebaseApp): Auth => {
+  if (customAuthInstance) {
+    return customAuthInstance;
+  }
   const currentApp = app || initializeFirebase();
   return getAuth(currentApp);
 };
