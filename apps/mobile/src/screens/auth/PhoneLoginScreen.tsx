@@ -97,23 +97,6 @@ export const PhoneLoginScreen: React.FC = () => {
     }
   };
 
-  const handleDemoLogin = () => {
-    const now = new Date().toISOString();
-    const demoOwner: UserProfile = {
-      uid: 'demo_owner_101',
-      displayName: 'Chacha Ji (Demo)',
-      email: 'chacha@kiranapro.in',
-      phoneNumber: '+919876543210',
-      photoURL: null,
-      authProvider: 'phone',
-      storeId: 'demo_store_1',
-      role: 'owner',
-      createdAt: now,
-      updatedAt: now,
-    };
-    setUser(demoOwner);
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -191,19 +174,7 @@ export const PhoneLoginScreen: React.FC = () => {
             )}
           </TouchableOpacity>
 
-          {/* Quick Demo Bypass for easy testing */}
-          <View style={styles.demoCard}>
-            <Text style={styles.demoTitle}>💡 Instant Testing Bypass</Text>
-            <Text style={styles.demoDesc}>
-              Skip SMS setup and log in directly as store owner:
-            </Text>
-            <TouchableOpacity
-              style={styles.demoButton}
-              onPress={handleDemoLogin}
-            >
-              <Text style={styles.demoButtonText}>⚡ Quick Enter as Demo Store</Text>
-            </TouchableOpacity>
-          </View>
+
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -327,34 +298,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  demoCard: {
-    marginTop: 40,
-    backgroundColor: '#ECFDF5',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  demoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#065F46',
-  },
-  demoDesc: {
-    fontSize: 12,
-    color: '#047857',
-    marginTop: 4,
-    marginBottom: 10,
-  },
-  demoButton: {
-    backgroundColor: '#059669',
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  demoButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 13,
-  },
+
 });

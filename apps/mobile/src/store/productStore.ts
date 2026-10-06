@@ -142,7 +142,7 @@ export interface ProductState {
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
-  products: DEFAULT_STARTER_PRODUCTS,
+  products: [],
   isLoading: false,
   searchQuery: '',
   selectedCategory: null,

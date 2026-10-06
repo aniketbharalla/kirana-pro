@@ -15,38 +15,7 @@ export interface KhataState {
 }
 
 export const useKhataStore = create<KhataState>((set, get) => ({
-  customers: [
-    {
-      id: 'cust_demo_1',
-      storeId: 'demo_store_1',
-      name: 'Ramesh Sharma (Pandit Ji)',
-      phoneNumber: '9876543210',
-      address: 'Near Shiv Mandir, Ward 4',
-      currentBalance: 420,
-      createdAt: '2026-10-01T08:00:00.000Z',
-      updatedAt: '2026-10-05T09:00:00.000Z',
-    },
-    {
-      id: 'cust_demo_2',
-      storeId: 'demo_store_1',
-      name: 'Gupta Ji Chai Wala',
-      phoneNumber: '9123456780',
-      address: 'Main Chowk',
-      currentBalance: 780,
-      createdAt: '2026-10-02T10:00:00.000Z',
-      updatedAt: '2026-10-05T10:30:00.000Z',
-    },
-    {
-      id: 'cust_demo_3',
-      storeId: 'demo_store_1',
-      name: 'Sunil Tailor',
-      phoneNumber: '9988776655',
-      address: 'Shop #12, Market',
-      currentBalance: 150,
-      createdAt: '2026-10-03T11:00:00.000Z',
-      updatedAt: '2026-10-04T12:00:00.000Z',
-    },
-  ],
+  customers: [],
   isLoading: false,
   searchQuery: '',
 

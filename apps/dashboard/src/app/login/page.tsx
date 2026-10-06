@@ -132,10 +132,7 @@ export default function LoginPage() {
     }
   };
 
-  // Demo Login Quick Bypass for Testing
-  const handleDemoBypass = () => {
-    router.push('/');
-  };
+
 
   return (
     <div style={styles.container}>
@@ -276,15 +273,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Demo Mode Bypass for Developer Testing */}
-        <div style={styles.demoCard}>
-          <div style={styles.demoHeader}>
-            <span>💡 Developer Quick Enter</span>
-          </div>
-          <button style={styles.demoBtn} onClick={handleDemoBypass}>
-            ⚡ Enter as Demo Store
-          </button>
-        </div>
+
 
         <p style={styles.footerText}>
           Secure Authentication powered by Firebase Project <code style={styles.codeText}>kirana-pro-edf3a</code>
@@ -492,31 +481,7 @@ const styles: Record<string, React.CSSProperties> = {
   googleIcon: {
     fontSize: '18px',
   },
-  demoCard: {
-    marginTop: '24px',
-    backgroundColor: '#F8FAFC',
-    borderRadius: '12px',
-    border: '1px solid #E2E8F0',
-    padding: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  demoHeader: {
-    fontSize: '12px',
-    fontWeight: 700,
-    color: '#475569',
-  },
-  demoBtn: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
-    borderRadius: '8px',
-    padding: '6px 12px',
-    fontSize: '11px',
-    fontWeight: 800,
-    color: '#0F172A',
-    cursor: 'pointer',
-  },
+
   footerText: {
     fontSize: '11px',
     color: '#94A3B8',
