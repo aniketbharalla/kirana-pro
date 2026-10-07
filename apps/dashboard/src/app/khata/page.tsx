@@ -41,7 +41,7 @@ export default function KhataPage() {
         storeId,
         name: newCust.name.trim(),
         phoneNumber: newCust.phoneNumber.trim(),
-        address: newCust.address.trim() || undefined,
+        address: newCust.address.trim() || '',
         currentBalance: initBal,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

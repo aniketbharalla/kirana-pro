@@ -180,7 +180,7 @@ export default function ProductsPage() {
             if (name) {
               newItems.push({
                 name,
-                nameHindi: nameHindi || undefined,
+                nameHindi: nameHindi || '',
                 barcode: barcode || null,
                 category: (category as any) || 'other',
                 purchasePrice: parseFloat(purchasePrice) || 0,
@@ -259,7 +259,7 @@ export default function ProductsPage() {
         id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
         storeId,
         name: newProd.name.trim(),
-        nameHindi: newProd.nameHindi.trim() || undefined,
+        nameHindi: newProd.nameHindi.trim() || '',
         barcode: newProd.barcode.trim() || null,
         category: newProd.category as any,
         sellingPrice: sp,

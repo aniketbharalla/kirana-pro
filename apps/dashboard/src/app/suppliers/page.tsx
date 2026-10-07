@@ -56,7 +56,7 @@ export default function SuppliersPage() {
         storeId,
         name: newSup.name.trim(),
         phone: newSup.phone.trim(),
-        gstin: newSup.gstin.trim() || undefined,
+        gstin: newSup.gstin.trim() || '',
         type: newSup.type,
         totalPurchases: 0,
         totalPaid: 0,

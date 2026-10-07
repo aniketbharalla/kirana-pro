@@ -17,7 +17,24 @@ import {
   Supplier,
   StaffMember,
   DailyGallaSession,
-} from '@kirana-pro/shared';
+/**
+ * Strips all `undefined` values recursively so Firestore `setDoc` never fails with
+ * "Unsupported field value: undefined"
+ */
+export const sanitizeForFirestore = <T extends Record<string, any>>(obj: T): Record<string, any> => {
+  const result: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined) {
+      continue;
+    }
+    if (value !== null && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+      result[key] = sanitizeForFirestore(value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+};
 
 // ─── Products ─────────────────────────────────────────────────────────────────
 
@@ -53,7 +70,8 @@ export const saveStoreProduct = async (storeId: string, product: Product): Promi
   const id = product.id || `prod_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
   const prodRef = doc(db, 'stores', storeId, 'products', id);
   const now = new Date().toISOString();
-  await setDoc(prodRef, { ...product, id, storeId, updatedAt: now }, { merge: true });
+  const data = sanitizeForFirestore({ ...product, id, storeId, updatedAt: now });
+  await setDoc(prodRef, data, { merge: true });
 };
 
 export const deleteStoreProduct = async (storeId: string, productId: string): Promise<void> => {
@@ -129,7 +147,8 @@ export const saveStoreCustomer = async (
   const db = getDb();
   const id = customer.id || `cust_${Date.now()}`;
   const ref = doc(db, 'stores', storeId, 'customers', id);
-  await setDoc(ref, { ...customer, id, storeId }, { merge: true });
+  const data = sanitizeForFirestore({ ...customer, id, storeId });
+  await setDoc(ref, data, { merge: true });
 };
 
 // ─── Stock Movements ──────────────────────────────────────────────────────────
@@ -201,7 +220,8 @@ export const saveStorePurchase = async (
   const db = getDb();
   const id = purchase.id || `purch_${Date.now()}`;
   const ref = doc(db, 'stores', storeId, 'purchases', id);
-  await setDoc(ref, { ...purchase, id, storeId }, { merge: true });
+  const data = sanitizeForFirestore({ ...purchase, id, storeId });
+  await setDoc(ref, data, { merge: true });
 };
 
 // ─── Suppliers ────────────────────────────────────────────────────────────────
@@ -240,7 +260,8 @@ export const saveStoreSupplier = async (
   const db = getDb();
   const id = supplier.id || `sup_${Date.now()}`;
   const ref = doc(db, 'stores', storeId, 'suppliers', id);
-  await setDoc(ref, { ...supplier, id, storeId }, { merge: true });
+  const data = sanitizeForFirestore({ ...supplier, id, storeId });
+  await setDoc(ref, data, { merge: true });
 };
 
 // ─── Staff ────────────────────────────────────────────────────────────────────
@@ -279,7 +300,8 @@ export const saveStoreStaff = async (
   const db = getDb();
   const id = staff.id || `staff_${Date.now()}`;
   const ref = doc(db, 'stores', storeId, 'staff', id);
-  await setDoc(ref, { ...staff, id, storeId }, { merge: true });
+  const data = sanitizeForFirestore({ ...staff, id, storeId });
+  await setDoc(ref, data, { merge: true });
 };
 
 // ─── Galla Sessions ───────────────────────────────────────────────────────────
@@ -320,5 +342,6 @@ export const saveStoreGalla = async (
   const db = getDb();
   const id = session.id || `galla_${session.date || Date.now()}`;
   const ref = doc(db, 'stores', storeId, 'galla_sessions', id);
-  await setDoc(ref, { ...session, id, storeId }, { merge: true });
+  const data = sanitizeForFirestore({ ...session, id, storeId });
+  await setDoc(ref, data, { merge: true });
 };
