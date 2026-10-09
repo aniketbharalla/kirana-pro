@@ -31,7 +31,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
 
   return (
     <div style={styles.container}>
-      {/* Table Header Filter Bar */}
+      {/* MasterX Filter & Search Toolbar */}
       <div style={styles.filterBar}>
         <div style={styles.searchBox}>
           <span style={styles.searchIcon}>🔍</span>
@@ -76,7 +76,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} style={styles.emptyTd}>
+                <td colSpan={8} style={styles.emptyTd}>
                   No products found matching filters.
                 </td>
               </tr>
@@ -86,13 +86,20 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
                 const isLowStock = !isOutOfStock && item.currentStock <= item.minStockAlert;
 
                 let stockBg = '#ECFDF5';
-                let stockColor = '#065F46';
+                let stockColor = '#047857';
+                let stockBorder = '1px solid rgba(16, 185, 129, 0.2)';
+                let stockLabel = `${item.currentStock} ${item.unit}`;
+
                 if (isOutOfStock) {
                   stockBg = '#FEF2F2';
-                  stockColor = '#DC2626';
+                  stockColor = '#B91C1C';
+                  stockBorder = '1px solid rgba(239, 68, 68, 0.2)';
+                  stockLabel = `0 ${item.unit} (Out of Stock)`;
                 } else if (isLowStock) {
                   stockBg = '#FFFBEB';
                   stockColor = '#B45309';
+                  stockBorder = '1px solid rgba(245, 158, 11, 0.25)';
+                  stockLabel = `${item.currentStock} ${item.unit} (Low Stock)`;
                 }
 
                 return (
@@ -122,20 +129,20 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
                       ₹{item.sellingPrice}
                       <span style={styles.unitText}>/{item.unit}</span>
                     </td>
-                    <td style={styles.td}>₹{item.purchasePrice}</td>
+                    <td style={styles.tdPurchasePrice}>₹{item.purchasePrice}</td>
                     <td style={styles.td}>
                       <span
                         style={{
                           ...styles.stockBadge,
                           backgroundColor: stockBg,
                           color: stockColor,
+                          border: stockBorder,
                         }}
                       >
-                        {item.currentStock} {item.unit}
-                        {isLowStock ? ' (Low)' : ''}
+                        {stockLabel}
                       </span>
                     </td>
-                    <td style={styles.td}>{item.gstRate}%</td>
+                    <td style={styles.tdGst}>{item.gstRate}%</td>
                     {onDeleteProduct && (
                       <td style={styles.td}>
                         <button
@@ -165,14 +172,16 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
 const styles: Record<string, React.CSSProperties> = {
   container: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
-    borderRadius: '20px',
-    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
+    border: '1px solid #E2E8F0',
+    borderRadius: '16px',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
     overflow: 'hidden',
+    fontFamily: 'var(--font-body)',
   },
   filterBar: {
     padding: '16px 20px',
-    borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+    borderBottom: '1px solid #E2E8F0',
+    backgroundColor: '#FFFFFF',
     display: 'flex',
     gap: '12px',
     flexWrap: 'wrap',
@@ -181,9 +190,9 @@ const styles: Record<string, React.CSSProperties> = {
   searchBox: {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: '#FAFAFB',
-    border: '1px solid rgba(0, 0, 0, 0.08)',
-    borderRadius: '11px',
+    backgroundColor: '#F8FAFC',
+    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
     padding: '8px 14px',
     flex: 1,
     minWidth: '240px',
@@ -198,16 +207,17 @@ const styles: Record<string, React.CSSProperties> = {
     outline: 'none',
     width: '100%',
     fontSize: '13px',
-    color: '#1D1D1F',
+    fontWeight: 500,
+    color: '#0F172A',
   },
   select: {
-    backgroundColor: '#FAFAFB',
-    border: '1px solid rgba(0, 0, 0, 0.08)',
-    borderRadius: '11px',
+    backgroundColor: '#F8FAFC',
+    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
     padding: '8px 14px',
     fontSize: '13px',
     fontWeight: 600,
-    color: '#555558',
+    color: '#334155',
     outline: 'none',
     cursor: 'pointer',
   },
@@ -220,25 +230,25 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'left',
   },
   thRow: {
-    backgroundColor: '#FAFAFB',
-    borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#F8FAFC',
+    borderBottom: '1px solid #E2E8F0',
   },
   th: {
     padding: '12px 20px',
     fontSize: '11px',
-    fontWeight: 700,
-    color: '#86868B',
-    letterSpacing: '0.04em',
+    fontWeight: 800,
+    color: '#64748B',
+    letterSpacing: '0.05em',
     textTransform: 'uppercase',
   },
   tr: {
-    borderBottom: '1px solid rgba(0, 0, 0, 0.04)',
-    transition: 'background-color 0.12s',
+    borderBottom: '1px solid #F1F5F9',
+    transition: 'background-color 0.12s ease',
   },
   td: {
     padding: '14px 20px',
     fontSize: '13px',
-    color: '#1D1D1F',
+    color: '#334155',
   },
   tdName: {
     padding: '14px 20px',
@@ -251,56 +261,74 @@ const styles: Record<string, React.CSSProperties> = {
   mainName: {
     fontSize: '14px',
     fontWeight: 700,
-    color: '#1D1D1F',
+    color: '#0F172A',
     letterSpacing: '-0.01em',
   },
   hindiName: {
     fontSize: '12px',
-    color: '#86868B',
+    color: '#64748B',
   },
   looseBadge: {
     display: 'inline-block',
     fontSize: '10px',
     fontWeight: 700,
     color: '#4F46E5',
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-    padding: '2px 7px',
-    borderRadius: '5px',
+    backgroundColor: '#EEF2FF',
+    border: '1px solid rgba(79, 70, 229, 0.2)',
+    padding: '2px 8px',
+    borderRadius: '6px',
     marginTop: '4px',
     width: 'fit-content',
   },
   catBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    backgroundColor: '#F1F5F9',
+    color: '#475569',
+    padding: '4px 9px',
+    borderRadius: '8px',
     fontSize: '12px',
-    color: '#555558',
     fontWeight: 600,
   },
   barcodeText: {
     fontSize: '12px',
-    color: '#86868B',
+    color: '#475569',
     fontFamily: 'monospace',
+    backgroundColor: '#F8FAFC',
+    padding: '2px 6px',
+    borderRadius: '6px',
+    border: '1px solid #E2E8F0',
   },
   mutedText: {
     fontSize: '12px',
-    color: '#A1A1A6',
+    color: '#94A3B8',
   },
   tdPrice: {
     padding: '14px 20px',
     fontSize: '14px',
-    fontWeight: 700,
-    color: '#1D1D1F',
+    fontWeight: 800,
+    color: '#0F172A',
     fontVariantNumeric: 'tabular-nums',
+  },
+  tdPurchasePrice: {
+    padding: '14px 20px',
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#64748B',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  tdGst: {
+    padding: '14px 20px',
+    fontSize: '13px',
+    fontWeight: 700,
+    color: '#4F46E5',
   },
   unitText: {
     fontSize: '12px',
     fontWeight: 500,
-    color: '#86868B',
+    color: '#64748B',
   },
   stockBadge: {
-    padding: '3px 9px',
-    borderRadius: '6px',
+    padding: '4px 10px',
+    borderRadius: '999px',
     fontSize: '12px',
     fontWeight: 700,
     display: 'inline-block',
@@ -309,15 +337,16 @@ const styles: Record<string, React.CSSProperties> = {
   emptyTd: {
     padding: '44px 20px',
     textAlign: 'center',
-    color: '#86868B',
+    color: '#64748B',
     fontSize: '13px',
   },
   deleteBtn: {
-    background: 'none',
-    border: 'none',
+    background: '#FEF2F2',
+    border: '1px solid #FECACA',
     cursor: 'pointer',
-    fontSize: '15px',
-    padding: '6px',
-    borderRadius: '6px',
+    fontSize: '14px',
+    padding: '6px 10px',
+    borderRadius: '8px',
+    transition: 'all 0.12s ease',
   },
 };
