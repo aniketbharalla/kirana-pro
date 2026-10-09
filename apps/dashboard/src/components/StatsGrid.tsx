@@ -17,44 +17,52 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
 }) => {
   const cards = [
     {
-      caption: 'INVENTORY CATALOG',
+      caption: 'CATALOG HEALTH',
       title: 'Active Products',
       value: totalProducts,
-      sub: 'Items registered in store',
+      sub: 'Total SKUs in store catalog',
+      statusPill: '● Live Inventory',
+      pillColor: '#047857',
+      pillBg: '#ECFDF5',
       icon: '📦',
-      color: '#059669',
-      tintBg: 'rgba(16, 185, 129, 0.1)',
-      borderTint: 'rgba(16, 185, 129, 0.2)',
+      tintBg: '#EEF2FF',
+      iconColor: '#4F46E5',
     },
     {
-      caption: 'INVENTORY ALERT',
-      title: 'Low Stock Items',
+      caption: 'REORDER THRESHOLD',
+      title: 'Low Stock Alerts',
       value: lowStockCount,
-      sub: 'Below reorder threshold',
-      icon: '⚠️',
-      color: '#D97706',
-      tintBg: 'rgba(245, 158, 11, 0.1)',
-      borderTint: 'rgba(245, 158, 11, 0.25)',
+      sub: 'Items below minimum buffer',
+      statusPill: lowStockCount > 0 ? '⚠️ Action Required' : '✓ Stock Healthy',
+      pillColor: lowStockCount > 0 ? '#B45309' : '#047857',
+      pillBg: lowStockCount > 0 ? '#FFFBEB' : '#ECFDF5',
+      icon: '🔔',
+      tintBg: '#FFFBEB',
+      iconColor: '#D97706',
     },
     {
-      caption: 'URGENT RESTOCK',
+      caption: 'CRITICAL INVENTORY',
       title: 'Out of Stock',
       value: outOfStockCount,
-      sub: 'Zero count in store',
-      icon: '❌',
-      color: '#DC2626',
-      tintBg: 'rgba(239, 68, 68, 0.1)',
-      borderTint: 'rgba(239, 68, 68, 0.25)',
+      sub: 'Zero count on retail shelf',
+      statusPill: outOfStockCount > 0 ? '❌ Urgent Restock' : '✓ Zero Depletion',
+      pillColor: outOfStockCount > 0 ? '#B91C1C' : '#047857',
+      pillBg: outOfStockCount > 0 ? '#FEF2F2' : '#ECFDF5',
+      icon: '🚨',
+      tintBg: '#FEF2F2',
+      iconColor: '#EF4444',
     },
     {
-      caption: 'SMART SCALE',
-      title: 'Loose / Taraju',
+      caption: 'SMART HARDWARE',
+      title: 'Taraju Scale Items',
       value: looseCount,
-      sub: 'Sold by weight (kg/g)',
+      sub: 'Sold by weight (kg/g/litres)',
+      statusPill: '⚖️ Weight Scale',
+      pillColor: '#4338CA',
+      pillBg: '#EEF2FF',
       icon: '⚖️',
-      color: '#4F46E5',
-      tintBg: 'rgba(99, 102, 241, 0.1)',
-      borderTint: 'rgba(99, 102, 241, 0.2)',
+      tintBg: '#ECFDF5',
+      iconColor: '#10B981',
     },
   ];
 
@@ -63,24 +71,24 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
       {cards.map((card, i) => (
         <div key={i} style={styles.card}>
           <div style={styles.topRow}>
-            <div
-              style={{
-                ...styles.iconBox,
-                backgroundColor: card.tintBg,
-                border: `1px solid ${card.borderTint}`,
-              }}
-            >
+            <div style={{ ...styles.iconBox, backgroundColor: card.tintBg }}>
               <span style={styles.icon}>{card.icon}</span>
             </div>
             <span
               style={{
-                ...styles.value,
-                color: card.color,
+                ...styles.statusBadge,
+                color: card.pillColor,
+                backgroundColor: card.pillBg,
               }}
             >
-              {card.value}
+              {card.statusPill}
             </span>
           </div>
+
+          <div style={styles.valueRow}>
+            <span style={styles.value}>{card.value}</span>
+          </div>
+
           <div style={styles.caption}>{card.caption}</div>
           <div style={styles.title}>{card.title}</div>
           <div style={styles.sub}>{card.sub}</div>
@@ -93,60 +101,74 @@ export const StatsGrid: React.FC<StatsGridProps> = ({
 const styles: Record<string, React.CSSProperties> = {
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: '16px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '18px',
     marginBottom: '28px',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
-    borderRadius: '18px',
+    border: '1px solid #E2E8F0',
+    borderRadius: '16px',
     padding: '20px',
-    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
     display: 'flex',
     flexDirection: 'column',
-    transition: 'transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease',
+    transition: 'all 0.15s ease',
   },
   topRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '14px',
+    marginBottom: '16px',
   },
   iconBox: {
     width: '40px',
     height: '40px',
-    borderRadius: '11px',
+    borderRadius: '12px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
   icon: {
-    fontSize: '18px',
+    fontSize: '20px',
+  },
+  statusBadge: {
+    fontSize: '11px',
+    fontWeight: 700,
+    padding: '3px 9px',
+    borderRadius: '999px',
+    letterSpacing: '-0.01em',
+  },
+  valueRow: {
+    marginBottom: '6px',
   },
   value: {
-    fontSize: '30px',
+    fontSize: '32px',
     fontWeight: 800,
+    color: '#0F172A',
+    fontFamily: 'var(--font-display)',
     letterSpacing: '-0.03em',
-    fontVariantNumeric: 'tabular-nums',
+    lineHeight: 1.1,
   },
   caption: {
     fontSize: '10px',
-    fontWeight: 700,
-    letterSpacing: '0.05em',
-    color: '#86868B',
+    fontWeight: 800,
+    letterSpacing: '0.06em',
+    color: '#94A3B8',
+    textTransform: 'uppercase',
+    marginTop: '6px',
     marginBottom: '2px',
   },
   title: {
     fontSize: '15px',
     fontWeight: 700,
-    color: '#1D1D1F',
+    color: '#0F172A',
     letterSpacing: '-0.015em',
     marginBottom: '4px',
   },
   sub: {
     fontSize: '12px',
-    color: '#86868B',
+    color: '#64748B',
     lineHeight: 1.35,
   },
 };

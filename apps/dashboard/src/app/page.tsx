@@ -52,7 +52,7 @@ export default function DashboardOverviewPage() {
 
   return (
     <div style={styles.container}>
-      {/* Apple-Style Hero Command Banner */}
+      {/* MasterX Command Center Hero Card */}
       <div style={styles.banner}>
         <div style={styles.bannerContent}>
           <div style={styles.pill}>✨ STORE COMMAND CENTER</div>
@@ -66,26 +66,19 @@ export default function DashboardOverviewPage() {
         </div>
 
         <div style={styles.bannerActions}>
-          <Link
-            href="/pos"
-            style={{
-              ...styles.primaryBtn,
-              backgroundColor: '#10B981',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-            }}
-          >
+          <Link href="/pos" style={styles.posPrimaryBtn}>
             ⚡ POS Quick Billing (F4)
           </Link>
-          <Link href="/products" style={styles.primaryBtn}>
+          <Link href="/products" style={styles.darkActionBtn}>
             ➕ Add Product
           </Link>
-          <Link href="/purchases/new" style={styles.accentBtn}>
+          <Link href="/purchases/new" style={styles.indigoActionBtn}>
             ⚡ Inward via OCR
           </Link>
-          <Link href="/bills" style={styles.secondaryBtn}>
+          <Link href="/bills" style={styles.outlineActionBtn}>
             🧾 Sales Invoices
           </Link>
-          <Link href="/khata" style={styles.secondaryBtn}>
+          <Link href="/khata" style={styles.outlineActionBtn}>
             📒 Khata Ledger
           </Link>
         </div>
@@ -114,7 +107,7 @@ export default function DashboardOverviewPage() {
             barcodes, and print customer bills.
           </p>
           <div style={styles.emptyActions}>
-            <Link href="/products" style={styles.addBtn}>
+            <Link href="/products" style={styles.posPrimaryBtn}>
               ➕ Add First Product
             </Link>
           </div>
@@ -166,38 +159,38 @@ export default function DashboardOverviewPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    maxWidth: '1280px',
+    maxWidth: '1360px',
     margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '6px',
+    fontFamily: 'var(--font-body)',
   },
   banner: {
-    backgroundColor: '#1D1D1F',
-    color: '#FFFFFF',
-    borderRadius: '20px',
-    padding: '32px 28px',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #E2E8F0',
+    borderRadius: '18px',
+    padding: '28px 28px',
     marginBottom: '24px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '20px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.15)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   bannerContent: {
-    maxWidth: '640px',
+    maxWidth: '680px',
   },
   pill: {
     display: 'inline-block',
     fontSize: '10px',
     fontWeight: 800,
-    letterSpacing: '0.05em',
-    color: '#34D399',
-    backgroundColor: 'rgba(52, 211, 153, 0.12)',
-    border: '1px solid rgba(52, 211, 153, 0.25)',
-    padding: '3px 9px',
+    letterSpacing: '0.06em',
+    color: '#4F46E5',
+    backgroundColor: '#EEF2FF',
+    border: '1px solid rgba(79, 70, 229, 0.2)',
+    padding: '3px 10px',
     borderRadius: '999px',
     marginBottom: '10px',
     textTransform: 'uppercase',
@@ -205,50 +198,63 @@ const styles: Record<string, React.CSSProperties> = {
   bannerTitle: {
     fontSize: '26px',
     fontWeight: 800,
+    color: '#0F172A',
+    fontFamily: 'var(--font-display)',
     margin: '0 0 8px 0',
     letterSpacing: '-0.03em',
-    lineHeight: 1.15,
+    lineHeight: 1.2,
   },
   bannerSub: {
     fontSize: '13px',
-    color: '#A1A1A6',
+    color: '#475569',
     margin: 0,
-    lineHeight: 1.5,
+    lineHeight: 1.55,
   },
   bannerActions: {
     display: 'flex',
     gap: '10px',
     flexWrap: 'wrap',
   },
-  primaryBtn: {
+  posPrimaryBtn: {
     backgroundColor: '#10B981',
     color: '#FFFFFF',
     padding: '10px 18px',
-    borderRadius: '11px',
+    borderRadius: '12px',
     fontSize: '13px',
     fontWeight: 700,
     textDecoration: 'none',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
   },
-  accentBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    color: '#1D1D1F',
-    padding: '10px 18px',
-    borderRadius: '11px',
-    fontSize: '13px',
-    fontWeight: 700,
-    textDecoration: 'none',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-  },
-  secondaryBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  darkActionBtn: {
+    backgroundColor: '#18181B',
     color: '#FFFFFF',
+    padding: '10px 18px',
+    borderRadius: '12px',
+    fontSize: '13px',
+    fontWeight: 700,
+    textDecoration: 'none',
+    boxShadow: '0 2px 8px rgba(24, 24, 27, 0.2)',
+  },
+  indigoActionBtn: {
+    backgroundColor: '#4F46E5',
+    color: '#FFFFFF',
+    padding: '10px 18px',
+    borderRadius: '12px',
+    fontSize: '13px',
+    fontWeight: 700,
+    textDecoration: 'none',
+    boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)',
+  },
+  outlineActionBtn: {
+    backgroundColor: '#FFFFFF',
+    color: '#334155',
     padding: '10px 16px',
-    borderRadius: '11px',
+    borderRadius: '12px',
     fontSize: '13px',
     fontWeight: 600,
     textDecoration: 'none',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
+    border: '1px solid #CBD5E1',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
   },
   loadingBox: {
     padding: '60px',
@@ -258,8 +264,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: '12px',
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '18px',
+    border: '1px solid #E2E8F0',
   },
   spinner: {
     width: '32px',
@@ -267,25 +273,25 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '50%',
     borderWidth: '3px',
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderTopColor: '#10B981',
+    borderColor: '#E2E8F0',
+    borderTopColor: '#4F46E5',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '13px',
     fontWeight: 600,
-    color: '#86868B',
+    color: '#64748B',
   },
   emptyCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
+    borderRadius: '18px',
     padding: '48px 32px',
     textAlign: 'center',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
+    border: '1px solid #E2E8F0',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   emptyIcon: {
     fontSize: '44px',
@@ -294,13 +300,14 @@ const styles: Record<string, React.CSSProperties> = {
   emptyTitle: {
     fontSize: '18px',
     fontWeight: 800,
-    color: '#1D1D1F',
+    color: '#0F172A',
+    fontFamily: 'var(--font-display)',
     marginBottom: '6px',
     letterSpacing: '-0.02em',
   },
   emptyDesc: {
     fontSize: '13px',
-    color: '#86868B',
+    color: '#64748B',
     maxWidth: '460px',
     lineHeight: 1.5,
     marginBottom: '20px',
@@ -309,15 +316,6 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     gap: '12px',
   },
-  addBtn: {
-    backgroundColor: '#10B981',
-    color: '#FFFFFF',
-    padding: '10px 22px',
-    borderRadius: '11px',
-    fontSize: '13px',
-    fontWeight: 700,
-    textDecoration: 'none',
-  },
   contentGrid: {
     display: 'flex',
     flexDirection: 'column',
@@ -325,10 +323,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '18px',
+    border: '1px solid #E2E8F0',
     padding: '24px',
-    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   sectionHeader: {
     display: 'flex',
@@ -338,29 +336,30 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionCaption: {
     fontSize: '10px',
-    fontWeight: 700,
-    letterSpacing: '0.05em',
-    color: '#86868B',
+    fontWeight: 800,
+    letterSpacing: '0.06em',
+    color: '#94A3B8',
     textTransform: 'uppercase',
   },
   sectionTitle: {
     fontSize: '17px',
     fontWeight: 800,
-    color: '#1D1D1F',
+    color: '#0F172A',
+    fontFamily: 'var(--font-display)',
     margin: '2px 0',
     letterSpacing: '-0.02em',
   },
   sectionSub: {
     fontSize: '12px',
-    color: '#86868B',
+    color: '#64748B',
     margin: 0,
   },
   linkMore: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#059669',
+    color: '#4F46E5',
     textDecoration: 'none',
-    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    backgroundColor: '#EEF2FF',
     padding: '6px 12px',
     borderRadius: '8px',
   },
