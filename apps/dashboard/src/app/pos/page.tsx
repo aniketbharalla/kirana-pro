@@ -1208,9 +1208,9 @@ const styles: Record<string, React.CSSProperties> = {
   historyLink: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#0071E3',
+    color: '#4F46E5',
     textDecoration: 'none',
-    backgroundColor: 'rgba(0, 113, 227, 0.08)',
+    backgroundColor: '#EEF2FF',
     padding: '4px 10px',
     borderRadius: '8px',
   },
@@ -1225,12 +1225,12 @@ const styles: Record<string, React.CSSProperties> = {
   // Left Catalog Panel
   catalogPanel: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.03)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   searchHeader: {
     padding: '14px 16px 10px',
@@ -1244,7 +1244,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '8px',
     backgroundColor: '#F8FAFC',
-    border: '2px solid #0071E3',
+    border: '2px solid #4F46E5',
     borderRadius: '12px',
     padding: '4px 12px',
   },
@@ -1261,7 +1261,7 @@ const styles: Record<string, React.CSSProperties> = {
     outline: 'none',
   },
   scanSubmitBtn: {
-    backgroundColor: '#0071E3',
+    backgroundColor: '#4F46E5',
     color: '#FFFFFF',
     border: 'none',
     padding: '6px 14px',
@@ -1443,12 +1443,12 @@ const styles: Record<string, React.CSSProperties> = {
   // Right Cart Panel
   cartPanel: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '16px',
+    border: '1px solid #E2E8F0',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.03)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   customerBar: {
     padding: '12px 16px',
@@ -1493,7 +1493,7 @@ const styles: Record<string, React.CSSProperties> = {
   customerDropdownCard: {
     padding: '12px',
     backgroundColor: '#FFFFFF',
-    borderBottom: '2px solid #0071E3',
+    borderBottom: '2px solid #4F46E5',
     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
   },
   custSearchInput: {
@@ -1742,7 +1742,7 @@ const styles: Record<string, React.CSSProperties> = {
   modalSub: {
     fontSize: '10px',
     fontWeight: 800,
-    color: '#0071E3',
+    color: '#4F46E5',
     letterSpacing: '0.05em',
   },
   modalTitle: {
@@ -1785,7 +1785,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   checkoutCustomerName: {
     fontSize: '12px',
-    color: '#0071E3',
+    color: '#4F46E5',
     fontWeight: 700,
   },
 
@@ -2140,7 +2140,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   recoverBtn: {
-    backgroundColor: '#0071E3',
+    backgroundColor: '#4F46E5',
     color: '#FFFFFF',
     border: 'none',
     padding: '10px 16px',
@@ -2168,7 +2168,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '32px',
     height: '32px',
     border: '3px solid rgba(0, 0, 0, 0.1)',
-    borderTopColor: '#0071E3',
+    borderTopColor: '#4F46E5',
     borderRadius: '50%',
     margin: '0 auto 10px',
     animation: 'spin 0.8s linear infinite',
