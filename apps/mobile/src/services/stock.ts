@@ -136,3 +136,5 @@ export const fetchStockMovements = async (
     return [];
   }
 };
+
+export const fetchStockHistory = fetchStockMovements;

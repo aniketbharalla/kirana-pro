@@ -120,8 +120,8 @@ export default function HardwarePage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.hardwareBadge}>🖨️ COUNTER PERIPHERALS</span>
-            <span style={styles.statusBadge}>🟢 POS Hardware Ready</span>
+            <span style={styles.hardwareBadge}>COUNTER PERIPHERALS</span>
+            <span style={styles.statusBadge}>✓ POS Hardware Active</span>
           </div>
           <h1 style={styles.title}>Hardware & Thermal Printer Hub</h1>
           <p style={styles.subtitle}>
@@ -154,7 +154,7 @@ export default function HardwarePage() {
 
           {/* Paper Roll Width */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>PAPER ROLL WIDTH (कागज़ की चौड़ाई)</label>
+            <label style={styles.label}>PAPER ROLL WIDTH</label>
             <div style={styles.toggleRow}>
               {(['58mm', '80mm'] as PrinterWidth[]).map((w) => (
                 <button
@@ -165,9 +165,9 @@ export default function HardwarePage() {
                   }}
                   onClick={() => setWidth(w)}
                 >
-                  <span style={{ fontWeight: 800 }}>{w} Roll</span>
-                  <span style={{ fontSize: '11px', opacity: 0.85 }}>
-                    {w === '58mm' ? '32 Columns • Compact standard' : '48 Columns • Wide receipt'}
+                  <span style={{ fontWeight: 700, fontSize: '14px' }}>{w} Roll</span>
+                  <span style={{ fontSize: '12px', color: width === w ? 'rgba(255,255,255,0.85)' : '#86868B' }}>
+                    {w === '58mm' ? '32 Columns • Standard' : '48 Columns • Wide'}
                   </span>
                 </button>
               ))}
@@ -176,7 +176,7 @@ export default function HardwarePage() {
 
           {/* Connection Type */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>CONNECTION TRANSPORT (कनेक्शन प्रकार)</label>
+            <label style={styles.label}>CONNECTION TRANSPORT</label>
             <div style={styles.toggleRow}>
               {(['system', 'bluetooth', 'usb'] as PrinterConnectionType[]).map((c) => (
                 <button
@@ -187,11 +187,11 @@ export default function HardwarePage() {
                   }}
                   onClick={() => setConnection(c)}
                 >
-                  <span style={{ fontWeight: 800, textTransform: 'capitalize' }}>
-                    {c === 'system' ? '💻 System Print' : c === 'bluetooth' ? '📶 Bluetooth' : '🔌 USB'}
+                  <span style={{ fontWeight: 700, fontSize: '13px', textTransform: 'capitalize' }}>
+                    {c === 'system' ? '💻 System' : c === 'bluetooth' ? '📶 Bluetooth' : '🔌 USB'}
                   </span>
-                  <span style={{ fontSize: '11px', opacity: 0.85 }}>
-                    {c === 'system' ? 'Universal Driver' : c === 'bluetooth' ? 'Web BLE 4.0' : 'WebUSB Direct'}
+                  <span style={{ fontSize: '11px', color: connection === c ? 'rgba(255,255,255,0.85)' : '#86868B' }}>
+                    {c === 'system' ? 'Universal' : c === 'bluetooth' ? 'Web BLE 4.0' : 'WebUSB'}
                   </span>
                 </button>
               ))}
@@ -241,23 +241,26 @@ export default function HardwarePage() {
           <div style={styles.scaleInfoBox}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '20px' }}>⚖️</span>
-              <span style={{ fontWeight: 800, fontSize: '14px', color: '#0F172A' }}>
+              <span style={{ fontWeight: 700, fontSize: '14px', color: '#1D1D1F' }}>
                 Electronic Weighing Scale (तराजू)
               </span>
             </div>
-            <p style={{ margin: 0, fontSize: '12px', color: '#64748B', lineHeight: 1.5 }}>
+            <p style={{ margin: 0, fontSize: '12px', color: '#86868B', lineHeight: 1.5 }}>
               Continuous ASCII serial stream receiver supports Essae-Teraoka, Phoenix, Eagle, and Avery Berkel at 9600 baud, 8-N-1. Live weight flows automatically into the Taraju calculator.
             </p>
           </div>
         </div>
 
-        {/* Right: Monospaced Receipt Preview */}
+        {/* Right: Live Plain Text Preview */}
         <div style={styles.previewCard}>
           <div style={styles.previewHeader}>
-            <h2 style={styles.cardTitle}>Live Monospace Paper Preview</h2>
-            <span style={styles.previewMeta}>
-              {width === '58mm' ? '32 Columns (58mm)' : '48 Columns (80mm)'}
-            </span>
+            <div>
+              <h2 style={styles.cardTitle}>Thermal Paper Preview</h2>
+              <span style={styles.previewMeta}>
+                ESC/POS Roll Simulation ({width})
+              </span>
+            </div>
+            <span style={styles.previewBadge}>Live Rendering</span>
           </div>
 
           <div style={styles.receiptPaper}>
@@ -271,9 +274,12 @@ export default function HardwarePage() {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
+    maxWidth: '1400px',
+    margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
+    paddingBottom: '48px',
   },
   header: {
     display: 'flex',
@@ -286,37 +292,38 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '6px',
+    marginBottom: '8px',
   },
   hardwareBadge: {
     fontSize: '11px',
-    fontWeight: 800,
-    color: '#065F46',
-    backgroundColor: '#ECFDF5',
-    padding: '3px 8px',
-    borderRadius: '6px',
-    letterSpacing: '0.5px',
+    fontWeight: 700,
+    color: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
+    letterSpacing: '0.04em',
   },
   statusBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#15803D',
-    backgroundColor: '#DCFCE7',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    color: '#059669',
+    backgroundColor: 'rgba(5, 150, 105, 0.12)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
   },
   title: {
-    fontSize: '26px',
+    fontSize: '28px',
     fontWeight: 800,
-    color: '#0F172A',
-    letterSpacing: '-0.5px',
+    color: '#1D1D1F',
+    letterSpacing: '-0.03em',
     margin: 0,
   },
   subtitle: {
     fontSize: '14px',
-    color: '#64748B',
-    marginTop: '4px',
+    color: '#86868B',
+    marginTop: '6px',
     margin: 0,
+    letterSpacing: '-0.01em',
   },
   actionsRow: {
     display: 'flex',
@@ -325,33 +332,41 @@ const styles: Record<string, React.CSSProperties> = {
   },
   btnSecondary: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
-    borderRadius: '10px',
-    padding: '10px 16px',
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#334155',
-    cursor: 'pointer',
-  },
-  btnPrimary: {
-    backgroundColor: '#10B981',
-    border: 'none',
-    borderRadius: '10px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderRadius: '9999px',
     padding: '10px 18px',
     fontSize: '13px',
-    fontWeight: 800,
-    color: '#FFFFFF',
+    fontWeight: 600,
+    color: '#1D1D1F',
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+    transition: 'all 0.15s ease',
   },
-  alertBox: {
-    backgroundColor: '#ECFDF5',
-    color: '#065F46',
-    border: '1px solid #A7F3D0',
-    borderRadius: '10px',
-    padding: '12px 16px',
+  btnPrimary: {
+    backgroundColor: '#1D1D1F',
+    borderWidth: 0,
+    borderStyle: 'none',
+    borderRadius: '9999px',
+    padding: '11px 20px',
     fontSize: '13px',
     fontWeight: 700,
+    color: '#FFFFFF',
+    cursor: 'pointer',
+    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
+    transition: 'all 0.15s ease',
+  },
+  alertBox: {
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    color: '#065F46',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+    borderRadius: '14px',
+    padding: '12px 18px',
+    fontSize: '13px',
+    fontWeight: 600,
   },
   twoCol: {
     display: 'grid',
@@ -360,18 +375,22 @@ const styles: Record<string, React.CSSProperties> = {
   },
   configCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
     padding: '24px',
     display: 'flex',
     flexDirection: 'column',
     gap: '20px',
+    boxShadow: '0 2px 14px rgba(0, 0, 0, 0.02)',
   },
   cardTitle: {
-    fontSize: '16px',
-    fontWeight: 800,
-    color: '#0F172A',
+    fontSize: '17px',
+    fontWeight: 700,
+    color: '#1D1D1F',
     margin: 0,
+    letterSpacing: '-0.02em',
   },
   formGroup: {
     display: 'flex',
@@ -380,9 +399,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   label: {
     fontSize: '11px',
-    fontWeight: 800,
-    color: '#64748B',
-    letterSpacing: '0.5px',
+    fontWeight: 700,
+    color: '#86868B',
+    letterSpacing: '0.04em',
   },
   toggleRow: {
     display: 'flex',
@@ -390,46 +409,54 @@ const styles: Record<string, React.CSSProperties> = {
   },
   toggleBtn: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    border: '1.5px solid #CBD5E1',
-    borderRadius: '10px',
-    padding: '12px',
+    backgroundColor: '#FBFBFC',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderRadius: '14px',
+    padding: '14px',
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
     cursor: 'pointer',
     textAlign: 'left',
-    color: '#334155',
+    color: '#1D1D1F',
+    transition: 'all 0.15s ease',
   },
   toggleBtnActive: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
-    color: '#065F46',
+    backgroundColor: '#1D1D1F',
+    borderColor: '#1D1D1F',
+    color: '#FFFFFF',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
   },
   input: {
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #CBD5E1',
-    borderRadius: '10px',
-    padding: '10px 14px',
-    fontSize: '13px',
-    color: '#0F172A',
+    backgroundColor: '#FBFBFC',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderRadius: '12px',
+    padding: '12px 16px',
+    fontSize: '14px',
+    color: '#1D1D1F',
     outline: 'none',
   },
   switchRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: '12px',
-    borderTop: '1px solid #F1F5F9',
+    paddingTop: '16px',
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: 'rgba(0, 0, 0, 0.06)',
   },
   switchTitle: {
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#1E293B',
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#1D1D1F',
   },
   switchSub: {
     fontSize: '12px',
-    color: '#64748B',
+    color: '#86868B',
     margin: 0,
     marginTop: '2px',
   },
@@ -440,22 +467,24 @@ const styles: Record<string, React.CSSProperties> = {
     accentColor: '#10B981',
   },
   scaleInfoBox: {
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #E2E8F0',
-    borderRadius: '12px',
-    padding: '16px',
+    backgroundColor: 'rgba(118, 118, 128, 0.06)',
+    borderRadius: '16px',
+    padding: '18px',
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
   },
   previewCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
     padding: '24px',
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
+    boxShadow: '0 2px 14px rgba(0, 0, 0, 0.02)',
   },
   previewHeader: {
     display: 'flex',
@@ -463,22 +492,34 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
   },
   previewMeta: {
-    fontSize: '12px',
+    fontSize: '13px',
+    color: '#86868B',
+    marginTop: '2px',
+    display: 'block',
+  },
+  previewBadge: {
+    fontSize: '11px',
     fontWeight: 700,
-    color: '#64748B',
+    color: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
   },
   receiptPaper: {
-    backgroundColor: '#FAFAF9',
-    borderRadius: '12px',
-    border: '1px dashed #D6D3D1',
-    padding: '20px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#FDFCF7',
+    borderRadius: '16px',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(0, 0, 0, 0.12)',
+    padding: '22px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.04)',
+    overflowX: 'auto',
   },
   receiptText: {
     margin: 0,
-    fontFamily: '"Courier New", Courier, monospace',
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
     fontSize: '12px',
-    lineHeight: 1.45,
+    lineHeight: 1.5,
     color: '#1C1917',
     whiteSpace: 'pre-wrap',
   },

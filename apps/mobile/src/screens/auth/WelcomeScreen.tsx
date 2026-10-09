@@ -70,12 +70,13 @@ export const WelcomeScreen: React.FC = () => {
 
         {/* Action Buttons */}
         <View style={styles.actionSection}>
+          {/* Owner Login Buttons */}
           <TouchableOpacity
             style={styles.primaryButton}
             activeOpacity={0.88}
             onPress={() => navigation.navigate('PhoneLogin')}
           >
-            <Text style={styles.primaryButtonText}>📱 Continue with Mobile Number</Text>
+            <Text style={styles.primaryButtonText}>👑 Store Owner Login (Mobile)</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -89,6 +90,23 @@ export const WelcomeScreen: React.FC = () => {
             ) : (
               <Text style={styles.googleButtonText}>🌐 Continue with Google</Text>
             )}
+          </TouchableOpacity>
+
+          {/* Persona Separator */}
+          <View style={styles.orDividerContainer}>
+            <View style={styles.orDividerLine} />
+            <Text style={styles.orDividerText}>OR CASHIER COUNTER</Text>
+            <View style={styles.orDividerLine} />
+          </View>
+
+          {/* Cashier / Staff Login Button */}
+          <TouchableOpacity
+            style={styles.staffButton}
+            activeOpacity={0.88}
+            onPress={() => navigation.navigate('StaffLogin')}
+          >
+            <Text style={styles.staffButtonText}>🧑‍💼 Staff Counter Login (Phone + PIN)</Text>
+            <Text style={styles.staffButtonSub}>Open counter shift register & galla</Text>
           </TouchableOpacity>
 
           <Text style={styles.disclaimerText}>
@@ -224,6 +242,43 @@ const styles = StyleSheet.create({
     color: '#1E293B',
     fontSize: 15,
     fontWeight: '600',
+  },
+  orDividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 4,
+    gap: 8,
+  },
+  orDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E2E8F0',
+  },
+  orDividerText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#94A3B8',
+    letterSpacing: 0.8,
+  },
+  staffButton: {
+    backgroundColor: '#ECFDF5',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
+  },
+  staffButtonText: {
+    color: '#065F46',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  staffButtonSub: {
+    color: '#059669',
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
   },
   disclaimerText: {
     fontSize: 11,

@@ -66,14 +66,14 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F2F2F7" />
 
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>⚡ POS Billing</Text>
+          <Text style={styles.headerTitle}>POS Checkout</Text>
           <Text style={styles.headerSub}>
-            {user?.displayName || 'My Store'} • {items.length} items in cart
+            {user?.displayName || 'Counter 1'} • {items.length} items in cart
           </Text>
         </View>
 
@@ -108,8 +108,8 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search product name, barcode, or Hindi..."
-          placeholderTextColor="#94A3B8"
+          placeholder="Search products, barcodes, Hindi..."
+          placeholderTextColor="#8E8E93"
           value={searchQuery}
           onChangeText={handleSearch}
         />
@@ -199,7 +199,7 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F2F2F7',
   },
   header: {
     flexDirection: 'row',
@@ -207,17 +207,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 8,
+    paddingBottom: 10,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#1C1C1E',
+    letterSpacing: -0.5,
   },
   headerSub: {
-    fontSize: 12,
-    color: '#64748B',
+    fontSize: 13,
+    color: '#8E8E93',
     marginTop: 2,
+    letterSpacing: -0.1,
   },
   headerActions: {
     flexDirection: 'row',
@@ -225,25 +227,23 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   clearBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(255, 59, 48, 0.12)',
   },
   clearText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#EF4444',
+    color: '#FF3B30',
   },
   scanBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 9999,
   },
   scanIcon: {
     fontSize: 14,
@@ -252,91 +252,98 @@ const styles = StyleSheet.create({
   scanText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#065F46',
+    color: '#059669',
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
-    marginTop: 6,
+    marginTop: 4,
     borderRadius: 14,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 10,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderWidth: 0.5,
+    borderColor: 'rgba(60, 60, 67, 0.12)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   searchIcon: {
-    fontSize: 15,
+    fontSize: 14,
     marginRight: 8,
+    opacity: 0.6,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '500',
-    color: '#0F172A',
+    color: '#1C1C1E',
   },
   clearIcon: {
     fontSize: 14,
-    color: '#94A3B8',
+    color: '#8E8E93',
     padding: 4,
   },
   searchResultsContainer: {
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
-    marginTop: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    marginTop: 6,
+    borderRadius: 16,
+    borderWidth: 0.5,
+    borderColor: 'rgba(60, 60, 67, 0.12)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowRadius: 14,
     elevation: 4,
-    maxHeight: 220,
+    maxHeight: 240,
     zIndex: 10,
+    overflow: 'hidden',
   },
   searchResultRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(60, 60, 67, 0.08)',
   },
   searchResultLeft: {
     flex: 1,
   },
   searchResultName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1C1C1E',
   },
   searchResultHindi: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 1,
+    fontSize: 12,
+    color: '#8E8E93',
+    marginTop: 2,
   },
   searchResultRight: {
     alignItems: 'flex-end',
   },
   searchResultPrice: {
-    fontSize: 14,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#10B981',
   },
   searchResultAdd: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#2563EB',
+    color: '#007AFF',
     marginTop: 2,
   },
   scrollArea: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 90,
+    paddingBottom: 100,
   },
   bottomBar: {
     position: 'absolute',
@@ -344,17 +351,17 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(60, 60, 67, 0.12)',
     paddingHorizontal: 20,
     paddingVertical: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
     elevation: 8,
   },
   totalsColumn: {
@@ -362,28 +369,30 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#8E8E93',
     fontWeight: '500',
   },
   totalValue: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#1C1C1E',
+    letterSpacing: -0.3,
   },
   payButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#1D1D1F',
     paddingHorizontal: 24,
     paddingVertical: 14,
-    borderRadius: 14,
-    shadowColor: '#10B981',
+    borderRadius: 9999,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 4,
   },
   payButtonText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '700',
+    letterSpacing: -0.2,
   },
 });

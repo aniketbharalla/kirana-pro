@@ -30,12 +30,12 @@ export default function GallaPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.badge}>💰 CASH RECONCILIATION</span>
+            <span style={styles.badge}>CASH RECONCILIATION</span>
             <span style={styles.countBadge}>{sessions.length} Audited Days</span>
           </div>
-          <h1 style={styles.title}>Daily Galla & Drawer Reconciliation</h1>
+          <h1 style={styles.title}>Daily Galla & Drawer Audit</h1>
           <p style={styles.subtitle}>
-            Audit morning opening cash, sales cash flow, and night closing drawer differences.
+            Audit morning opening cash, continuous sales cash flow, and night closing drawer tallies.
           </p>
         </div>
       </div>
@@ -50,24 +50,24 @@ export default function GallaPage() {
           {/* Stats Cards */}
           <div style={styles.statsRow}>
             <div style={styles.statCard}>
-              <div style={styles.statLabel}>Latest Expected Drawer Cash</div>
-              <div style={{ ...styles.statValue, color: '#059669' }}>
-                ₹{latestSession ? latestSession.expectedClosingCash.toFixed(2) : '0.00'}
+              <div style={styles.statLabel}>LATEST EXPECTED DRAWER CASH</div>
+              <div style={{ ...styles.statValue, color: '#10B981' }}>
+                ₹{latestSession ? latestSession.expectedClosingCash.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
               </div>
             </div>
             <div style={styles.statCard}>
-              <div style={styles.statLabel}>Cumulative Discrepancy</div>
+              <div style={styles.statLabel}>CUMULATIVE DISCREPANCY</div>
               <div
                 style={{
                   ...styles.statValue,
-                  color: totalDifference === 0 ? '#0F172A' : totalDifference < 0 ? '#DC2626' : '#2563EB',
+                  color: totalDifference === 0 ? '#1D1D1F' : totalDifference < 0 ? '#FF3B30' : '#007AFF',
                 }}
               >
                 {totalDifference >= 0 ? `+₹${totalDifference.toFixed(2)}` : `-₹${Math.abs(totalDifference).toFixed(2)}`}
               </div>
             </div>
             <div style={styles.statCard}>
-              <div style={styles.statLabel}>Drawer Audit Match Rate</div>
+              <div style={styles.statLabel}>DRAWER AUDIT MATCH RATE</div>
               <div style={styles.statValue}>{matchRate}%</div>
             </div>
           </div>
@@ -86,39 +86,39 @@ export default function GallaPage() {
               <table style={styles.table}>
                 <thead>
                   <tr style={styles.thRow}>
-                    <th style={styles.th}>Date</th>
-                    <th style={styles.th}>Opening Cash</th>
-                    <th style={styles.th}>Cash Sales</th>
-                    <th style={styles.th}>UPI (Bank)</th>
-                    <th style={styles.th}>Udhar Repaid</th>
-                    <th style={styles.th}>Expenses</th>
-                    <th style={styles.th}>Expected Drawer</th>
-                    <th style={styles.th}>Actual Counted</th>
-                    <th style={styles.th}>Difference</th>
-                    <th style={styles.th}>Notes</th>
+                    <th style={styles.th}>DATE</th>
+                    <th style={styles.th}>OPENING CASH</th>
+                    <th style={styles.th}>CASH SALES</th>
+                    <th style={styles.th}>UPI (BANK)</th>
+                    <th style={styles.th}>UDHAR REPAID</th>
+                    <th style={styles.th}>EXPENSES</th>
+                    <th style={styles.th}>EXPECTED DRAWER</th>
+                    <th style={styles.th}>ACTUAL COUNTED</th>
+                    <th style={styles.th}>DIFFERENCE</th>
+                    <th style={styles.th}>NOTES</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sessions.map((s) => (
                     <tr key={s.id} style={styles.tr}>
-                      <td style={{ ...styles.td, fontWeight: '700', color: '#0F172A' }}>
+                      <td style={{ ...styles.td, fontWeight: 700, color: '#1D1D1F' }}>
                         {s.date}
                       </td>
-                      <td style={styles.td}>₹{s.openingCash.toFixed(2)}</td>
-                      <td style={{ ...styles.td, color: '#059669', fontWeight: '600' }}>
+                      <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>₹{s.openingCash.toFixed(2)}</td>
+                      <td style={{ ...styles.td, color: '#10B981', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                         +₹{s.systemSalesCash.toFixed(2)}
                       </td>
-                      <td style={styles.td}>₹{s.systemSalesUPI.toFixed(2)}</td>
-                      <td style={{ ...styles.td, color: '#059669' }}>
+                      <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>₹{s.systemSalesUPI.toFixed(2)}</td>
+                      <td style={{ ...styles.td, color: '#10B981', fontVariantNumeric: 'tabular-nums' }}>
                         +₹{s.systemUdharRepaid.toFixed(2)}
                       </td>
-                      <td style={{ ...styles.td, color: '#EF4444' }}>
+                      <td style={{ ...styles.td, color: '#FF3B30', fontVariantNumeric: 'tabular-nums' }}>
                         -₹{s.expenses.toFixed(2)}
                       </td>
-                      <td style={{ ...styles.td, fontWeight: '700' }}>
+                      <td style={{ ...styles.td, fontWeight: 700, color: '#1D1D1F', fontVariantNumeric: 'tabular-nums' }}>
                         ₹{s.expectedClosingCash.toFixed(2)}
                       </td>
-                      <td style={{ ...styles.td, fontWeight: '700' }}>
+                      <td style={{ ...styles.td, fontWeight: 700, color: '#1D1D1F', fontVariantNumeric: 'tabular-nums' }}>
                         ₹{(s.actualClosingCash ?? 0).toFixed(2)}
                       </td>
                       <td style={styles.td}>
@@ -127,16 +127,16 @@ export default function GallaPage() {
                             ...styles.diffBadge,
                             backgroundColor:
                               (s.cashDifference ?? 0) === 0
-                                ? '#ECFDF5'
+                                ? 'rgba(16, 185, 129, 0.12)'
                                 : (s.cashDifference ?? 0) > 0
-                                ? '#F0FDF4'
-                                : '#FEF2F2',
+                                ? 'rgba(0, 122, 255, 0.12)'
+                                : 'rgba(255, 59, 48, 0.12)',
                             color:
                               (s.cashDifference ?? 0) === 0
-                                ? '#065F46'
+                                ? '#059669'
                                 : (s.cashDifference ?? 0) > 0
-                                ? '#15803D'
-                                : '#B91C1C',
+                                ? '#007AFF'
+                                : '#FF3B30',
                           }}
                         >
                           {(s.cashDifference ?? 0) === 0
@@ -146,7 +146,7 @@ export default function GallaPage() {
                             : `-₹${Math.abs(s.cashDifference ?? 0).toFixed(2)}`}
                         </span>
                       </td>
-                      <td style={{ ...styles.td, color: '#64748B', fontSize: '12px' }}>
+                      <td style={{ ...styles.td, color: '#86868B', fontSize: '13px' }}>
                         {s.notes || '—'}
                       </td>
                     </tr>
@@ -168,7 +168,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
-    paddingBottom: '40px',
+    paddingBottom: '48px',
   },
   header: {
     display: 'flex',
@@ -181,86 +181,100 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '6px',
+    marginBottom: '8px',
   },
   badge: {
     fontSize: '11px',
-    fontWeight: 800,
-    letterSpacing: '0.5px',
-    color: '#059669',
-    backgroundColor: '#ECFDF5',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    fontWeight: 700,
+    letterSpacing: '0.04em',
+    color: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
   },
   countBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#64748B',
-    backgroundColor: '#F1F5F9',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    color: '#86868B',
+    backgroundColor: 'rgba(118, 118, 128, 0.1)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
   },
   title: {
-    fontSize: '26px',
+    fontSize: '28px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
     margin: 0,
-    letterSpacing: '-0.5px',
+    letterSpacing: '-0.03em',
   },
   subtitle: {
     fontSize: '14px',
-    color: '#64748B',
-    marginTop: '4px',
+    color: '#86868B',
+    marginTop: '6px',
     margin: 0,
+    letterSpacing: '-0.01em',
   },
   loadingState: {
-    padding: '60px 20px',
+    padding: '80px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#059669',
+    borderWidth: 3,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderTopColor: '#10B981',
     borderRadius: '50%',
-    margin: '0 auto 12px',
+    margin: '0 auto 14px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#86868B',
     margin: 0,
+    fontWeight: 500,
   },
   statsRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
     gap: '16px',
   },
   statCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
-    padding: '20px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderRadius: '20px',
+    padding: '22px',
+    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.02)',
   },
   statLabel: {
     fontSize: '11px',
-    fontWeight: 800,
-    color: '#64748B',
-    letterSpacing: '0.5px',
+    fontWeight: 700,
+    color: '#86868B',
+    letterSpacing: '0.04em',
     marginBottom: '8px',
   },
   statValue: {
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
+    letterSpacing: '-0.03em',
+    fontVariantNumeric: 'tabular-nums',
   },
   emptyCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px dashed #CBD5E1',
-    borderRadius: '16px',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderRadius: '20px',
     padding: '60px 24px',
     textAlign: 'center',
     display: 'flex',
@@ -272,22 +286,25 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '12px',
   },
   emptyTitle: {
-    fontSize: '18px',
+    fontSize: '17px',
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#1D1D1F',
     margin: '0 0 6px 0',
   },
   emptySubtitle: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#86868B',
     maxWidth: '460px',
     margin: '0 auto',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderRadius: '20px',
     overflow: 'hidden',
+    boxShadow: '0 2px 14px rgba(0, 0, 0, 0.02)',
   },
   table: {
     width: '100%',
@@ -295,28 +312,33 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'left',
   },
   thRow: {
-    backgroundColor: '#F8FAFC',
-    borderBottom: '1px solid #E2E8F0',
+    backgroundColor: '#FBFBFC',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
   },
   th: {
     padding: '12px 16px',
     fontSize: '11px',
-    fontWeight: 800,
-    color: '#64748B',
-    letterSpacing: '0.5px',
+    fontWeight: 700,
+    color: '#86868B',
+    letterSpacing: '0.04em',
   },
   tr: {
-    borderBottom: '1px solid #F1F5F9',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
+    transition: 'background-color 0.12s ease',
   },
   td: {
     padding: '14px 16px',
     fontSize: '13px',
-    color: '#334155',
+    color: '#1D1D1F',
   },
   diffBadge: {
     display: 'inline-block',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    padding: '4px 10px',
+    borderRadius: '9999px',
     fontSize: '11px',
     fontWeight: 700,
   },

@@ -1,5 +1,5 @@
 import { getApps, initializeApp, getApp, FirebaseApp } from 'firebase/app';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, Firestore } from 'firebase/firestore';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirebaseConfig } from '@kirana-pro/shared';
 
@@ -20,7 +20,14 @@ export const getDashboardFirebaseApp = (): FirebaseApp => {
 
 export const getDb = (): Firestore => {
   if (!dbInstance) {
-    dbInstance = getFirestore(getDashboardFirebaseApp());
+    const app = getDashboardFirebaseApp();
+    try {
+      dbInstance = initializeFirestore(app, {
+        experimentalAutoDetectLongPolling: true,
+      });
+    } catch {
+      dbInstance = getFirestore(app);
+    }
   }
   return dbInstance;
 };

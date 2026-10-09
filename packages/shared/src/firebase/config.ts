@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, Firestore } from 'firebase/firestore';
 import { getAuth, Auth } from 'firebase/auth';
 
 export interface FirebaseEnvironmentConfig {
@@ -54,7 +54,13 @@ export const initializeFirebase = (customConfig?: FirebaseEnvironmentConfig): Fi
 
 export const getFirestoreDb = (app?: FirebaseApp): Firestore => {
   const currentApp = app || initializeFirebase();
-  return getFirestore(currentApp);
+  try {
+    return initializeFirestore(currentApp, {
+      experimentalAutoDetectLongPolling: true,
+    });
+  } catch {
+    return getFirestore(currentApp);
+  }
 };
 
 let customAuthInstance: Auth | null = null;

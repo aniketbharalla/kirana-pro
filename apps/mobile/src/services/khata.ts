@@ -20,7 +20,7 @@ import {
 
 export const createCustomer = async (
   storeId: string,
-  data: Omit<CustomerKhata, 'id' | 'currentBalance' | 'createdAt' | 'updatedAt'>
+  data: Omit<CustomerKhata, 'id' | 'currentBalance' | 'createdAt' | 'updatedAt' | 'storeId'>
 ): Promise<CustomerKhata> => {
   customerKhataSchema.parse({
     ...data,

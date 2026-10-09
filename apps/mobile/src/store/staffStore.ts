@@ -58,7 +58,7 @@ export interface StaffState {
 
   // Counter Shift Management
   openShift: (counterNumber: number, openingCash: number) => CounterSession;
-  recordShiftSale: (amount: number, mode: 'cash' | 'upi' | 'credit') => void;
+  recordShiftSale: (amount: number, mode: 'cash' | 'upi' | 'credit' | 'split') => void;
   closeShift: (closingCash: number, notes?: string) => CounterSession | null;
 
   // Role permissions checker
@@ -173,7 +173,7 @@ export const useStaffStore = create<StaffState>((set, get) => ({
     return newShift;
   },
 
-  recordShiftSale: (amount: number, mode: 'cash' | 'upi' | 'credit') => {
+  recordShiftSale: (amount: number, mode: 'cash' | 'upi' | 'credit' | 'split') => {
     const { activeCounterSession } = get();
     if (!activeCounterSession || activeCounterSession.isClosed) return;
 
@@ -181,7 +181,7 @@ export const useStaffStore = create<StaffState>((set, get) => ({
     const currentUpi = activeCounterSession.upiSales || 0;
     const currentCredit = activeCounterSession.creditSales || 0;
 
-    const newCash = mode === 'cash' ? currentCash + amount : currentCash;
+    const newCash = mode === 'cash' || mode === 'split' ? currentCash + amount : currentCash;
     const newUpi = mode === 'upi' ? currentUpi + amount : currentUpi;
     const newCredit = mode === 'credit' ? currentCredit + amount : currentCredit;
 

@@ -3,6 +3,7 @@ import {
   doc,
   getDocs,
   onSnapshot,
+  setDoc,
 } from 'firebase/firestore';
 import {
   getFirestoreDb,
@@ -20,7 +21,7 @@ import {
 
 const generateId = () => `prod_local_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
 
-// ─── Add Product (LOCAL-FIRST, Queued for Cloud Sync) ─────────────────────────
+// ─── Add Product (LOCAL-FIRST, Queued for Cloud Sync & Direct Write) ──────────
 
 export const addProduct = async (
   storeId: string,
@@ -114,10 +115,21 @@ export const addProduct = async (
   // 2. Persist locally to storage
   try {
     await saveProductsLocally(effectiveStoreId, updatedProducts);
-    // 3. Mark as pending sync (will be synced to cloud when user taps "Sync with Cloud" in Dukaan)
+    // 3. Mark as pending sync (for offline queue resilience)
     await enqueuePendingProduct(effectiveStoreId, newProduct);
   } catch (localErr) {
     console.warn('Local save warning (product preserved in memory):', localErr);
+  }
+
+  // 4. Immediately write to Firestore cloud so dashboard and real-time listeners see it
+  try {
+    const db = getFirestoreDb();
+    if (db) {
+      const prodRef = doc(db, 'stores', effectiveStoreId, 'products', productId);
+      await setDoc(prodRef, newProduct, { merge: true });
+    }
+  } catch (cloudErr) {
+    console.warn('Direct Firestore cloud save note (enqueued for sync):', cloudErr);
   }
 
   return newProduct;
@@ -147,6 +159,17 @@ export const updateProduct = async (
   const updatedItem = updatedProducts.find((p) => p.id === productId);
   if (updatedItem) {
     await enqueuePendingProduct(effectiveStoreId, updatedItem).catch(() => {});
+  }
+
+  // Immediately update Firestore in background
+  try {
+    const db = getFirestoreDb();
+    if (db) {
+      const prodRef = doc(db, 'stores', effectiveStoreId, 'products', productId);
+      await setDoc(prodRef, { ...data, updatedAt: now }, { merge: true });
+    }
+  } catch (cloudErr) {
+    console.warn('Direct Firestore cloud update note (enqueued):', cloudErr);
   }
 };
 

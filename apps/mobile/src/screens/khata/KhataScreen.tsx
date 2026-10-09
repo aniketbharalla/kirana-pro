@@ -51,13 +51,13 @@ export const KhataScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F2F2F7" />
 
-      {/* Header Summary */}
+      {/* Header Summary Card (Apple Wallet / Credit aesthetic) */}
       <View style={styles.summaryCard}>
         <View>
-          <Text style={styles.summaryLabel}>TOTAL MARKET UDHAR (कुल उधारी)</Text>
-          <Text style={styles.summaryAmount}>₹{totalPending.toFixed(2)}</Text>
+          <Text style={styles.summaryLabel}>TOTAL MARKET UDHAR</Text>
+          <Text style={styles.summaryAmount}>₹{totalPending.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
         </View>
         <View style={styles.countBadge}>
           <Text style={styles.countText}>{customers.length} Customers</Text>
@@ -69,8 +69,8 @@ export const KhataScreen: React.FC = () => {
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search customer by name, phone, or area..."
-          placeholderTextColor="#94A3B8"
+          placeholder="Search customer name, phone, area..."
+          placeholderTextColor="#8E8E93"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -98,7 +98,7 @@ export const KhataScreen: React.FC = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.customerCard}
-              activeOpacity={0.85}
+              activeOpacity={0.8}
               onPress={() => navigation.navigate('CustomerDetail', { customer: item })}
             >
               <View style={styles.avatar}>
@@ -133,11 +133,11 @@ export const KhataScreen: React.FC = () => {
                     ]}
                   >
                     {item.currentBalance > 0
-                      ? `₹${item.currentBalance} Due`
+                      ? `₹${item.currentBalance.toLocaleString('en-IN')} Due`
                       : 'All Clear'}
                   </Text>
                 </View>
-                <Text style={styles.arrowIcon}>➔</Text>
+                <Text style={styles.arrowIcon}>›</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -165,76 +165,79 @@ export const KhataScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F2F2F7',
   },
   summaryCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1C1C1E',
     marginHorizontal: 16,
     marginTop: 12,
     marginBottom: 8,
-    padding: 18,
+    padding: 20,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.16,
+    shadowRadius: 16,
+    elevation: 4,
   },
   summaryLabel: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#DC2626',
-    letterSpacing: 0.5,
+    fontWeight: '700',
+    color: '#FF453A',
+    letterSpacing: 0.6,
   },
   summaryAmount: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: '#0F172A',
-    marginTop: 2,
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginTop: 4,
+    letterSpacing: -0.5,
   },
   countBadge: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#FECACA',
+    borderRadius: 9999,
   },
   countText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#DC2626',
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
-    marginVertical: 8,
+    marginVertical: 6,
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderWidth: 0.5,
+    borderColor: 'rgba(60, 60, 67, 0.12)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   searchIcon: {
-    fontSize: 15,
+    fontSize: 14,
     marginRight: 8,
+    opacity: 0.6,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '500',
-    color: '#0F172A',
+    color: '#1C1C1E',
   },
   clearText: {
     fontSize: 14,
-    color: '#94A3B8',
+    color: '#8E8E93',
     padding: 4,
   },
   listContent: {
@@ -245,79 +248,80 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    padding: 14,
-    borderRadius: 16,
+    padding: 16,
+    borderRadius: 18,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderWidth: 0.5,
+    borderColor: 'rgba(60, 60, 67, 0.12)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
     elevation: 1,
   },
   avatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: '#ECFDF5',
+    borderRadius: 14,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
+    marginRight: 14,
   },
   avatarText: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#065F46',
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#059669',
   },
   infoCol: {
     flex: 1,
   },
   name: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#1C1C1E',
+    letterSpacing: -0.2,
   },
   phone: {
-    fontSize: 12,
-    color: '#64748B',
+    fontSize: 13,
+    color: '#8E8E93',
     marginTop: 2,
   },
   address: {
-    fontSize: 11,
-    color: '#94A3B8',
+    fontSize: 12,
+    color: '#8E8E93',
     marginTop: 2,
   },
   balanceCol: {
-    alignItems: 'flex-end',
-    gap: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   balanceBadge: {
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 9999,
   },
   balanceBadgeDue: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(255, 59, 48, 0.12)',
   },
   balanceBadgeClear: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
   },
   balanceBadgeText: {
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   balanceTextDue: {
-    color: '#DC2626',
+    color: '#FF3B30',
   },
   balanceTextClear: {
-    color: '#065F46',
+    color: '#059669',
   },
   arrowIcon: {
-    fontSize: 12,
-    color: '#CBD5E1',
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#C7C7CC',
   },
   emptyContainer: {
     flex: 1,
@@ -330,14 +334,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   emptyTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1C1C1E',
     marginBottom: 4,
   },
   emptySubtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#8E8E93',
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -347,25 +351,26 @@ const styles = StyleSheet.create({
     right: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: '#1D1D1F',
     paddingHorizontal: 20,
     paddingVertical: 14,
-    borderRadius: 30,
-    shadowColor: '#10B981',
+    borderRadius: 9999,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.25,
     shadowRadius: 10,
     elevation: 5,
   },
   fabIcon: {
     fontSize: 20,
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     marginRight: 6,
   },
   fabText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
+    letterSpacing: -0.1,
   },
 });

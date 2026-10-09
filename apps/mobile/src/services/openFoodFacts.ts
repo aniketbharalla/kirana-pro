@@ -5,6 +5,7 @@ export interface ScannedProductMetadata {
   quantity?: string;
   imageUrl?: string;
   categories?: string;
+  suggestedPrice?: number;
 }
 
 export const USER_AGENT = 'KiranaPro-App/1.0 - contact@kiranapro.in';

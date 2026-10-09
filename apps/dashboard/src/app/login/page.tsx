@@ -10,13 +10,31 @@ import {
   verifyPhoneOtp,
 } from '../../lib/auth';
 import { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
+import { useAuth } from '../../context/AuthContext';
+import { StaffMember, Store } from '@kirana-pro/shared';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { staffSignIn, startStaffShift } = useAuth();
+
+  // Persona: Store Owner vs Staff / Cashier
+  const [persona, setPersona] = useState<'owner' | 'staff'>('owner');
+
+  // Owner Auth state
   const [authMethod, setAuthMethod] = useState<'phone' | 'google'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
+
+  // Staff Auth state
+  const [staffPhone, setStaffPhone] = useState('');
+  const [staffPin, setStaffPin] = useState('');
+  const [verifiedStaff, setVerifiedStaff] = useState<StaffMember | null>(null);
+  const [verifiedStore, setVerifiedStore] = useState<Store | null>(null);
+  const [counterNumber, setCounterNumber] = useState(1);
+  const [openingCash, setOpeningCash] = useState('500');
+
+  // Status & loading
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
@@ -31,6 +49,41 @@ export default function LoginPage() {
       recaptchaVerifierRef.current = null;
     };
   }, []);
+
+  // Handle Staff Verification (Only Phone + PIN required)
+  const handleStaffVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setInfoMsg('');
+    setLoading(true);
+
+    try {
+      const res = await staffSignIn(staffPhone, staffPin);
+      setVerifiedStaff(res.staff);
+      setVerifiedStore(res.store);
+      setInfoMsg(`✓ Verified: ${res.staff.name} (${res.staff.role}) at ${res.store.name}`);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Staff verification failed. Check phone and PIN.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle Shift Register Activation
+  const handleOpenShiftAndLaunch = async () => {
+    if (!verifiedStaff) return;
+    setErrorMsg('');
+    setLoading(true);
+
+    try {
+      const parsedFloat = parseFloat(openingCash) || 0;
+      await startStaffShift(counterNumber, parsedFloat);
+      router.replace('/bills');
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to open counter shift.');
+      setLoading(false);
+    }
+  };
 
   // Handle Real Google Sign-In
   const handleGoogleSignIn = async () => {
@@ -140,31 +193,33 @@ export default function LoginPage() {
         <p style={styles.subtitle}>Desktop Store Management System</p>
         <div style={styles.freePill}>100% Free Forever • Zero Subscription</div>
 
-        {/* Auth Method Tabs */}
-        <div style={styles.tabContainer}>
+        {/* Persona Switcher: Store Owner vs Staff / Cashier */}
+        <div style={styles.personaContainer}>
           <button
             style={{
-              ...styles.tabBtn,
-              ...(authMethod === 'phone' ? styles.tabBtnActive : {}),
+              ...styles.personaBtn,
+              ...(persona === 'owner' ? styles.personaBtnActive : {}),
             }}
             onClick={() => {
-              setAuthMethod('phone');
+              setPersona('owner');
               setErrorMsg('');
+              setInfoMsg('');
             }}
           >
-            📱 Mobile OTP
+            👑 Store Owner (मालिक)
           </button>
           <button
             style={{
-              ...styles.tabBtn,
-              ...(authMethod === 'google' ? styles.tabBtnActive : {}),
+              ...styles.personaBtn,
+              ...(persona === 'staff' ? styles.personaBtnActive : {}),
             }}
             onClick={() => {
-              setAuthMethod('google');
+              setPersona('staff');
               setErrorMsg('');
+              setInfoMsg('');
             }}
           >
-            🌐 Google Sign-In
+            🧑‍💼 Staff & Cashier (कैशियर)
           </button>
         </div>
 
@@ -172,100 +227,257 @@ export default function LoginPage() {
         {errorMsg && <div style={styles.errorBox}>⚠️ {errorMsg}</div>}
         {infoMsg && <div style={styles.infoBox}>✓ {infoMsg}</div>}
 
-        {/* 1. MOBILE NUMBER OTP FORM */}
-        {authMethod === 'phone' && (
+        {/* ============================================================== */}
+        {/* A. STAFF / CASHIER PHONE + PIN FLOW */}
+        {/* ============================================================== */}
+        {persona === 'staff' && (
           <div style={styles.formSection}>
-            {!isOtpSent ? (
-              <div style={styles.inputGroup}>
-                <label style={styles.inputLabel}>ENTER YOUR 10-DIGIT MOBILE NUMBER</label>
-                <div style={styles.phoneInputRow}>
-                  <div style={styles.flagPrefix}>
-                    <span>🇮🇳</span>
-                    <span>+91</span>
+            {!verifiedStaff ? (
+              <form onSubmit={handleStaffVerify} style={styles.staffForm}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.inputLabel}>STAFF MOBILE NUMBER (कैशियर मोबाइल नंबर)</label>
+                  <div style={styles.phoneInputRow}>
+                    <div style={styles.flagPrefix}>
+                      <span>🇮🇳</span>
+                      <span>+91</span>
+                    </div>
+                    <input
+                      style={styles.phoneInput}
+                      type="tel"
+                      placeholder="98765 43210"
+                      maxLength={10}
+                      value={staffPhone}
+                      onChange={(e) => setStaffPhone(e.target.value)}
+                      required
+                      autoFocus
+                    />
                   </div>
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.inputLabel}>4-DIGIT SECURITY PIN (४ अंकों का पिन)</label>
                   <input
-                    style={styles.phoneInput}
-                    type="tel"
-                    placeholder="98765 43210"
-                    maxLength={10}
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    autoFocus
+                    style={styles.pinInput}
+                    type="password"
+                    inputMode="numeric"
+                    placeholder="• • • •"
+                    maxLength={4}
+                    value={staffPin}
+                    onChange={(e) => setStaffPin(e.target.value.replace(/\D/g, ''))}
+                    required
                   />
+                  <span style={styles.helperText}>Counter PIN assigned by store owner in Staff Register</span>
                 </div>
 
                 <button
                   style={styles.submitBtn}
-                  onClick={handleSendPhoneOtp}
+                  type="submit"
                   disabled={loading}
                 >
-                  {loading ? 'Sending OTP SMS...' : '📲 Get OTP (ओटीपी भेजें)'}
+                  {loading ? 'Verifying Credentials...' : '🔑 Verify Credentials (पिन सत्यापित करें) ➔'}
                 </button>
-              </div>
+              </form>
             ) : (
-              <div style={styles.inputGroup}>
-                <label style={styles.inputLabel}>ENTER 6-DIGIT VERIFICATION CODE</label>
-                <input
-                  style={styles.otpInput}
-                  type="text"
-                  placeholder="• • • • • •"
-                  maxLength={6}
-                  value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value)}
-                  autoFocus
-                />
+              /* Step 2: Open Shift Register & Count Opening Cash */
+              <div style={styles.shiftCard}>
+                <div style={styles.shiftHeader}>
+                  <div style={styles.shiftAvatar}>
+                    {verifiedStaff.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 style={styles.shiftStaffName}>{verifiedStaff.name}</h3>
+                    <span style={styles.shiftRoleBadge}>{verifiedStaff.role.toUpperCase()}</span>
+                  </div>
+                </div>
 
-                <div style={styles.resendRow}>
+                <div style={styles.inputGroup}>
+                  <label style={styles.inputLabel}>SELECT COUNTER (काउंटर चुनें)</label>
+                  <div style={styles.counterRow}>
+                    {[1, 2, 3].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        style={{
+                          ...styles.counterBtn,
+                          ...(counterNumber === num ? styles.counterBtnActive : {}),
+                        }}
+                        onClick={() => setCounterNumber(num)}
+                      >
+                        Counter {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={styles.inputGroup}>
+                  <label style={styles.inputLabel}>MORNING OPENING CASH IN GALLA (गल्ले में शुरुआती नकद)</label>
+                  <div style={styles.currencyInputRow}>
+                    <span style={styles.currencySymbol}>₹</span>
+                    <input
+                      style={styles.currencyInput}
+                      type="number"
+                      placeholder="500"
+                      value={openingCash}
+                      onChange={(e) => setOpeningCash(e.target.value)}
+                    />
+                  </div>
+                  <span style={styles.helperText}>Starting cash float for giving change to customers</span>
+                </div>
+
+                <div style={styles.shiftActionsRow}>
                   <button
-                    style={styles.resendLink}
+                    style={styles.submitBtn}
+                    onClick={handleOpenShiftAndLaunch}
+                    disabled={loading}
+                  >
+                    {loading ? 'Opening Shift...' : '🚀 Start Shift & Launch Billing (बिलिंग शुरू करें)'}
+                  </button>
+                  <button
+                    style={styles.cancelLink}
+                    type="button"
                     onClick={() => {
-                      setIsOtpSent(false);
-                      setOtpCode('');
+                      setVerifiedStaff(null);
+                      setVerifiedStore(null);
+                      setStaffPin('');
                     }}
                   >
-                    ← Change number or resend
+                    Switch Staff / Re-enter PIN
                   </button>
                 </div>
-
-                <button
-                  style={styles.submitBtn}
-                  onClick={handleVerifyPhoneOtp}
-                  disabled={loading}
-                >
-                  {loading ? 'Verifying...' : '✓ Verify & Enter Dukaan'}
-                </button>
               </div>
             )}
           </div>
         )}
 
-        {/* 2. GOOGLE SIGN-IN FORM */}
-        {authMethod === 'google' && (
-          <div style={styles.formSection}>
-            <div style={styles.featuresList}>
-              <div style={styles.featureItem}>
-                <span>📊</span>
-                <span>Live Stock & Low-Alert Monitoring</span>
-              </div>
-              <div style={styles.featureItem}>
-                <span>⚖️</span>
-                <span>Taraju Smart Scale Synchronization</span>
-              </div>
-              <div style={styles.featureItem}>
-                <span>🏛️</span>
-                <span>Automated GSTR-1 & HSN Tax Return Filing</span>
-              </div>
+        {/* ============================================================== */}
+        {/* B. STORE OWNER GOOGLE & PHONE OTP FLOW */}
+        {/* ============================================================== */}
+        {persona === 'owner' && (
+          <>
+            {/* Auth Method Tabs */}
+            <div style={styles.tabContainer}>
+              <button
+                style={{
+                  ...styles.tabBtn,
+                  ...(authMethod === 'phone' ? styles.tabBtnActive : {}),
+                }}
+                onClick={() => {
+                  setAuthMethod('phone');
+                  setErrorMsg('');
+                }}
+              >
+                📱 Mobile OTP
+              </button>
+              <button
+                style={{
+                  ...styles.tabBtn,
+                  ...(authMethod === 'google' ? styles.tabBtnActive : {}),
+                }}
+                onClick={() => {
+                  setAuthMethod('google');
+                  setErrorMsg('');
+                }}
+              >
+                🌐 Google Sign-In
+              </button>
             </div>
 
-            <button
-              style={styles.googleBtn}
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-            >
-              <span style={styles.googleIcon}>🌐</span>
-              <span>{loading ? 'Signing in with Google...' : 'Continue with Google'}</span>
-            </button>
-          </div>
+            {/* 1. MOBILE NUMBER OTP FORM */}
+            {authMethod === 'phone' && (
+              <div style={styles.formSection}>
+                {!isOtpSent ? (
+                  <div style={styles.inputGroup}>
+                    <label style={styles.inputLabel}>ENTER STORE OWNER MOBILE NUMBER</label>
+                    <div style={styles.phoneInputRow}>
+                      <div style={styles.flagPrefix}>
+                        <span>🇮🇳</span>
+                        <span>+91</span>
+                      </div>
+                      <input
+                        style={styles.phoneInput}
+                        type="tel"
+                        placeholder="98765 43210"
+                        maxLength={10}
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
+
+                    <button
+                      style={styles.submitBtn}
+                      onClick={handleSendPhoneOtp}
+                      disabled={loading}
+                    >
+                      {loading ? 'Sending OTP SMS...' : '📲 Get OTP (ओटीपी भेजें)'}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={styles.inputGroup}>
+                    <label style={styles.inputLabel}>ENTER 6-DIGIT VERIFICATION CODE</label>
+                    <input
+                      style={styles.otpInput}
+                      type="text"
+                      placeholder="• • • • • •"
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      autoFocus
+                    />
+
+                    <div style={styles.resendRow}>
+                      <button
+                        style={styles.resendLink}
+                        onClick={() => {
+                          setIsOtpSent(false);
+                          setOtpCode('');
+                        }}
+                      >
+                        ← Change number or resend
+                      </button>
+                    </div>
+
+                    <button
+                      style={styles.submitBtn}
+                      onClick={handleVerifyPhoneOtp}
+                      disabled={loading}
+                    >
+                      {loading ? 'Verifying...' : '✓ Verify & Enter Dukaan'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 2. GOOGLE SIGN-IN FORM */}
+            {authMethod === 'google' && (
+              <div style={styles.formSection}>
+                <div style={styles.featuresList}>
+                  <div style={styles.featureItem}>
+                    <span>📊</span>
+                    <span>Live Stock & Low-Alert Monitoring</span>
+                  </div>
+                  <div style={styles.featureItem}>
+                    <span>⚖️</span>
+                    <span>Taraju Smart Scale Synchronization</span>
+                  </div>
+                  <div style={styles.featureItem}>
+                    <span>🏛️</span>
+                    <span>Automated GSTR-1 & HSN Tax Return Filing</span>
+                  </div>
+                </div>
+
+                <button
+                  style={styles.googleBtn}
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                >
+                  <span style={styles.googleIcon}>🌐</span>
+                  <span>{loading ? 'Signing in with Google...' : 'Continue with Google'}</span>
+                </button>
+              </div>
+            )}
+          </>
         )}
 
 
@@ -513,5 +725,230 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '14px',
     border: '1px solid #A7F3D0',
     textAlign: 'left',
+  },
+  personaContainer: {
+    display: 'flex',
+    backgroundColor: 'rgba(118, 118, 128, 0.1)',
+    borderRadius: '14px',
+    padding: '4px',
+    gap: '4px',
+    marginBottom: '20px',
+  },
+  personaBtn: {
+    flex: 1,
+    borderWidth: 0,
+    borderStyle: 'none',
+    backgroundColor: 'transparent',
+    padding: '10px 12px',
+    borderRadius: '10px',
+    fontSize: '13px',
+    fontWeight: 700,
+    color: '#636366',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  personaBtnActive: {
+    backgroundColor: '#FFFFFF',
+    color: '#1D1D1F',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+  },
+  staffForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+    textAlign: 'left',
+  },
+  quickFillBox: {
+    backgroundColor: '#F0FDF4',
+    border: '1px solid #BBF7D0',
+    borderRadius: '12px',
+    padding: '10px 12px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  quickFillLabel: {
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#166534',
+  },
+  quickFillRow: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+  },
+  quickPill: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #86EFAC',
+    borderRadius: '8px',
+    padding: '6px 10px',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: '#15803D',
+    cursor: 'pointer',
+    transition: 'background-color 0.15s ease',
+  },
+  quickPinTag: {
+    backgroundColor: '#DCFCE7',
+    padding: '1px 5px',
+    borderRadius: '4px',
+    fontSize: '11px',
+    fontWeight: 700,
+  },
+  textInput: {
+    width: '100%',
+    boxSizing: 'border-box',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderRadius: '12px',
+    padding: '12px 14px',
+    fontSize: '15px',
+    fontWeight: 600,
+    color: '#1D1D1F',
+    outline: 'none',
+  },
+  helperText: {
+    fontSize: '11px',
+    color: '#86868B',
+    marginTop: '2px',
+  },
+  pinInput: {
+    width: '100%',
+    boxSizing: 'border-box',
+    backgroundColor: '#FBFBFC',
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderColor: '#10B981',
+    borderRadius: '14px',
+    padding: '14px',
+    fontSize: '24px',
+    fontWeight: 800,
+    letterSpacing: '14px',
+    textAlign: 'center',
+    color: '#1D1D1F',
+    outline: 'none',
+  },
+  shiftCard: {
+    backgroundColor: '#FBFBFC',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderRadius: '20px',
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+    textAlign: 'left',
+  },
+  shiftHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    paddingBottom: '12px',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
+  },
+  shiftAvatar: {
+    width: '44px',
+    height: '44px',
+    borderRadius: '14px',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '20px',
+    fontWeight: 800,
+    color: '#059669',
+  },
+  shiftStaffName: {
+    margin: 0,
+    fontSize: '17px',
+    fontWeight: 800,
+    color: '#1D1D1F',
+  },
+  shiftRoleBadge: {
+    display: 'inline-block',
+    fontSize: '10px',
+    fontWeight: 700,
+    color: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: '2px 8px',
+    borderRadius: '9999px',
+    marginTop: '2px',
+  },
+  counterRow: {
+    display: 'flex',
+    gap: '8px',
+  },
+  counterBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: '10px',
+    padding: '10px',
+    fontSize: '13px',
+    fontWeight: 700,
+    color: '#636366',
+    cursor: 'pointer',
+    textAlign: 'center',
+    transition: 'all 0.15s ease',
+  },
+  counterBtnActive: {
+    backgroundColor: '#1D1D1F',
+    borderColor: '#1D1D1F',
+    color: '#FFFFFF',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+  },
+  currencyInputRow: {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderStyle: 'solid',
+    borderColor: '#10B981',
+    borderRadius: '12px',
+    overflow: 'hidden',
+  },
+  currencySymbol: {
+    padding: '12px 16px',
+    fontSize: '18px',
+    fontWeight: 800,
+    color: '#059669',
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+  },
+  currencyInput: {
+    flex: 1,
+    borderWidth: 0,
+    borderStyle: 'none',
+    outline: 'none',
+    padding: '12px 14px',
+    fontSize: '18px',
+    fontWeight: 800,
+    color: '#1D1D1F',
+  },
+  shiftActionsRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    alignItems: 'center',
+    marginTop: '6px',
+  },
+  cancelLink: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderStyle: 'none',
+    color: '#86868B',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    textDecoration: 'underline',
   },
 };

@@ -1,24 +1,38 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { PurchaseInvoice, PurchaseInvoiceDraft } from '@kirana-pro/shared';
 import { BillUploadModal } from '../../components/purchases/BillUploadModal';
 import { useAuth } from '../../context/AuthContext';
-import { subscribeStorePurchases, saveStorePurchase } from '../../lib/storeService';
+import {
+  subscribeStorePurchases,
+  saveStorePurchase,
+  subscribeStoreProducts,
+  saveStoreProduct,
+} from '../../lib/storeService';
+import { Product } from '@kirana-pro/shared';
 
 export default function PurchasesPage() {
   const { storeId, user } = useAuth();
   const [purchases, setPurchases] = useState<PurchaseInvoice[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!storeId) return;
-    const unsubscribe = subscribeStorePurchases(storeId, (data) => {
+    const unsubPurchases = subscribeStorePurchases(storeId, (data) => {
       setPurchases(data);
       setLoading(false);
     });
-    return () => unsubscribe();
+    const unsubProducts = subscribeStoreProducts(storeId, (data) => {
+      setProducts(data);
+    });
+    return () => {
+      unsubPurchases();
+      unsubProducts();
+    };
   }, [storeId]);
 
   const totalInwarded = purchases.reduce((sum, p) => sum + p.netPayable, 0);
@@ -50,6 +64,40 @@ export default function PurchasesPage() {
     };
 
     await saveStorePurchase(storeId, newInvoice);
+
+    // Also automatically credit product inventory in stock
+    for (const item of draft.items) {
+      const match = products.find(
+        (p) => p.name.toLowerCase() === item.productName.toLowerCase()
+      );
+      if (match) {
+        await saveStoreProduct(storeId, {
+          ...match,
+          currentStock: match.currentStock + item.totalQty,
+          purchasePrice: item.rate,
+        });
+      } else {
+        await saveStoreProduct(storeId, {
+          id: `prod_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          storeId,
+          name: item.productName,
+          category: 'other',
+          barcode: item.barcode || null,
+          sellingPrice: Math.round(item.rate * 1.15),
+          purchasePrice: item.rate,
+          pricePerUnit: Math.round(item.rate * 1.15),
+          gstRate: (item.cgstRate || 2.5) + (item.sgstRate || 2.5),
+          unit: item.uomMapped || 'packet',
+          currentStock: item.totalQty,
+          minStockAlert: 5,
+          isLoose: false,
+          imageURL: null,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
   };
 
   return (
@@ -66,9 +114,14 @@ export default function PurchasesPage() {
             Inward stock from distributor invoices with free OCR line-item extraction.
           </p>
         </div>
-        <button style={styles.scanBtn} onClick={() => setIsModalOpen(true)}>
-          📷 Scan / Upload Distributor Bill
-        </button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <Link href="/purchases/new" style={styles.newScannerLink}>
+            ⚡ Inward via OCR (/purchases/new)
+          </Link>
+          <button style={styles.scanBtn} onClick={() => setIsModalOpen(true)}>
+            📷 Quick Upload Modal
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -194,45 +247,59 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '6px',
   },
   badge: {
-    fontSize: '11px',
+    fontSize: '10px',
     fontWeight: 800,
-    letterSpacing: '0.5px',
-    color: '#059669',
-    backgroundColor: '#ECFDF5',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    letterSpacing: '0.04em',
+    color: '#047857',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: '3px 9px',
+    borderRadius: '999px',
+    textTransform: 'uppercase',
   },
   countBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#64748B',
-    backgroundColor: '#F1F5F9',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    color: '#86868B',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    padding: '3px 9px',
+    borderRadius: '999px',
   },
   title: {
     fontSize: '26px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
     margin: 0,
-    letterSpacing: '-0.5px',
+    letterSpacing: '-0.03em',
+    lineHeight: 1.15,
   },
   subtitle: {
-    fontSize: '14px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     marginTop: '4px',
     margin: 0,
   },
+  newScannerLink: {
+    backgroundColor: '#1D1D1F',
+    color: '#FFFFFF',
+    textDecoration: 'none',
+    borderRadius: '11px',
+    padding: '10px 18px',
+    fontSize: '13px',
+    fontWeight: 700,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    display: 'inline-flex',
+    alignItems: 'center',
+  },
   scanBtn: {
-    backgroundColor: '#059669',
+    backgroundColor: '#10B981',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '11px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)',
+    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
   },
   loadingState: {
     padding: '60px 20px',

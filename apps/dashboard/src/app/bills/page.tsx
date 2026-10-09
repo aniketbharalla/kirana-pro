@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { BillsTable } from '../../components/BillsTable';
 import { Invoice } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
@@ -33,6 +34,25 @@ export default function BillsPage() {
             Live counter sales, payment modes breakdown, and 58mm thermal receipts
           </p>
         </div>
+
+        <Link
+          href="/pos"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: '#10B981',
+            color: '#FFFFFF',
+            textDecoration: 'none',
+            padding: '12px 20px',
+            borderRadius: '14px',
+            fontWeight: 800,
+            fontSize: '14px',
+            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+          }}
+        >
+          ⚡ Open POS Quick Billing (F4)
+        </Link>
       </div>
 
       {loading ? (
@@ -47,6 +67,25 @@ export default function BillsPage() {
           <p style={styles.emptySubtitle}>
             Bills generated at your checkout counter or from the mobile app will automatically appear here in real time.
           </p>
+          <div style={{ marginTop: '20px' }}>
+            <Link
+              href="/pos"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: '#10B981',
+                color: '#FFFFFF',
+                textDecoration: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '14px',
+              }}
+            >
+              ⚡ Create Your First POS Bill
+            </Link>
+          </div>
         </div>
       ) : (
         <BillsTable invoices={invoices} />
@@ -75,32 +114,34 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '6px',
   },
   badge: {
-    fontSize: '11px',
+    fontSize: '10px',
     fontWeight: 800,
-    letterSpacing: '0.5px',
-    color: '#2563EB',
-    backgroundColor: '#EFF6FF',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    letterSpacing: '0.04em',
+    color: '#0071E3',
+    backgroundColor: 'rgba(0, 113, 227, 0.1)',
+    padding: '3px 9px',
+    borderRadius: '999px',
+    textTransform: 'uppercase',
   },
   countBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#64748B',
-    backgroundColor: '#F1F5F9',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    color: '#86868B',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    padding: '3px 9px',
+    borderRadius: '999px',
   },
   title: {
     fontSize: '26px',
     fontWeight: 800,
-    color: '#0F172A',
-    letterSpacing: '-0.5px',
+    color: '#1D1D1F',
+    letterSpacing: '-0.03em',
     margin: 0,
+    lineHeight: 1.15,
   },
   subtitle: {
-    fontSize: '14px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     marginTop: '4px',
     margin: 0,
   },
@@ -108,29 +149,33 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
+    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#2563EB',
+    borderWidth: '3px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderTopColor: '#0071E3',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
-    fontSize: '14px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     margin: 0,
   },
   emptyCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px dashed #CBD5E1',
-    borderRadius: '16px',
-    padding: '60px 24px',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '20px',
+    padding: '64px 24px',
     textAlign: 'center',
+    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
   },
   emptyIcon: {
     fontSize: '44px',
@@ -138,14 +183,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   emptyTitle: {
     fontSize: '18px',
-    fontWeight: 700,
-    color: '#0F172A',
+    fontWeight: 800,
+    color: '#1D1D1F',
     margin: '0 0 6px 0',
+    letterSpacing: '-0.02em',
   },
   emptySubtitle: {
-    fontSize: '14px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     maxWidth: '460px',
     margin: '0 auto',
+    lineHeight: 1.5,
   },
 };

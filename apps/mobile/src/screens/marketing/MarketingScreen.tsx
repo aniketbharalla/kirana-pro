@@ -113,7 +113,7 @@ export const MarketingScreen: React.FC = () => {
       name: p.name,
       price: p.sellingPrice,
       unit: p.unit,
-      inStock: (p.stock || 0) > 0,
+      inStock: (p.currentStock || 0) > 0,
     })),
     storePhone
   );
@@ -275,7 +275,7 @@ export const MarketingScreen: React.FC = () => {
 
             <View style={styles.catalogStat}>
               <View style={styles.catalogStatItem}>
-                <Text style={styles.catalogStatValue}>{products.filter(p => (p.stock || 0) > 0).length}</Text>
+                <Text style={styles.catalogStatValue}>{products.filter(p => (p.currentStock || 0) > 0).length}</Text>
                 <Text style={styles.catalogStatLabel}>In Stock</Text>
               </View>
               <View style={styles.catalogStatItem}>

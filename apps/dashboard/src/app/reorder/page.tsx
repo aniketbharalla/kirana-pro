@@ -80,14 +80,14 @@ export default function SmartReorderPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.reorderBadge}>🔄 INVENTORY FORECASTING</span>
-            <span style={styles.alertBadge}>
-              {outOfStockCount > 0 ? `⚠️ ${outOfStockCount} Out of Stock` : '🟢 Stock Healthy'}
+            <span style={styles.reorderBadge}>INVENTORY FORECASTING</span>
+            <span style={outOfStockCount > 0 ? styles.criticalBadge : styles.healthyBadge}>
+              {outOfStockCount > 0 ? `⚠️ ${outOfStockCount} Out of Stock` : '✓ Stock Healthy'}
             </span>
           </div>
-          <h1 style={styles.title}>Smart Reorder & Procurement Alerts</h1>
+          <h1 style={styles.title}>Smart Reorder & Procurement</h1>
           <p style={styles.subtitle}>
-            Algorithmic stock depletion forecasting and 1-click WhatsApp purchase orders for mandi distributors.
+            Continuous inventory velocity forecasting with 1-click WhatsApp purchase orders for wholesale distributors.
           </p>
         </div>
 
@@ -102,69 +102,69 @@ export default function SmartReorderPage() {
       {loading ? (
         <div style={styles.loadingState}>
           <div style={styles.spinner} />
-          <p style={styles.loadingText}>Checking inventory thresholds...</p>
+          <p style={styles.loadingText}>Syncing inventory forecast models...</p>
         </div>
       ) : (
         <>
           {/* KPI Cards */}
           <div style={styles.kpiGrid}>
-            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #EF4444' }}>
+            <div style={styles.kpiCard}>
               <span style={styles.kpiLabel}>ITEMS NEEDING REORDER</span>
-              <span style={{ ...styles.kpiVal, color: '#DC2626' }}>{reorderItems.length} Products</span>
-              <span style={styles.kpiSub}>Stock at or below minimum threshold</span>
+              <span style={{ ...styles.kpiVal, color: '#FF3B30' }}>{reorderItems.length}</span>
+              <span style={styles.kpiSub}>At or below minimum buffer threshold</span>
             </div>
 
             <div style={styles.kpiCard}>
               <span style={styles.kpiLabel}>OUT OF STOCK (CRITICAL)</span>
-              <span style={{ ...styles.kpiVal, color: outOfStockCount > 0 ? '#B91C1C' : '#0F172A' }}>
-                {outOfStockCount} Items
+              <span style={{ ...styles.kpiVal, color: outOfStockCount > 0 ? '#FF3B30' : '#1D1D1F' }}>
+                {outOfStockCount}
               </span>
-              <span style={styles.kpiSub}>Immediate stockout crisis</span>
+              <span style={styles.kpiSub}>Immediate replenishment required</span>
             </div>
 
-            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #10B981' }}>
+            <div style={styles.kpiCard}>
               <span style={styles.kpiLabel}>ESTIMATED REORDER BUDGET</span>
-              <span style={{ ...styles.kpiVal, color: '#047857' }}>
+              <span style={{ ...styles.kpiVal, color: '#10B981' }}>
                 ₹{totalBudgetNeeded.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </span>
-              <span style={styles.kpiSub}>Wholesale replenishment cost</span>
+              <span style={styles.kpiSub}>Wholesale distributor replenishment cost</span>
             </div>
 
             <div style={styles.kpiCard}>
               <span style={styles.kpiLabel}>TOTAL STORE SKUS</span>
-              <span style={styles.kpiVal}>{products.length} Items</span>
-              <span style={styles.kpiSub}>Active items in store catalog</span>
+              <span style={styles.kpiVal}>{products.length}</span>
+              <span style={styles.kpiSub}>Tracked inventory items in catalog</span>
             </div>
           </div>
 
-          {/* Filter Tabs */}
-          <div style={styles.filterRow}>
+          {/* iOS Segmented Filter Tabs */}
+          <div style={styles.segmentedControl}>
             <button
               style={{
-                ...styles.filterBtn,
-                ...(filter === 'all_alerts' ? styles.filterBtnActive : {}),
+                ...styles.segmentedBtn,
+                ...(filter === 'all_alerts' ? styles.segmentedBtnActive : {}),
               }}
               onClick={() => setFilter('all_alerts')}
             >
-              🚨 All Alerts ({reorderItems.length})
+              All Alerts ({reorderItems.length})
             </button>
             <button
               style={{
-                ...styles.filterBtn,
-                ...(filter === 'out_of_stock' ? styles.filterBtnActive : {}),
+                ...styles.segmentedBtn,
+                ...(filter === 'out_of_stock' ? styles.segmentedBtnActive : {}),
               }}
               onClick={() => setFilter('out_of_stock')}
             >
-              🔴 Out of Stock ({outOfStockCount})
+              Out of Stock ({outOfStockCount})
             </button>
             <button
               style={{
-                ...styles.filterBtn,
-                ...(filter === 'low_stock' ? styles.filterBtnActive : {}),
+                ...styles.segmentedBtn,
+                ...(filter === 'low_stock' ? styles.segmentedBtnActive : {}),
               }}
               onClick={() => setFilter('low_stock')}
             >
-              🟡 Low Stock ({Math.max(0, reorderItems.length - outOfStockCount)})
+              Low Stock ({Math.max(0, reorderItems.length - outOfStockCount)})
             </button>
           </div>
 
@@ -172,21 +172,21 @@ export default function SmartReorderPage() {
           <div style={styles.tableCard}>
             <div style={styles.tableHeaderRow}>
               <div>
-                <h2 style={styles.tableTitle}>Recommended Replenishment Orders</h2>
+                <h2 style={styles.tableTitle}>Recommended Wholesale Replenishment</h2>
                 <span style={styles.tableSubtitle}>
-                  Quantities calculated automatically based on min alert buffer safety margins.
+                  Order batches calculated dynamically based on safety stock threshold margins.
                 </span>
               </div>
             </div>
 
             {filteredItems.length === 0 ? (
               <div style={styles.emptyState}>
-                <div style={{ fontSize: '36px', marginBottom: '8px' }}>🎉</div>
-                <h4 style={{ margin: '0 0 4px 0', color: '#0F172A', fontSize: '16px' }}>
+                <div style={{ fontSize: '42px', marginBottom: '12px' }}>✨</div>
+                <h4 style={{ margin: '0 0 6px 0', color: '#1D1D1F', fontSize: '17px', fontWeight: 700 }}>
                   All Inventory Levels Are Healthy
                 </h4>
-                <p style={{ margin: 0, color: '#64748B', fontSize: '13px' }}>
-                  No items require replenishment for the selected filter at this moment.
+                <p style={{ margin: 0, color: '#86868B', fontSize: '13px' }}>
+                  No items require replenishment for this filter criteria.
                 </p>
               </div>
             ) : (
@@ -200,37 +200,38 @@ export default function SmartReorderPage() {
                       <th style={styles.th}>CURRENT STOCK</th>
                       <th style={styles.th}>MIN ALERT</th>
                       <th style={styles.th}>SUGGESTED REORDER</th>
-                      <th style={styles.th}>WHOLESALE RATE (₹)</th>
-                      <th style={styles.th}>EST. BUDGET (₹)</th>
+                      <th style={styles.th}>WHOLESALE RATE</th>
+                      <th style={styles.th}>EST. BUDGET</th>
                       <th style={styles.th}>STATUS</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredItems.map((item) => (
                       <tr key={item.id} style={styles.tr}>
-                        <td style={{ ...styles.td, fontWeight: 700 }}>{item.name}</td>
-                        <td style={{ ...styles.td, color: '#64748B' }}>{item.nameHindi || '—'}</td>
+                        <td style={{ ...styles.td, fontWeight: 700, color: '#1D1D1F' }}>{item.name}</td>
+                        <td style={{ ...styles.td, color: '#86868B' }}>{item.nameHindi || '—'}</td>
                         <td style={{ ...styles.td, textTransform: 'capitalize' }}>
                           {item.category.replace('-', ' ')}
                         </td>
                         <td style={styles.td}>
                           <span
                             style={{
-                              fontWeight: 800,
-                              color: item.isOut ? '#DC2626' : '#D97706',
+                              fontWeight: 700,
+                              fontVariantNumeric: 'tabular-nums',
+                              color: item.isOut ? '#FF3B30' : '#FF9500',
                             }}
                           >
                             {item.currentStock} {item.unit}
                           </span>
                         </td>
-                        <td style={styles.td}>
+                        <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>
                           {item.minStockAlert} {item.unit}
                         </td>
-                        <td style={{ ...styles.td, fontWeight: 800, color: '#10B981' }}>
+                        <td style={{ ...styles.td, fontWeight: 700, color: '#10B981', fontVariantNumeric: 'tabular-nums' }}>
                           +{item.suggestedQty} {item.unit}
                         </td>
-                        <td style={styles.td}>₹{item.purchasePrice}</td>
-                        <td style={{ ...styles.td, fontWeight: 800, color: '#0F172A' }}>
+                        <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>₹{item.purchasePrice}</td>
+                        <td style={{ ...styles.td, fontWeight: 700, color: '#1D1D1F', fontVariantNumeric: 'tabular-nums' }}>
                           ₹{item.estCost.toLocaleString('en-IN')}
                         </td>
                         <td style={styles.td}>
@@ -260,7 +261,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
-    paddingBottom: '40px',
+    paddingBottom: '48px',
   },
   header: {
     display: 'flex',
@@ -273,143 +274,175 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '6px',
+    marginBottom: '8px',
   },
   reorderBadge: {
     fontSize: '11px',
-    fontWeight: 800,
-    letterSpacing: '0.5px',
-    color: '#D97706',
-    backgroundColor: '#FEF3C7',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    fontWeight: 700,
+    letterSpacing: '0.04em',
+    color: '#FF9500',
+    backgroundColor: 'rgba(255, 149, 0, 0.12)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
   },
-  alertBadge: {
+  criticalBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#0F172A',
-    backgroundColor: '#F1F5F9',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    color: '#FF3B30',
+    backgroundColor: 'rgba(255, 59, 48, 0.12)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
+  },
+  healthyBadge: {
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: '4px 10px',
+    borderRadius: '9999px',
   },
   title: {
-    fontSize: '26px',
+    fontSize: '28px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
     margin: 0,
-    letterSpacing: '-0.5px',
+    letterSpacing: '-0.03em',
   },
   subtitle: {
     fontSize: '14px',
-    color: '#64748B',
-    marginTop: '4px',
+    color: '#86868B',
+    marginTop: '6px',
     margin: 0,
+    letterSpacing: '-0.01em',
   },
   headerActions: {
     display: 'flex',
     gap: '12px',
   },
   btnPrimary: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#1D1D1F',
     color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '10px',
-    padding: '10px 18px',
+    borderWidth: 0,
+    borderStyle: 'none',
+    borderRadius: '9999px',
+    padding: '12px 22px',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)',
+    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
+    transition: 'all 0.15s ease',
   },
   loadingState: {
-    padding: '60px 20px',
+    padding: '80px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#2563EB',
+    borderWidth: 3,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderTopColor: '#10B981',
     borderRadius: '50%',
-    margin: '0 auto 12px',
+    margin: '0 auto 14px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#86868B',
     margin: 0,
+    fontWeight: 500,
   },
   kpiGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
     gap: '16px',
   },
   kpiCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
-    padding: '20px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderRadius: '20px',
+    padding: '22px',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.02)',
   },
   kpiLabel: {
     fontSize: '11px',
-    fontWeight: 800,
-    color: '#64748B',
-    letterSpacing: '0.5px',
+    fontWeight: 700,
+    color: '#86868B',
+    letterSpacing: '0.04em',
     marginBottom: '8px',
   },
   kpiVal: {
-    fontSize: '26px',
+    fontSize: '30px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
+    letterSpacing: '-0.03em',
+    fontVariantNumeric: 'tabular-nums',
     marginBottom: '4px',
   },
   kpiSub: {
     fontSize: '12px',
-    color: '#94A3B8',
+    color: '#86868B',
+    letterSpacing: '-0.01em',
   },
-  filterRow: {
-    display: 'flex',
-    gap: '8px',
+  segmentedControl: {
+    display: 'inline-flex',
+    backgroundColor: 'rgba(118, 118, 128, 0.1)',
+    padding: '4px',
+    borderRadius: '12px',
+    gap: '4px',
+    alignSelf: 'flex-start',
   },
-  filterBtn: {
-    backgroundColor: '#FFFFFF',
-    border: '1.5px solid #E2E8F0',
-    borderRadius: '10px',
-    padding: '8px 16px',
-    fontSize: '12px',
+  segmentedBtn: {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderStyle: 'none',
+    borderRadius: '8px',
+    padding: '8px 18px',
+    fontSize: '13px',
     fontWeight: 600,
-    color: '#475569',
+    color: '#636366',
     cursor: 'pointer',
+    transition: 'all 0.15s ease',
   },
-  filterBtnActive: {
-    backgroundColor: '#0F172A',
-    color: '#FFFFFF',
-    borderColor: '#0F172A',
+  segmentedBtnActive: {
+    backgroundColor: '#FFFFFF',
+    color: '#1D1D1F',
     fontWeight: 700,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
   },
   tableCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderRadius: '20px',
     padding: '24px',
+    boxShadow: '0 2px 14px rgba(0, 0, 0, 0.02)',
   },
   tableHeaderRow: {
-    marginBottom: '18px',
+    marginBottom: '20px',
   },
   tableTitle: {
-    fontSize: '16px',
-    fontWeight: 800,
-    color: '#0F172A',
+    fontSize: '17px',
+    fontWeight: 700,
+    color: '#1D1D1F',
     margin: 0,
+    letterSpacing: '-0.02em',
   },
   tableSubtitle: {
-    fontSize: '12px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     marginTop: '4px',
     display: 'block',
   },
@@ -424,38 +457,43 @@ const styles: Record<string, React.CSSProperties> = {
   th: {
     padding: '12px 16px',
     fontSize: '11px',
-    fontWeight: 800,
-    color: '#64748B',
-    letterSpacing: '0.5px',
-    borderBottom: '1px solid #E2E8F0',
-    backgroundColor: '#F8FAFC',
+    fontWeight: 700,
+    color: '#86868B',
+    letterSpacing: '0.04em',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
+    backgroundColor: '#FBFBFC',
   },
   tr: {
-    borderBottom: '1px solid #F1F5F9',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
+    transition: 'background-color 0.12s ease',
   },
   td: {
     padding: '14px 16px',
     fontSize: '13px',
-    color: '#334155',
+    color: '#1D1D1F',
   },
   outBadge: {
-    backgroundColor: '#FEE2E2',
-    color: '#B91C1C',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    backgroundColor: 'rgba(255, 59, 48, 0.12)',
+    color: '#FF3B30',
+    padding: '4px 10px',
+    borderRadius: '9999px',
     fontSize: '11px',
-    fontWeight: 800,
+    fontWeight: 700,
   },
   lowBadge: {
-    backgroundColor: '#FEF3C7',
-    color: '#92400E',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    backgroundColor: 'rgba(255, 149, 0, 0.12)',
+    color: '#FF9500',
+    padding: '4px 10px',
+    borderRadius: '9999px',
     fontSize: '11px',
-    fontWeight: 800,
+    fontWeight: 700,
   },
   emptyState: {
-    padding: '48px 20px',
+    padding: '56px 20px',
     textAlign: 'center',
   },
 };

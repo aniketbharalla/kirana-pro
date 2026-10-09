@@ -449,7 +449,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                 />
               ) : nativePermission?.granted ? (
                 <CameraView
-                  style={StyleSheet.absoluteFillObject}
+                  style={StyleSheet.absoluteFill}
                   facing="back"
                   barcodeScannerSettings={{
                     barcodeTypes: [

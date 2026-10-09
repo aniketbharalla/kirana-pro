@@ -52,28 +52,41 @@ export default function DashboardOverviewPage() {
 
   return (
     <div style={styles.container}>
-      {/* Welcome Banner */}
+      {/* Apple-Style Hero Command Banner */}
       <div style={styles.banner}>
         <div style={styles.bannerContent}>
           <div style={styles.pill}>✨ STORE COMMAND CENTER</div>
           <h2 style={styles.bannerTitle}>
-            Welcome, {profile?.displayName || 'Store Owner'}!
+            Welcome, {profile?.displayName || 'Store Owner'}
           </h2>
           <p style={styles.bannerSub}>
-            Real-time live synchronization with your store. Manage catalog, monitor inventory,
-            audit sales invoices, and track customer credit khata.
+            Real-time live cloud synchronization. Manage retail catalog, monitor low inventory alerts,
+            generate customer GST invoices, and track Udhar Khata ledger.
           </p>
         </div>
 
         <div style={styles.bannerActions}>
+          <Link
+            href="/pos"
+            style={{
+              ...styles.primaryBtn,
+              backgroundColor: '#10B981',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+            }}
+          >
+            ⚡ POS Quick Billing (F4)
+          </Link>
           <Link href="/products" style={styles.primaryBtn}>
             ➕ Add Product
           </Link>
+          <Link href="/purchases/new" style={styles.accentBtn}>
+            ⚡ Inward via OCR
+          </Link>
           <Link href="/bills" style={styles.secondaryBtn}>
-            🧾 Sales & Invoices
+            🧾 Sales Invoices
           </Link>
           <Link href="/khata" style={styles.secondaryBtn}>
-            📒 Customer Khata
+            📒 Khata Ledger
           </Link>
         </div>
       </div>
@@ -112,28 +125,38 @@ export default function DashboardOverviewPage() {
           <div style={styles.sectionCard}>
             <div style={styles.sectionHeader}>
               <div>
-                <h3 style={styles.sectionTitle}>Catalog Inventory</h3>
+                <span style={styles.sectionCaption}>STORE INVENTORY</span>
+                <h3 style={styles.sectionTitle}>Catalog Overview</h3>
                 <p style={styles.sectionSub}>Latest items synchronized with cloud database</p>
               </div>
               <Link href="/products" style={styles.linkMore}>
                 View All Catalog →
               </Link>
             </div>
-            <ProductsTable products={products.slice(0, 8)} />
+            <ProductsTable
+              products={products.slice(0, 10)}
+              showActions={false}
+              compact={true}
+            />
           </div>
 
-          {/* Recent Stock Audit Movements */}
+          {/* Stock Log Preview */}
           <div style={styles.sectionCard}>
             <div style={styles.sectionHeader}>
               <div>
-                <h3 style={styles.sectionTitle}>Stock Movement Ledger</h3>
-                <p style={styles.sectionSub}>Live audit trail of restocks and sales</p>
+                <span style={styles.sectionCaption}>AUDIT TRAIL</span>
+                <h3 style={styles.sectionTitle}>Recent Stock Movements</h3>
+                <p style={styles.sectionSub}>Live audit log of sales, purchases, and manual updates</p>
               </div>
               <Link href="/stock" style={styles.linkMore}>
-                Full Ledger →
+                View Full Log →
               </Link>
             </div>
-            <StockLog movements={movements.slice(0, 8)} productMap={productMap} />
+            <StockLog
+              movements={movements.slice(0, 8)}
+              productMap={productMap}
+              compact={true}
+            />
           </div>
         </div>
       )}
@@ -143,73 +166,89 @@ export default function DashboardOverviewPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    maxWidth: '1300px',
+    maxWidth: '1280px',
     margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: '24px',
+    gap: '4px',
   },
   banner: {
-    backgroundColor: '#064E3B',
-    backgroundImage: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
-    borderRadius: '16px',
-    padding: '28px 32px',
+    backgroundColor: '#1D1D1F',
     color: '#FFFFFF',
+    borderRadius: '20px',
+    padding: '32px 28px',
+    marginBottom: '24px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '20px',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.15)',
   },
   bannerContent: {
     maxWidth: '640px',
   },
   pill: {
     display: 'inline-block',
-    fontSize: '11px',
+    fontSize: '10px',
     fontWeight: 800,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    color: '#A7F3D0',
-    padding: '4px 10px',
-    borderRadius: '20px',
-    letterSpacing: '0.5px',
-    marginBottom: '8px',
+    letterSpacing: '0.05em',
+    color: '#34D399',
+    backgroundColor: 'rgba(52, 211, 153, 0.12)',
+    border: '1px solid rgba(52, 211, 153, 0.25)',
+    padding: '3px 9px',
+    borderRadius: '999px',
+    marginBottom: '10px',
+    textTransform: 'uppercase',
   },
   bannerTitle: {
-    fontSize: '24px',
+    fontSize: '26px',
     fontWeight: 800,
-    margin: '0 0 6px 0',
+    margin: '0 0 8px 0',
+    letterSpacing: '-0.03em',
+    lineHeight: 1.15,
   },
   bannerSub: {
-    fontSize: '14px',
-    color: '#D1FAE5',
+    fontSize: '13px',
+    color: '#A1A1A6',
     margin: 0,
     lineHeight: 1.5,
   },
   bannerActions: {
     display: 'flex',
-    gap: '12px',
+    gap: '10px',
     flexWrap: 'wrap',
   },
   primaryBtn: {
     backgroundColor: '#10B981',
     color: '#FFFFFF',
     padding: '10px 18px',
-    borderRadius: '10px',
+    borderRadius: '11px',
     fontSize: '13px',
     fontWeight: 700,
     textDecoration: 'none',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+  },
+  accentBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    color: '#1D1D1F',
+    padding: '10px 18px',
+    borderRadius: '11px',
+    fontSize: '13px',
+    fontWeight: 700,
+    textDecoration: 'none',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
   },
   secondaryBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     color: '#FFFFFF',
     padding: '10px 16px',
-    borderRadius: '10px',
+    borderRadius: '11px',
     fontSize: '13px',
     fontWeight: 600,
     textDecoration: 'none',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
   },
   loadingBox: {
     padding: '60px',
@@ -219,46 +258,50 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: '12px',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
   },
   spinner: {
     width: '32px',
     height: '32px',
     borderRadius: '50%',
-    border: '3px solid #E2E8F0',
+    borderWidth: '3px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
     borderTopColor: '#10B981',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '13px',
     fontWeight: 600,
-    color: '#64748B',
+    color: '#86868B',
   },
   emptyCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
+    borderRadius: '20px',
     padding: '48px 32px',
     textAlign: 'center',
-    border: '1px solid #E2E8F0',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
   },
   emptyIcon: {
-    fontSize: '48px',
+    fontSize: '44px',
     marginBottom: '12px',
   },
   emptyTitle: {
     fontSize: '18px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
     marginBottom: '6px',
+    letterSpacing: '-0.02em',
   },
   emptyDesc: {
-    fontSize: '14px',
-    color: '#64748B',
-    maxWidth: '480px',
+    fontSize: '13px',
+    color: '#86868B',
+    maxWidth: '460px',
     lineHeight: 1.5,
     marginBottom: '20px',
   },
@@ -269,9 +312,9 @@ const styles: Record<string, React.CSSProperties> = {
   addBtn: {
     backgroundColor: '#10B981',
     color: '#FFFFFF',
-    padding: '10px 20px',
-    borderRadius: '10px',
-    fontSize: '14px',
+    padding: '10px 22px',
+    borderRadius: '11px',
+    fontSize: '13px',
     fontWeight: 700,
     textDecoration: 'none',
   },
@@ -282,31 +325,43 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
     padding: '24px',
+    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02)',
   },
   sectionHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '20px',
+    alignItems: 'flex-start',
+    marginBottom: '18px',
+  },
+  sectionCaption: {
+    fontSize: '10px',
+    fontWeight: 700,
+    letterSpacing: '0.05em',
+    color: '#86868B',
+    textTransform: 'uppercase',
   },
   sectionTitle: {
-    fontSize: '18px',
+    fontSize: '17px',
     fontWeight: 800,
-    color: '#0F172A',
-    margin: '0 0 4px 0',
+    color: '#1D1D1F',
+    margin: '2px 0',
+    letterSpacing: '-0.02em',
   },
   sectionSub: {
-    fontSize: '13px',
-    color: '#64748B',
+    fontSize: '12px',
+    color: '#86868B',
     margin: 0,
   },
   linkMore: {
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: 700,
     color: '#059669',
     textDecoration: 'none',
+    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    padding: '6px 12px',
+    borderRadius: '8px',
   },
 };

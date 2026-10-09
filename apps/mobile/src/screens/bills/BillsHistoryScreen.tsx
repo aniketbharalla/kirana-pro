@@ -284,6 +284,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginTop: 4,
   },
+  modeBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
   modeBadgeCash: {
     backgroundColor: '#ECFDF5',
   },

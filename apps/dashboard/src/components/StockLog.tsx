@@ -6,6 +6,7 @@ import { StockMovement } from '@kirana-pro/shared';
 export interface StockLogProps {
   movements: StockMovement[];
   productMap?: Record<string, string>;
+  compact?: boolean;
 }
 
 export const StockLog: React.FC<StockLogProps> = ({

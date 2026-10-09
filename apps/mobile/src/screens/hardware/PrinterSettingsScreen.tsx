@@ -42,8 +42,8 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
 
   const storeInfo = {
     name: store?.name || 'Kirana Pro Dukaan',
-    address: store?.address || 'Main Market, Delhi',
-    phone: store?.phoneNumber || '9876543210',
+    address: typeof store?.address === 'string' ? store.address : store?.address?.street ? `${store.address.street}, ${store.address.city}` : 'Main Market, Delhi',
+    phone: (store as any)?.phoneNumber || (store as any)?.phone || '9876543210',
     gstin: store?.gstNumber || '07AABCK1234F1Z5',
   };
 

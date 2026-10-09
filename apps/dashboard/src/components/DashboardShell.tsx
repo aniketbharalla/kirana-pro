@@ -7,7 +7,7 @@ import { Sidebar } from './Sidebar';
 
 export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
-  const { user, profile, store, loading, signOut } = useAuth();
+  const { user, profile, store, loading, signOut, activeStaff, activeShift, staffSignOut } = useAuth();
 
   const isLoginPage = pathname === '/login';
 
@@ -19,12 +19,21 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
     return (
       <div style={styles.loadingScreen}>
         <div style={styles.spinner} />
-        <p style={styles.loadingText}>Loading Kirana Pro Store...</p>
+        <p style={styles.loadingText}>Syncing Kirana Pro Store OS...</p>
       </div>
     );
   }
 
-  const initials = profile?.displayName
+  const isStaffSession = Boolean(activeStaff);
+
+  const initials = isStaffSession
+    ? (activeStaff?.name || 'ST')
+        .split(' ')
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : profile?.displayName
     ? profile.displayName
         .split(' ')
         .map((n) => n[0])
@@ -35,16 +44,32 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
     ? user.email.slice(0, 2).toUpperCase()
     : 'KP';
 
-  const storeName = store?.name || (profile?.displayName ? `${profile.displayName}'s Store` : 'My Store');
+  const storeName = store?.name || (profile?.displayName ? `${profile.displayName}'s Store` : 'My Kirana Store');
+
+  const displayName = isStaffSession
+    ? activeStaff?.name
+    : (profile?.displayName || 'Store Owner');
+
+  const displayRole = isStaffSession
+    ? `🧑‍💼 Staff (${activeStaff?.role.toUpperCase()}) • Counter ${activeShift?.counterNumber || 1}`
+    : (profile?.phoneNumber || profile?.email || 'Store Admin');
+
+  const handleSignOutAction = () => {
+    if (isStaffSession) {
+      staffSignOut();
+    } else {
+      signOut();
+    }
+  };
 
   return (
     <div style={styles.layoutContainer}>
-      <Suspense fallback={<aside style={{ width: 260, backgroundColor: '#FFFFFF' }} />}>
+      <Suspense fallback={<aside style={{ width: 264, backgroundColor: 'rgba(255, 255, 255, 0.72)' }} />}>
         <Sidebar />
       </Suspense>
 
       <div style={styles.mainContent}>
-        {/* Top Global Bar */}
+        {/* Top Apple Frosted Header */}
         <header style={styles.header}>
           <div>
             <span style={styles.storeBadge}>🏪 ACTIVE STORE</span>
@@ -54,7 +79,7 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
           <div style={styles.headerRight}>
             <div style={styles.freeBadge}>
               <span style={styles.freeDot}>●</span>
-              <span>100% Free Plan</span>
+              <span>Free Community Plan</span>
             </div>
 
             <div style={styles.userInfo}>
@@ -62,19 +87,19 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
                 <span>{initials}</span>
               </div>
               <div style={styles.userMeta}>
-                <span style={styles.userName}>{profile?.displayName || 'Store Owner'}</span>
+                <span style={styles.userName}>{displayName}</span>
                 <span style={styles.userRole}>
-                  {profile?.phoneNumber || profile?.email || 'Authenticated'}
+                  {displayRole}
                 </span>
               </div>
             </div>
 
             <button
-              onClick={signOut}
+              onClick={handleSignOutAction}
               style={styles.signOutBtn}
-              title="Sign Out of Dashboard"
+              title={isStaffSession ? "Close Shift & Sign Out" : "Sign Out of Dashboard"}
             >
-              Sign Out 🚪
+              {isStaffSession ? 'End Shift 🚪' : 'Sign Out 🚪'}
             </button>
           </div>
         </header>
@@ -90,11 +115,11 @@ const styles: Record<string, React.CSSProperties> = {
   layoutContainer: {
     display: 'flex',
     minHeight: '100vh',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F5F7',
   },
   loginContainer: {
     minHeight: '100vh',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F5F7',
   },
   loadingScreen: {
     display: 'flex',
@@ -102,21 +127,24 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '100vh',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F5F5F7',
     gap: '16px',
   },
   spinner: {
-    width: '40px',
-    height: '40px',
+    width: '36px',
+    height: '36px',
     borderRadius: '50%',
-    border: '3px solid #E2E8F0',
+    borderWidth: '3px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
     borderTopColor: '#10B981',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: 600,
-    color: '#64748B',
+    color: '#86868B',
+    letterSpacing: '-0.01em',
   },
   mainContent: {
     flex: 1,
@@ -125,50 +153,56 @@ const styles: Record<string, React.CSSProperties> = {
     overflowY: 'auto',
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1px solid #E2E8F0',
-    padding: '16px 32px',
+    backgroundColor: 'rgba(255, 255, 255, 0.78)',
+    backdropFilter: 'blur(25px) saturate(190%)',
+    WebkitBackdropFilter: 'blur(25px) saturate(190%)',
+    borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+    padding: '14px 28px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     position: 'sticky',
     top: 0,
     zIndex: 10,
+    boxShadow: '0 1px 8px rgba(0, 0, 0, 0.02)',
   },
   storeBadge: {
     fontSize: '10px',
     fontWeight: 800,
     color: '#065F46',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
     padding: '2px 8px',
-    borderRadius: '4px',
-    letterSpacing: '0.5px',
+    borderRadius: '999px',
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase',
   },
   headerTitle: {
-    fontSize: '20px',
+    fontSize: '19px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
     marginTop: '2px',
+    letterSpacing: '-0.025em',
   },
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
+    gap: '14px',
   },
   freeBadge: {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    backgroundColor: '#F1F5F9',
-    padding: '6px 12px',
-    borderRadius: '20px',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    border: '1px solid rgba(0, 0, 0, 0.04)',
+    padding: '5px 12px',
+    borderRadius: '999px',
     fontSize: '12px',
     fontWeight: 600,
-    color: '#475569',
+    color: '#555558',
   },
   freeDot: {
     color: '#10B981',
-    fontSize: '10px',
+    fontSize: '8px',
   },
   userInfo: {
     display: 'flex',
@@ -176,17 +210,17 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '10px',
   },
   avatar: {
-    width: '38px',
-    height: '38px',
-    borderRadius: '50%',
-    backgroundColor: '#ECFDF5',
-    border: '1.5px solid #10B981',
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    border: '1px solid rgba(16, 185, 129, 0.25)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '13px',
     fontWeight: 800,
-    color: '#065F46',
+    color: '#047857',
   },
   userMeta: {
     display: 'flex',
@@ -195,27 +229,26 @@ const styles: Record<string, React.CSSProperties> = {
   userName: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#1E293B',
+    color: '#1D1D1F',
     lineHeight: 1.2,
   },
   userRole: {
     fontSize: '11px',
-    color: '#64748B',
+    color: '#86868B',
     lineHeight: 1.2,
   },
   signOutBtn: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(239, 68, 68, 0.08)',
     color: '#DC2626',
-    border: '1px solid #FECACA',
-    borderRadius: '8px',
-    padding: '8px 14px',
+    border: 'none',
+    borderRadius: '9px',
+    padding: '7px 13px',
     fontSize: '12px',
     fontWeight: 700,
     cursor: 'pointer',
-    transition: 'all 0.15s ease',
   },
   pageBody: {
-    padding: '32px',
+    padding: '28px',
     flex: 1,
   },
 };

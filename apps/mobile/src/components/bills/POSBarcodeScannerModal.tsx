@@ -230,7 +230,7 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
         storeId,
         {
           name: unrecognizedName.trim(),
-          nameHindi: null,
+          nameHindi: undefined,
           category: 'snacks-namkeen',
           barcode: unrecognizedCode,
           purchasePrice: cost,
@@ -263,7 +263,7 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
         id: `custom_${Date.now()}`,
         storeId,
         name: unrecognizedName.trim(),
-        nameHindi: null,
+        nameHindi: undefined,
         category: 'general',
         barcode: unrecognizedCode,
         purchasePrice: cost,
@@ -378,7 +378,7 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
                 />
               ) : nativePermission?.granted ? (
                 <CameraView
-                  style={StyleSheet.absoluteFillObject}
+                  style={StyleSheet.absoluteFill}
                   facing="back"
                   barcodeScannerSettings={{
                     barcodeTypes: [

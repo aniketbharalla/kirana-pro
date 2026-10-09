@@ -33,18 +33,24 @@ export const MainTabNavigator: React.FC<{
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#94A3B8',
+        tabBarInactiveTintColor: '#8E8E93',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopColor: '#E2E8F0',
-          borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
+          borderTopColor: 'rgba(60, 60, 67, 0.12)',
+          borderTopWidth: 0.5,
+          height: 68,
+          paddingBottom: 10,
           paddingTop: 8,
+          elevation: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -1 },
+          shadowOpacity: 0.03,
+          shadowRadius: 4,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '700',
+          fontSize: 10.5,
+          fontWeight: '600',
+          letterSpacing: -0.1,
         },
       }}
     >
@@ -63,7 +69,7 @@ export const MainTabNavigator: React.FC<{
         component={ProductsComponent || ProductsNavigator}
         listeners={({ navigation }) => ({
           tabPress: () => {
-            navigation.navigate('Products', { screen: 'ProductList' });
+            (navigation as any).navigate('Products', { screen: 'ProductList' });
           },
         })}
         options={{

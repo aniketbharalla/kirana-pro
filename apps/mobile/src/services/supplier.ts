@@ -14,9 +14,9 @@ import { useSupplierStore } from '../store/supplierStore';
 
 export const createSupplier = async (
   storeId: string,
-  data: Omit<Supplier, 'id' | 'totalPurchases' | 'totalPaid' | 'balance' | 'invoiceCount' | 'createdAt' | 'updatedAt'>
+  data: Omit<Supplier, 'id' | 'storeId' | 'totalPurchases' | 'totalPaid' | 'balance' | 'invoiceCount' | 'createdAt' | 'updatedAt'>
 ): Promise<Supplier> => {
-  supplierSchema.parse(data);
+  supplierSchema.parse({ ...data, storeId });
 
   const now = Date.now();
   const supplierId = `sup_${now}_${Math.random().toString(36).substring(2, 6)}`;

@@ -8,12 +8,15 @@ import {
   subscribeStoreProducts,
   saveStoreProduct,
   deleteStoreProduct,
+  autoDiscoverAndMigrateProducts,
+  seedStarterProducts,
 } from '../../lib/storeService';
 
 export default function ProductsPage() {
   const { storeId } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [discovering, setDiscoveredState] = useState(false);
 
   // Modal States
   const [showImportModal, setShowImportModal] = useState(false);
@@ -39,13 +42,60 @@ export default function ProductsPage() {
 
   // Subscribe to real store products in Firestore
   useEffect(() => {
-    if (!storeId) return;
+    // Safety fallback: never spin indefinitely
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 3500);
+
+    if (!storeId) {
+      return () => clearTimeout(safetyTimer);
+    }
+
     const unsubscribe = subscribeStoreProducts(storeId, (data) => {
       setProducts(data);
       setLoading(false);
+      clearTimeout(safetyTimer);
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribe();
+      clearTimeout(safetyTimer);
+    };
   }, [storeId]);
+
+  // Handle manual product recovery / discovery
+  const handleDiscoverExisting = async () => {
+    if (!storeId) return;
+    setDiscoveredState(true);
+    try {
+      const found = await autoDiscoverAndMigrateProducts(storeId);
+      if (found.length > 0) {
+        setProducts(found);
+        alert(`✓ Successfully discovered and linked ${found.length} products to your store!`);
+      } else {
+        alert('No existing products found in alternate sessions. You can add products manually or load the starter catalog below.');
+      }
+    } catch (err: any) {
+      alert(`Discovery note: ${err.message}`);
+    } finally {
+      setDiscoveredState(false);
+    }
+  };
+
+  // Handle loading 12 standard staples
+  const handleSeedStaples = async () => {
+    if (!storeId) return;
+    setSaving(true);
+    try {
+      const seeded = await seedStarterProducts(storeId);
+      setProducts(seeded);
+      alert(`✓ Added ${seeded.length} top Indian grocery staples to your store catalog!`);
+    } catch (err: any) {
+      alert(`Failed to seed staples: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Export all products as CSV
   const handleExportCsv = () => {
@@ -325,6 +375,14 @@ export default function ProductsPage() {
 
         {/* Action Buttons */}
         <div style={styles.actionsRow}>
+          <button
+            style={styles.btnSecondary}
+            onClick={handleDiscoverExisting}
+            disabled={discovering}
+            title="Scan for products added in previous demo/cashier sessions or alternate stores and link them to your store"
+          >
+            {discovering ? '🔄 Scanning...' : '🔄 Discover Added Products'}
+          </button>
           <button style={styles.btnSecondary} onClick={handleExportCsv}>
             📤 Export CSV
           </button>
@@ -348,11 +406,25 @@ export default function ProductsPage() {
           <div style={styles.emptyIcon}>📦</div>
           <h3 style={styles.emptyTitle}>No Products In Your Store Catalog</h3>
           <p style={styles.emptySubtitle}>
-            Your catalog is currently empty. Add your first item or import an existing CSV file to get started.
+            Your catalog is currently empty. If you previously added products in demo/cashier mode or another store, click <strong>Discover Added Products</strong> to auto-link them now, or start by loading the starter grocery essentials.
           </p>
           <div style={styles.emptyActions}>
-            <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
-              ➕ Add First Product
+            <button
+              style={{ ...styles.btnPrimary, backgroundColor: '#0071E3' }}
+              onClick={handleDiscoverExisting}
+              disabled={discovering}
+            >
+              {discovering ? '🔄 Scanning Stores...' : '🔄 Discover / Recover Added Products'}
+            </button>
+            <button
+              style={{ ...styles.btnSecondary, backgroundColor: '#ECFDF5', borderColor: '#10B981', color: '#065F46', fontWeight: 700 }}
+              onClick={handleSeedStaples}
+              disabled={saving}
+            >
+              ✨ Load 12 Indian Kirana Staples (Atta, Dal, Oil, Salt...)
+            </button>
+            <button style={styles.btnSecondary} onClick={() => setShowAddModal(true)}>
+              ➕ Add Single Product
             </button>
             <button style={styles.btnSecondary} onClick={() => setShowImportModal(true)}>
               📥 Upload Inventory CSV
@@ -622,44 +694,47 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '6px',
   },
   badge: {
-    fontSize: '11px',
+    fontSize: '10px',
     fontWeight: 800,
-    letterSpacing: '0.5px',
-    color: '#059669',
-    backgroundColor: '#ECFDF5',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    letterSpacing: '0.04em',
+    color: '#047857',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: '3px 9px',
+    borderRadius: '999px',
+    textTransform: 'uppercase',
   },
   countBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#64748B',
-    backgroundColor: '#F1F5F9',
-    padding: '3px 8px',
-    borderRadius: '6px',
+    color: '#86868B',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    padding: '3px 9px',
+    borderRadius: '999px',
   },
   title: {
     fontSize: '26px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
     margin: 0,
-    letterSpacing: '-0.5px',
+    letterSpacing: '-0.03em',
+    lineHeight: 1.15,
   },
   subtitle: {
-    fontSize: '14px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     marginTop: '4px',
     margin: 0,
   },
   actionsRow: {
     display: 'flex',
     gap: '10px',
+    flexWrap: 'wrap',
   },
   btnPrimary: {
-    backgroundColor: '#059669',
+    backgroundColor: '#10B981',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '11px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 700,
@@ -667,13 +742,13 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.2)',
+    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
   },
   btnSecondary: {
-    backgroundColor: '#FFFFFF',
-    color: '#334155',
-    border: '1.5px solid #E2E8F0',
-    borderRadius: '10px',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    color: '#555558',
+    border: 'none',
+    borderRadius: '11px',
     padding: '10px 16px',
     fontSize: '13px',
     fontWeight: 600,
@@ -683,29 +758,33 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '20px',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
+    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#059669',
+    borderWidth: '3px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+    borderTopColor: '#10B981',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
-    fontSize: '14px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     margin: 0,
   },
   emptyCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px dashed #CBD5E1',
-    borderRadius: '16px',
-    padding: '50px 24px',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '20px',
+    padding: '64px 24px',
     textAlign: 'center',
+    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
   },
   emptyIcon: {
     fontSize: '44px',
@@ -713,15 +792,17 @@ const styles: Record<string, React.CSSProperties> = {
   },
   emptyTitle: {
     fontSize: '18px',
-    fontWeight: 700,
-    color: '#0F172A',
+    fontWeight: 800,
+    color: '#1D1D1F',
     margin: '0 0 6px 0',
+    letterSpacing: '-0.02em',
   },
   emptySubtitle: {
-    fontSize: '14px',
-    color: '#64748B',
+    fontSize: '13px',
+    color: '#86868B',
     maxWidth: '460px',
     margin: '0 auto 20px',
+    lineHeight: 1.5,
   },
   emptyActions: {
     display: 'flex',
@@ -734,22 +815,24 @@ const styles: Record<string, React.CSSProperties> = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
-    backdropFilter: 'blur(4px)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
+    borderRadius: '24px',
     padding: '28px',
     width: '92%',
     maxWidth: '680px',
     maxHeight: '90vh',
     overflowY: 'auto',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+    boxShadow: '0 20px 48px -8px rgba(0, 0, 0, 0.2)',
+    border: '1px solid rgba(0, 0, 0, 0.08)',
   },
   modalHeader: {
     display: 'flex',
@@ -758,17 +841,18 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '20px',
   },
   modalTitle: {
-    fontSize: '18px',
+    fontSize: '19px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#1D1D1F',
     margin: 0,
+    letterSpacing: '-0.02em',
   },
   closeBtn: {
     background: 'none',
     border: 'none',
     fontSize: '18px',
     cursor: 'pointer',
-    color: '#64748B',
+    color: '#86868B',
   },
   form: {
     display: 'flex',
@@ -788,14 +872,14 @@ const styles: Record<string, React.CSSProperties> = {
   label: {
     fontSize: '12px',
     fontWeight: 600,
-    color: '#334155',
+    color: '#475569',
   },
   input: {
-    border: '1.5px solid #CBD5E1',
+    border: '1px solid rgba(0, 0, 0, 0.1)',
     borderRadius: '10px',
     padding: '9px 12px',
     fontSize: '13px',
-    color: '#0F172A',
+    color: '#1D1D1F',
     outline: 'none',
   },
   importInfo: {
@@ -803,26 +887,26 @@ const styles: Record<string, React.CSSProperties> = {
   },
   importDesc: {
     fontSize: '13px',
-    color: '#475569',
+    color: '#636366',
     lineHeight: 1.5,
     marginBottom: '10px',
   },
   btnDownloadTemplate: {
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #CBD5E1',
+    backgroundColor: '#FAFAFB',
+    border: '1px solid rgba(0, 0, 0, 0.08)',
     borderRadius: '8px',
     padding: '8px 14px',
     fontSize: '12px',
     fontWeight: 600,
-    color: '#0284C7',
+    color: '#0071E3',
     cursor: 'pointer',
   },
   uploadArea: {
-    border: '2px dashed #93C5FD',
-    borderRadius: '12px',
+    border: '2px dashed rgba(0, 113, 227, 0.3)',
+    borderRadius: '16px',
     padding: '30px 16px',
     textAlign: 'center',
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(0, 113, 227, 0.04)',
     cursor: 'pointer',
     marginBottom: '16px',
   },
@@ -839,34 +923,35 @@ const styles: Record<string, React.CSSProperties> = {
   uploadTitle: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#1D4ED8',
+    color: '#0071E3',
   },
   statusBox: {
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #E2E8F0',
-    borderRadius: '8px',
+    backgroundColor: '#FAFAFB',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
+    borderRadius: '10px',
     padding: '10px 14px',
     fontSize: '13px',
-    color: '#334155',
+    color: '#1D1D1F',
     marginBottom: '14px',
   },
   previewBox: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: '10px',
+    backgroundColor: '#FAFAFB',
+    borderRadius: '12px',
     padding: '12px 16px',
     marginBottom: '16px',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
   },
   previewTitle: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#475569',
+    color: '#636366',
     margin: '0 0 8px 0',
   },
   previewList: {
     margin: 0,
     paddingLeft: '18px',
     fontSize: '12px',
-    color: '#334155',
+    color: '#1D1D1F',
   },
   previewItem: {
     marginBottom: '4px',

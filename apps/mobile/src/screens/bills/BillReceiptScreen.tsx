@@ -75,7 +75,7 @@ export const BillReceiptScreen: React.FC = () => {
         name: storeName,
         address: storeAddress,
         phone: storePhone,
-        gstin: store?.gstNumber,
+        gstin: store?.gstNumber || undefined,
       },
       settings
     );

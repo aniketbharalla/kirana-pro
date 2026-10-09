@@ -33,8 +33,8 @@ export const ProductDetailScreen: React.FC = () => {
     if (user?.storeId && productId) {
       setLoadingHistory(true);
       fetchStockHistory(user.storeId, productId)
-        .then((items) => setHistory(items.slice(0, 5)))
-        .catch((e) => console.warn('Could not load stock history:', e))
+        .then((items: StockMovement[]) => setHistory(items.slice(0, 5)))
+        .catch((e: any) => console.warn('Could not load stock history:', e))
         .finally(() => setLoadingHistory(false));
     }
   }, [user?.storeId, productId]);
