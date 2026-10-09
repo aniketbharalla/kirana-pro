@@ -9,21 +9,36 @@ export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { store, profile, activeStaff, activeShift } = useAuth();
 
-  const navLinks = [
-    { href: '/', label: 'Overview', icon: '📊' },
-    { href: '/pos', label: 'POS Quick Billing', icon: '⚡' },
-    { href: '/bills', label: 'Sales & Invoices', icon: '🧾' },
-    { href: '/khata', label: 'Customer Khata', icon: '📒' },
-    { href: '/products', label: 'Products & Catalog', icon: '📦' },
-    { href: '/reorder', label: 'Smart Reorder', icon: '🔄' },
-    { href: '/stock', label: 'Stock Movement Log', icon: '📋' },
-    { href: '/purchases', label: 'Wholesale & OCR', icon: '🚚' },
-    { href: '/suppliers', label: 'Wholesalers Directory', icon: '🏢' },
-    { href: '/galla', label: 'Daily Galla Cash', icon: '💰' },
-    { href: '/staff', label: 'Staff & Shift Register', icon: '🧑‍💼' },
-    { href: '/gst', label: 'GST & Tax Returns', icon: '🏛️' },
-    { href: '/analytics', label: 'Profit & Analytics', icon: '📈' },
-    { href: '/hardware', label: 'Hardware & Printers', icon: '🖨️' },
+  const navSections = [
+    {
+      title: 'BILLING & SALES',
+      links: [
+        { href: '/pos', label: 'POS Quick Billing', icon: '⚡', badge: 'F4' },
+        { href: '/bills', label: 'Sales & Invoices', icon: '🧾' },
+        { href: '/khata', label: 'Customer Khata', icon: '📒' },
+      ],
+    },
+    {
+      title: 'INVENTORY & CATALOG',
+      links: [
+        { href: '/products', label: 'Products & Catalog', icon: '📦' },
+        { href: '/reorder', label: 'Smart Reorder', icon: '🔄' },
+        { href: '/stock', label: 'Stock Movement Log', icon: '📋' },
+        { href: '/purchases', label: 'Wholesale & OCR', icon: '🚚' },
+        { href: '/suppliers', label: 'Wholesalers Directory', icon: '🏢' },
+      ],
+    },
+    {
+      title: 'STORE OPERATIONS',
+      links: [
+        { href: '/', label: 'Overview Dashboard', icon: '📊' },
+        { href: '/galla', label: 'Daily Galla Cash', icon: '💰' },
+        { href: '/staff', label: 'Staff & Shift Register', icon: '🧑‍💼' },
+        { href: '/gst', label: 'GST & Tax Returns', icon: '🏛️' },
+        { href: '/analytics', label: 'Profit & Analytics', icon: '📈' },
+        { href: '/hardware', label: 'Hardware & Printers', icon: '🖨️' },
+      ],
+    },
   ];
 
   return (
@@ -32,39 +47,63 @@ export const Sidebar: React.FC = () => {
       <div style={styles.brandContainer}>
         <div style={styles.logoBadge}>🏪</div>
         <div>
-          <h2 style={styles.brandTitle}>Kirana Pro</h2>
-          <span style={styles.brandSub}>Store OS</span>
+          <div style={styles.brandTitleRow}>
+            <h2 style={styles.brandTitle}>Kirana Pro</h2>
+            <span style={styles.versionPill}>v2.4</span>
+          </div>
+          <span style={styles.brandSub}>Store Operating System</span>
         </div>
       </div>
 
-      {/* Free Plan Glass Card */}
-      <div style={styles.planCard}>
-        <div style={styles.planHeader}>
-          <span style={styles.planDot}>●</span>
-          <span style={styles.planBadge}>100% FREE TIER</span>
-        </div>
-        <p style={styles.planText}>Zero fee • Unlimited cloud stock tracking</p>
+      {/* Free Plan MasterX Chip */}
+      <div style={styles.tierChip}>
+        <div style={styles.tierDot} />
+        <span style={styles.tierText}>100% Free Forever • Zero Subscription</span>
       </div>
 
-      {/* Nav Links */}
+      {/* Navigation Groups */}
       <nav style={styles.nav}>
-        {navLinks.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                ...styles.navItem,
-                ...(isActive ? styles.navItemActive : {}),
-              }}
-            >
-              <span style={styles.navIcon}>{item.icon}</span>
-              <span style={styles.navLabel}>{item.label}</span>
-              {isActive && <div style={styles.activePill} />}
-            </Link>
-          );
-        })}
+        {navSections.map((sec) => (
+          <div key={sec.title} style={styles.sectionGroup}>
+            <span style={styles.sectionTitle}>{sec.title}</span>
+            <div style={styles.sectionLinks}>
+              {sec.links.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    style={{
+                      ...styles.navItem,
+                      ...(isActive ? styles.navItemActive : {}),
+                    }}
+                  >
+                    {isActive && <div style={styles.activeBar} />}
+                    <span style={styles.navIcon}>{item.icon}</span>
+                    <span
+                      style={{
+                        ...styles.navLabel,
+                        ...(isActive ? styles.navLabelActive : {}),
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                    {item.badge && (
+                      <span
+                        style={{
+                          ...styles.itemBadge,
+                          ...(isActive ? styles.itemBadgeActive : {}),
+                        }}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Footer Store Info */}
@@ -77,7 +116,7 @@ export const Sidebar: React.FC = () => {
             {activeStaff ? activeStaff.name : (store?.name || (profile?.displayName ? `${profile.displayName}'s Store` : 'My Store'))}
           </div>
           <div style={styles.storeStatus}>
-            <span style={styles.statusDot}>●</span> {activeStaff ? `Counter ${activeShift?.counterNumber || 1} Active` : 'Firebase Live'}
+            <span style={styles.statusDot}>●</span> {activeStaff ? `Counter ${activeShift?.counterNumber || 1} Active` : 'Cloud Live Sync'}
           </div>
         </div>
       </div>
@@ -87,161 +126,209 @@ export const Sidebar: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   sidebar: {
-    width: '264px',
-    backgroundColor: 'rgba(255, 255, 255, 0.72)',
-    backdropFilter: 'blur(25px) saturate(190%)',
-    WebkitBackdropFilter: 'blur(25px) saturate(190%)',
-    borderRight: '1px solid rgba(0, 0, 0, 0.06)',
+    width: '268px',
+    backgroundColor: '#FFFFFF',
+    borderRight: '1px solid #E2E8F0',
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
     position: 'sticky',
     top: 0,
-    padding: '24px 16px',
-    gap: '18px',
-    boxShadow: '1px 0 10px rgba(0, 0, 0, 0.02)',
+    padding: '20px 16px',
+    gap: '14px',
+    boxShadow: '1px 0 3px rgba(0, 0, 0, 0.02)',
     zIndex: 20,
+    overflowY: 'auto',
   },
   brandContainer: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '0 6px',
+    padding: '4px 6px',
   },
   logoBadge: {
     width: '40px',
     height: '40px',
-    borderRadius: '11px',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    border: '1px solid rgba(16, 185, 129, 0.25)',
+    borderRadius: '12px',
+    backgroundColor: '#EEF2FF',
+    border: '1px solid rgba(99, 102, 241, 0.25)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '20px',
-    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.15)',
+    boxShadow: '0 2px 8px rgba(79, 70, 229, 0.12)',
+  },
+  brandTitleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
   brandTitle: {
     fontSize: '17px',
     fontWeight: 800,
-    color: '#1D1D1F',
+    color: '#0F172A',
+    fontFamily: 'var(--font-display)',
     letterSpacing: '-0.025em',
     lineHeight: 1.2,
+    margin: 0,
+  },
+  versionPill: {
+    fontSize: '10px',
+    fontWeight: 700,
+    color: '#4F46E5',
+    backgroundColor: '#EEF2FF',
+    padding: '1px 6px',
+    borderRadius: '6px',
   },
   brandSub: {
     fontSize: '11px',
-    color: '#86868B',
+    color: '#64748B',
     fontWeight: 600,
     letterSpacing: '0.02em',
-    textTransform: 'uppercase',
   },
-  planCard: {
-    backgroundColor: 'rgba(0, 0, 0, 0.03)',
-    border: '1px solid rgba(0, 0, 0, 0.04)',
-    borderRadius: '12px',
-    padding: '10px 12px',
-  },
-  planHeader: {
+  tierChip: {
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
-    marginBottom: '4px',
+    gap: '8px',
+    backgroundColor: '#F8FAFC',
+    border: '1px solid #E2E8F0',
+    borderRadius: '10px',
+    padding: '8px 10px',
   },
-  planDot: {
-    color: '#10B981',
-    fontSize: '9px',
+  tierDot: {
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    backgroundColor: '#10B981',
   },
-  planBadge: {
-    fontSize: '10px',
-    fontWeight: 800,
-    color: '#065F46',
-    letterSpacing: '0.04em',
-  },
-  planText: {
+  tierText: {
     fontSize: '11px',
-    color: '#64748B',
-    lineHeight: 1.35,
-    margin: 0,
+    fontWeight: 700,
+    color: '#047857',
+    letterSpacing: '-0.01em',
   },
   nav: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '18px',
     flex: 1,
-    overflowY: 'auto',
-    paddingRight: '2px',
+  },
+  sectionGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+  },
+  sectionTitle: {
+    fontSize: '10px',
+    fontWeight: 800,
+    color: '#94A3B8',
+    letterSpacing: '0.06em',
+    padding: '0 10px 4px',
+  },
+  sectionLinks: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
   },
   navItem: {
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '9px 12px',
+    padding: '8px 12px',
     borderRadius: '10px',
+    textDecoration: 'none',
     color: '#475569',
-    fontWeight: 600,
-    fontSize: '13px',
-    transition: 'all 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)',
-    position: 'relative',
+    transition: 'all 0.15s ease',
   },
   navItemActive: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    color: '#047857',
-    fontWeight: 700,
+    backgroundColor: '#EEF2FF',
+    color: '#4F46E5',
+    boxShadow: '0 1px 2px rgba(79, 70, 229, 0.05)',
+  },
+  activeBar: {
+    position: 'absolute',
+    left: '0px',
+    top: '6px',
+    bottom: '6px',
+    width: '3.5px',
+    borderRadius: '0 4px 4px 0',
+    backgroundColor: '#4F46E5',
   },
   navIcon: {
     fontSize: '16px',
+    width: '20px',
+    textAlign: 'center',
   },
   navLabel: {
+    fontSize: '13px',
+    fontWeight: 600,
     flex: 1,
   },
-  activePill: {
-    width: '4px',
-    height: '14px',
-    borderRadius: '999px',
-    backgroundColor: '#10B981',
+  navLabelActive: {
+    fontWeight: 700,
+    color: '#4F46E5',
+  },
+  itemBadge: {
+    fontSize: '10px',
+    fontWeight: 800,
+    backgroundColor: '#F1F5F9',
+    color: '#64748B',
+    padding: '2px 6px',
+    borderRadius: '6px',
+  },
+  itemBadgeActive: {
+    backgroundColor: '#E0E7FF',
+    color: '#4338CA',
   },
   footerCard: {
+    marginTop: 'auto',
+    backgroundColor: '#F8FAFC',
+    border: '1px solid #E2E8F0',
+    borderRadius: '14px',
+    padding: '10px 12px',
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    padding: '10px 12px',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: '12px',
-    border: '1px solid rgba(0, 0, 0, 0.05)',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)',
   },
   storeAvatar: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '9px',
-    backgroundColor: '#10B981',
-    color: '#FFFFFF',
-    fontWeight: 800,
+    width: '34px',
+    height: '34px',
+    borderRadius: '10px',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #CBD5E1',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '14px',
-    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.25)',
+    fontSize: '15px',
+    fontWeight: 800,
+    color: '#0F172A',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
   },
   storeDetails: {
+    flex: 1,
     overflow: 'hidden',
   },
   storeName: {
-    fontSize: '12px',
+    fontSize: '13px',
     fontWeight: 700,
-    color: '#1D1D1F',
+    color: '#0F172A',
     whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
     overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    lineHeight: 1.2,
   },
   storeStatus: {
-    fontSize: '10px',
-    color: '#059669',
+    fontSize: '11px',
+    color: '#64748B',
     fontWeight: 600,
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
+    marginTop: '2px',
   },
   statusDot: {
+    color: '#10B981',
     fontSize: '8px',
   },
 };

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Suspense } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { Sidebar } from './Sidebar';
@@ -64,22 +65,28 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
 
   return (
     <div style={styles.layoutContainer}>
-      <Suspense fallback={<aside style={{ width: 264, backgroundColor: 'rgba(255, 255, 255, 0.72)' }} />}>
+      <Suspense fallback={<aside style={{ width: 268, backgroundColor: '#FFFFFF', borderRight: '1px solid #E2E8F0' }} />}>
         <Sidebar />
       </Suspense>
 
       <div style={styles.mainContent}>
-        {/* Top Apple Frosted Header */}
+        {/* MasterX Top Header Bar */}
         <header style={styles.header}>
-          <div>
+          <div style={styles.headerLeft}>
             <span style={styles.storeBadge}>🏪 ACTIVE STORE</span>
             <h1 style={styles.headerTitle}>{storeName}</h1>
           </div>
 
           <div style={styles.headerRight}>
+            {/* Quick POS Launch Shortcut Button */}
+            <Link href="/pos" style={styles.posShortcutBtn}>
+              <span style={{ fontSize: '14px' }}>⚡</span>
+              <span>POS Billing (F4)</span>
+            </Link>
+
             <div style={styles.freeBadge}>
               <span style={styles.freeDot}>●</span>
-              <span>Free Community Plan</span>
+              <span>Community Tier</span>
             </div>
 
             <div style={styles.userInfo}>
@@ -88,23 +95,21 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
               </div>
               <div style={styles.userMeta}>
                 <span style={styles.userName}>{displayName}</span>
-                <span style={styles.userRole}>
-                  {displayRole}
-                </span>
+                <span style={styles.userRole}>{displayRole}</span>
               </div>
             </div>
 
             <button
               onClick={handleSignOutAction}
               style={styles.signOutBtn}
-              title={isStaffSession ? "Close Shift & Sign Out" : "Sign Out of Dashboard"}
+              title={isStaffSession ? 'Close Shift & Sign Out' : 'Sign Out of Dashboard'}
             >
               {isStaffSession ? 'End Shift 🚪' : 'Sign Out 🚪'}
             </button>
           </div>
         </header>
 
-        {/* Page Content */}
+        {/* MasterX Page Canvas */}
         <main style={styles.pageBody}>{children}</main>
       </div>
     </div>
@@ -115,11 +120,11 @@ const styles: Record<string, React.CSSProperties> = {
   layoutContainer: {
     display: 'flex',
     minHeight: '100vh',
-    backgroundColor: '#F5F5F7',
+    backgroundColor: '#F8FAFC',
+    fontFamily: 'var(--font-body)',
   },
   loginContainer: {
     minHeight: '100vh',
-    backgroundColor: '#F5F5F7',
   },
   loadingScreen: {
     display: 'flex',
@@ -127,7 +132,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '100vh',
-    backgroundColor: '#F5F5F7',
+    backgroundColor: '#F8FAFC',
     gap: '16px',
   },
   spinner: {
@@ -136,14 +141,14 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '50%',
     borderWidth: '3px',
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderTopColor: '#10B981',
+    borderColor: '#E2E8F0',
+    borderTopColor: '#4F46E5',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '13px',
     fontWeight: 600,
-    color: '#86868B',
+    color: '#64748B',
     letterSpacing: '-0.01em',
   },
   mainContent: {
@@ -151,12 +156,11 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     overflowY: 'auto',
+    backgroundColor: '#F8FAFC',
   },
   header: {
-    backgroundColor: 'rgba(255, 255, 255, 0.78)',
-    backdropFilter: 'blur(25px) saturate(190%)',
-    WebkitBackdropFilter: 'blur(25px) saturate(190%)',
-    borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+    backgroundColor: '#FFFFFF',
+    borderBottom: '1px solid #E2E8F0',
     padding: '14px 28px',
     display: 'flex',
     justifyContent: 'space-between',
@@ -164,41 +168,61 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'sticky',
     top: 0,
     zIndex: 10,
-    boxShadow: '0 1px 8px rgba(0, 0, 0, 0.02)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+  },
+  headerLeft: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
   },
   storeBadge: {
     fontSize: '10px',
     fontWeight: 800,
-    color: '#065F46',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    color: '#4F46E5',
+    backgroundColor: '#EEF2FF',
     padding: '2px 8px',
     borderRadius: '999px',
     letterSpacing: '0.04em',
     textTransform: 'uppercase',
+    alignSelf: 'flex-start',
   },
   headerTitle: {
-    fontSize: '19px',
+    fontSize: '18px',
     fontWeight: 800,
-    color: '#1D1D1F',
-    marginTop: '2px',
+    color: '#0F172A',
+    fontFamily: 'var(--font-display)',
     letterSpacing: '-0.025em',
+    margin: 0,
   },
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '14px',
+    gap: '12px',
+  },
+  posShortcutBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backgroundColor: '#10B981',
+    color: '#FFFFFF',
+    padding: '7px 14px',
+    borderRadius: '10px',
+    fontSize: '13px',
+    fontWeight: 700,
+    textDecoration: 'none',
+    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)',
   },
   freeBadge: {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    border: '1px solid rgba(0, 0, 0, 0.04)',
-    padding: '5px 12px',
+    backgroundColor: '#F1F5F9',
+    border: '1px solid #E2E8F0',
+    padding: '6px 12px',
     borderRadius: '999px',
     fontSize: '12px',
     fontWeight: 600,
-    color: '#555558',
+    color: '#475569',
   },
   freeDot: {
     color: '#10B981',
@@ -208,19 +232,23 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
+    padding: '4px 8px',
+    backgroundColor: '#F8FAFC',
+    borderRadius: '12px',
+    border: '1px solid #E2E8F0',
   },
   avatar: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '10px',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    border: '1px solid rgba(16, 185, 129, 0.25)',
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
+    backgroundColor: '#EEF2FF',
+    border: '1px solid rgba(79, 70, 229, 0.2)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: 800,
-    color: '#047857',
+    color: '#4F46E5',
   },
   userMeta: {
     display: 'flex',
@@ -229,26 +257,28 @@ const styles: Record<string, React.CSSProperties> = {
   userName: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#1D1D1F',
+    color: '#0F172A',
     lineHeight: 1.2,
   },
   userRole: {
     fontSize: '11px',
-    color: '#86868B',
+    color: '#64748B',
     lineHeight: 1.2,
   },
   signOutBtn: {
-    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+    backgroundColor: '#FEF2F2',
     color: '#DC2626',
-    border: 'none',
-    borderRadius: '9px',
-    padding: '7px 13px',
+    border: '1px solid #FECACA',
+    borderRadius: '10px',
+    padding: '7px 12px',
     fontSize: '12px',
     fontWeight: 700,
     cursor: 'pointer',
+    transition: 'all 0.15s ease',
   },
   pageBody: {
     padding: '28px',
     flex: 1,
+    backgroundColor: '#F8FAFC',
   },
 };
