@@ -23,6 +23,7 @@ import {
   AnalyticsDateRange,
 } from '../../services/analytics';
 import { Invoice } from '@kirana-pro/shared';
+import { Feather } from '@expo/vector-icons';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { getFirestoreDb } from '@kirana-pro/shared';
 
@@ -74,7 +75,7 @@ export const AnalyticsScreen: React.FC = () => {
         ? 'This Month'
         : 'All Time';
 
-    const text = `📊 *${user?.displayName || 'Kirana Store'} - Business Summary*\n📅 Period: ${periodLabel}\n----------------------------------\n💰 Gross Revenue: ₹${financialSummary.grossSales}\n📉 Cost of Goods (COGS): ₹${financialSummary.totalCOGS}\n📈 Net Profit: ₹${financialSummary.netProfit} (${financialSummary.profitMarginPercent}% Margin)\n🛒 Total Bills: ${financialSummary.invoiceCount} (Avg: ₹${financialSummary.averageBillValue})\n\n💵 Payment Split:\n• Cash: ₹${paymentBreakdown.cash} (${paymentBreakdown.cashPercent}%)\n• UPI: ₹${paymentBreakdown.upi} (${paymentBreakdown.upiPercent}%)\n• Khata Udhar: ₹${paymentBreakdown.credit} (${paymentBreakdown.creditPercent}%)\n\n🏛️ GST Tax Collected: ₹${gstReport.totalTaxCollected}\n(CGST: ₹${gstReport.totalCGST} + SGST: ₹${gstReport.totalSGST})\n\nGenerated via Kirana Pro ERP.`;
+    const text = `*${user?.displayName || 'Kirana Store'} - Business Summary*\nPeriod: ${periodLabel}\n----------------------------------\nGross Revenue: ₹${financialSummary.grossSales}\nCost of Goods (COGS): ₹${financialSummary.totalCOGS}\nNet Profit: ₹${financialSummary.netProfit} (${financialSummary.profitMarginPercent}% Margin)\nTotal Bills: ${financialSummary.invoiceCount} (Avg: ₹${financialSummary.averageBillValue})\n\nPayment Split:\n• Cash: ₹${paymentBreakdown.cash} (${paymentBreakdown.cashPercent}%)\n• UPI: ₹${paymentBreakdown.upi} (${paymentBreakdown.upiPercent}%)\n• Khata Udhar: ₹${paymentBreakdown.credit} (${paymentBreakdown.creditPercent}%)\n\nGST Tax Collected: ₹${gstReport.totalTaxCollected}\n(CGST: ₹${gstReport.totalCGST} + SGST: ₹${gstReport.totalSGST})\n\nGenerated via Kirana Pro ERP.`;
 
     try {
       await Share.share({ message: text });
@@ -90,14 +91,17 @@ export const AnalyticsScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>📊 Dukaan Analytics & Reports</Text>
+          <Text style={styles.headerTitle}>Dukaan Analytics & Reports</Text>
           <Text style={styles.headerSub}>
             Real-time profit, payment collection & GST summary
           </Text>
         </View>
 
         <TouchableOpacity style={styles.shareBtn} onPress={handleShareSummary}>
-          <Text style={styles.shareBtnText}>📤 Share</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Feather name="share-2" size={13} color="#7367F0" />
+            <Text style={styles.shareBtnText}>Share</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -132,7 +136,7 @@ export const AnalyticsScreen: React.FC = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {loading ? (
-          <ActivityIndicator size="large" color="#10B981" style={{ marginVertical: 30 }} />
+          <ActivityIndicator size="large" color="#7367F0" style={{ marginVertical: 30 }} />
         ) : (
           <>
             {/* Main Financial KPI Grid */}
@@ -182,7 +186,10 @@ export const AnalyticsScreen: React.FC = () => {
 
             {/* Payment Method Split Card */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>💵 Payment Modes Collection</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <Feather name="pie-chart" size={16} color="#7367F0" />
+                <Text style={styles.cardTitle}>Payment Modes Collection</Text>
+              </View>
               <Text style={styles.cardSub}>Where your customers paid</Text>
 
               {/* Progress Bars */}
@@ -190,19 +197,19 @@ export const AnalyticsScreen: React.FC = () => {
                 <View
                   style={[
                     styles.paymentBarSegment,
-                    { flex: Math.max(1, paymentBreakdown.cash), backgroundColor: '#10B981' },
+                    { flex: Math.max(1, paymentBreakdown.cash), backgroundColor: '#28C76F' },
                   ]}
                 />
                 <View
                   style={[
                     styles.paymentBarSegment,
-                    { flex: Math.max(1, paymentBreakdown.upi), backgroundColor: '#6366F1' },
+                    { flex: Math.max(1, paymentBreakdown.upi), backgroundColor: '#7367F0' },
                   ]}
                 />
                 <View
                   style={[
                     styles.paymentBarSegment,
-                    { flex: Math.max(1, paymentBreakdown.credit), backgroundColor: '#F59E0B' },
+                    { flex: Math.max(1, paymentBreakdown.credit), backgroundColor: '#FF9F43' },
                   ]}
                 />
               </View>
@@ -210,7 +217,7 @@ export const AnalyticsScreen: React.FC = () => {
               {/* Legend Row */}
               <View style={styles.legendRow}>
                 <View style={styles.legendCol}>
-                  <View style={[styles.legendDot, { backgroundColor: '#10B981' }]} />
+                  <View style={[styles.legendDot, { backgroundColor: '#28C76F' }]} />
                   <Text style={styles.legendLabel}>Cash in Galla</Text>
                   <Text style={styles.legendValue}>
                     ₹{paymentBreakdown.cash.toLocaleString('en-IN')} ({paymentBreakdown.cashPercent}%)
@@ -218,7 +225,7 @@ export const AnalyticsScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.legendCol}>
-                  <View style={[styles.legendDot, { backgroundColor: '#6366F1' }]} />
+                  <View style={[styles.legendDot, { backgroundColor: '#7367F0' }]} />
                   <Text style={styles.legendLabel}>UPI / QR</Text>
                   <Text style={styles.legendValue}>
                     ₹{paymentBreakdown.upi.toLocaleString('en-IN')} ({paymentBreakdown.upiPercent}%)
@@ -226,7 +233,7 @@ export const AnalyticsScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.legendCol}>
-                  <View style={[styles.legendDot, { backgroundColor: '#F59E0B' }]} />
+                  <View style={[styles.legendDot, { backgroundColor: '#FF9F43' }]} />
                   <Text style={styles.legendLabel}>Khata Udhar</Text>
                   <Text style={styles.legendValue}>
                     ₹{paymentBreakdown.credit.toLocaleString('en-IN')} ({paymentBreakdown.creditPercent}%)
@@ -237,7 +244,10 @@ export const AnalyticsScreen: React.FC = () => {
 
             {/* Top 5 Bestsellers vs Dead Stock */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>🏆 Top Bestsellers (सर्वाधिक बिकने वाले)</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <Feather name="award" size={16} color="#FF9F43" />
+                <Text style={styles.cardTitle}>Top Bestsellers (सर्वाधिक बिकने वाले)</Text>
+              </View>
               {topSelling.length === 0 ? (
                 <Text style={styles.emptyNote}>No sales recorded for this period.</Text>
               ) : (
@@ -265,14 +275,20 @@ export const AnalyticsScreen: React.FC = () => {
             <View style={styles.card}>
               <View style={styles.deadStockHeader}>
                 <View>
-                  <Text style={styles.cardTitle}>⚠️ Slow-Moving / Dead Stock</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <Feather name="alert-triangle" size={15} color="#EA5455" />
+                    <Text style={styles.cardTitle}>Slow-Moving / Dead Stock</Text>
+                  </View>
                   <Text style={styles.cardSub}>Items with 0 or low sales tying up cash</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.reorderLinkBtn}
                   onPress={() => navigation.navigate('SmartReorder')}
                 >
-                  <Text style={styles.reorderLinkText}>Reorder Hub ➔</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Text style={styles.reorderLinkText}>Reorder Hub</Text>
+                    <Feather name="arrow-right" size={12} color="#7367F0" />
+                  </View>
                 </TouchableOpacity>
               </View>
 
@@ -295,7 +311,10 @@ export const AnalyticsScreen: React.FC = () => {
 
             {/* GST Summary Report Table */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>🏛️ GST Filing Summary (CA / Accountant)</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <Feather name="file-text" size={16} color="#7367F0" />
+                <Text style={styles.cardTitle}>GST Filing Summary (CA / Accountant)</Text>
+              </View>
               <Text style={styles.cardSub}>Taxable value & tax collected by slab</Text>
 
               <View style={styles.gstTable}>

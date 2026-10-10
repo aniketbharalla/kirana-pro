@@ -12,6 +12,7 @@ import {
   saveStoreProduct,
 } from '../../lib/storeService';
 import { Product } from '@kirana-pro/shared';
+import { Truck, ScanLine, Camera, FileText } from 'lucide-react';
 
 export default function PurchasesPage() {
   const { storeId, user } = useAuth();
@@ -106,7 +107,7 @@ export default function PurchasesPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.badge}>📦 INWARD PROCUREMENT</span>
+            <span style={styles.badge}><Truck size={13} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> INWARD PROCUREMENT</span>
             <span style={styles.countBadge}>{purchases.length} Invoices</span>
           </div>
           <h1 style={styles.title}>Wholesale Purchases & Bill OCR</h1>
@@ -116,10 +117,10 @@ export default function PurchasesPage() {
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <Link href="/purchases/new" style={styles.newScannerLink}>
-            ⚡ Inward via OCR (/purchases/new)
+            <ScanLine size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Inward via OCR (/purchases/new)
           </Link>
           <button style={styles.scanBtn} onClick={() => setIsModalOpen(true)}>
-            📷 Quick Upload Modal
+            <Camera size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Quick Upload Modal
           </button>
         </div>
       </div>
@@ -139,13 +140,13 @@ export default function PurchasesPage() {
             </div>
             <div style={styles.statCard}>
               <div style={styles.statLabel}>Total Inwarded Value</div>
-              <div style={{ ...styles.statValue, color: '#0F172A' }}>
+              <div style={{ ...styles.statValue, color: '#2F2B3D' }}>
                 ₹{totalInwarded.toFixed(2)}
               </div>
             </div>
             <div style={styles.statCard}>
               <div style={styles.statLabel}>Payable to Wholesalers</div>
-              <div style={{ ...styles.statValue, color: '#EF4444' }}>
+              <div style={{ ...styles.statValue, color: '#EA5455' }}>
                 ₹{totalPending.toFixed(2)}
               </div>
             </div>
@@ -154,13 +155,17 @@ export default function PurchasesPage() {
           {/* Purchases Table or Empty State */}
           {purchases.length === 0 ? (
             <div style={styles.emptyCard}>
-              <div style={styles.emptyIcon}>📄</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                <div style={{ width: 56, height: 56, borderRadius: '12px', backgroundColor: '#EDEBFD', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileText size={28} color="#7367F0" />
+                </div>
+              </div>
               <h3 style={styles.emptyTitle}>No Purchase Invoices Uploaded Yet</h3>
               <p style={styles.emptySubtitle}>
                 Digitize paper invoices from your suppliers and distributors. Line items will be automatically extracted into your inventory.
               </p>
-              <button style={styles.scanBtn} onClick={() => setIsModalOpen(true)}>
-                📷 Upload First Distributor Bill
+              <button style={styles.newScannerLink} onClick={() => setIsModalOpen(true)}>
+                <Camera size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Upload First Distributor Bill
               </button>
             </div>
           ) : (
@@ -279,47 +284,48 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
   },
   newScannerLink: {
-    backgroundColor: '#1D1D1F',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     textDecoration: 'none',
-    borderRadius: '11px',
+    borderRadius: '8px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 700,
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
     display: 'inline-flex',
     alignItems: 'center',
   },
   scanBtn: {
-    backgroundColor: '#10B981',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '11px',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
+    border: '1px solid rgba(115, 103, 240, 0.35)',
+    borderRadius: '8px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   loadingState: {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#059669',
+    border: '3px solid #EDEBFD',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#6F6B7D',
     margin: 0,
   },
   statsRow: {
@@ -329,9 +335,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
+    border: '1px solid #DBDADE',
+    borderRadius: '12px',
     padding: '20px',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   statLabel: {
     fontSize: '11px',

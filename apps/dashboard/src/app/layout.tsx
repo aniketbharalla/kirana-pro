@@ -2,6 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '../context/AuthContext';
+import { ToastProvider } from '../context/ToastContext';
 import { DashboardShell } from '../components/DashboardShell';
 
 export const metadata: Metadata = {
@@ -18,7 +19,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <AuthProvider>
-          <DashboardShell>{children}</DashboardShell>
+          <ToastProvider>
+            <DashboardShell>{children}</DashboardShell>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

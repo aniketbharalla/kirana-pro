@@ -26,8 +26,8 @@ const translations: Record<Language, Translations> = {
     search_placeholder: 'Search product, barcode, or name...',
 
     // Home Screen
-    welcome_greeting: 'Namaste 🙏',
-    instant_calculator: '⚡ INSTANT SCALE CALCULATOR',
+    welcome_greeting: 'Namaste',
+    instant_calculator: 'INSTANT SCALE CALCULATOR',
     taraju_smart_scale: 'Taraju Smart Scale',
     taraju_promo_sub: 'Customer asked ₹5 ka chawal? Tap to get exact grams instantly!',
     quick_actions: 'Quick Actions',
@@ -42,10 +42,10 @@ const translations: Record<Language, Translations> = {
     smart_reorder_sub: 'Burn velocity & 1-tap WhatsApp order',
 
     // POS & Billing
-    pos_billing: '⚡ POS Billing',
+    pos_billing: 'POS Billing',
     new_bill: 'New Bill',
     clear_cart: 'Clear Cart',
-    proceed_to_pay: 'Proceed to Pay ➔',
+    proceed_to_pay: 'Proceed to Pay',
     cash_in_galla: 'Cash in Galla',
     upi_payment: 'UPI / QR',
     khata_credit: 'Khata Udhar',
@@ -53,12 +53,12 @@ const translations: Record<Language, Translations> = {
     total_bill: 'Total Bill',
 
     // Products & Stock
-    product_catalog: '📦 Products Catalog',
-    stock_register: '📊 Stock Register',
+    product_catalog: 'Products Catalog',
+    stock_register: 'Stock Register',
     wholesale_cost: 'Wholesale Cost',
     retail_mrp: 'Retail MRP',
     unit_profit: 'Unit Profit',
-    quick_restock: '➕ Quick Restock',
+    quick_restock: 'Quick Restock',
     in_stock: 'In Stock',
 
     // Marketing & Khata Reminders
@@ -87,8 +87,8 @@ const translations: Record<Language, Translations> = {
     search_placeholder: 'सामान का नाम या बारकोड खोजें...',
 
     // Home Screen
-    welcome_greeting: 'नमस्ते 🙏',
-    instant_calculator: '⚡ तुरंत वजन कैलकुलेटर',
+    welcome_greeting: 'नमस्ते',
+    instant_calculator: 'तुरंत वजन कैलकुलेटर',
     taraju_smart_scale: 'स्मार्ट तराजू स्केल',
     taraju_promo_sub: 'ग्राहक ने माँगा ₹5 का चावल? तुरंत ग्राम निकालें!',
     quick_actions: 'त्वरित कार्य',
@@ -103,10 +103,10 @@ const translations: Record<Language, Translations> = {
     smart_reorder_sub: 'स्टॉक खत्म होने का अलर्ट व WhatsApp ऑर्डर',
 
     // POS & Billing
-    pos_billing: '⚡ पीओएस बिलिंग',
+    pos_billing: 'पीओएस बिलिंग',
     new_bill: 'नया बिल बनाएं',
     clear_cart: 'सामान हटाएं',
-    proceed_to_pay: 'भुगतान करें ➔',
+    proceed_to_pay: 'भुगतान करें',
     cash_in_galla: 'गल्ला नकद',
     upi_payment: 'यूपीआई / क्यूआर',
     khata_credit: 'उधार खाता',
@@ -114,12 +114,12 @@ const translations: Record<Language, Translations> = {
     total_bill: 'कुल बिल',
 
     // Products & Stock
-    product_catalog: '📦 सामान सूची',
-    stock_register: '📊 स्टॉक रजिस्टर',
+    product_catalog: 'सामान सूची',
+    stock_register: 'स्टॉक रजिस्टर',
     wholesale_cost: 'थोक खरीद मूल्य',
     retail_mrp: 'बिक्री मूल्य (MRP)',
     unit_profit: 'प्रति इकाई मुनाफा',
-    quick_restock: '➕ स्टॉक बढ़ाएं',
+    quick_restock: 'स्टॉक बढ़ाएं',
     in_stock: 'स्टॉक में उपलब्ध',
 
     // Marketing & Khata Reminders
@@ -148,8 +148,8 @@ const translations: Record<Language, Translations> = {
     search_placeholder: 'Item name, barcode ya Hindi search...',
 
     // Home Screen
-    welcome_greeting: 'Namaste 🙏',
-    instant_calculator: '⚡ INSTANT SCALE CALCULATOR',
+    welcome_greeting: 'Namaste',
+    instant_calculator: 'INSTANT SCALE CALCULATOR',
     taraju_smart_scale: 'Taraju Smart Scale',
     taraju_promo_sub: 'Customer ne manga ₹5 ka chawal? Ek tap me grams nikalein!',
     quick_actions: 'Quick Actions',
@@ -164,10 +164,10 @@ const translations: Record<Language, Translations> = {
     smart_reorder_sub: 'Stock khatam hone se pehle WhatsApp order bhejein',
 
     // POS & Billing
-    pos_billing: '⚡ POS Billing Counter',
+    pos_billing: 'POS Billing Counter',
     new_bill: 'Naya Bill',
     clear_cart: 'Cart Khali Karein',
-    proceed_to_pay: 'Proceed to Pay ➔',
+    proceed_to_pay: 'Proceed to Pay',
     cash_in_galla: 'Galla Cash',
     upi_payment: 'UPI / QR Code',
     khata_credit: 'Udhar Khata',
@@ -175,12 +175,12 @@ const translations: Record<Language, Translations> = {
     total_bill: 'Total Bill Amount',
 
     // Products & Stock
-    product_catalog: '📦 Product Catalog',
-    stock_register: '📊 Stock Register',
+    product_catalog: 'Product Catalog',
+    stock_register: 'Stock Register',
     wholesale_cost: 'Wholesale Rate',
     retail_mrp: 'Selling MRP',
     unit_profit: 'Munafa per Piece',
-    quick_restock: '➕ Restock Karein',
+    quick_restock: 'Restock Karein',
     in_stock: 'Available Stock',
 
     // Marketing & Khata Reminders

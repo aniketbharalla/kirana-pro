@@ -29,7 +29,7 @@ export const AuthNavigator: React.FC = () => {
           headerShown: true,
           title: 'Store Owner Login',
           headerBackTitle: 'Back',
-          headerTintColor: '#10B981',
+          headerTintColor: '#7367F0',
           headerStyle: { backgroundColor: '#F8FAFC' },
         }}
       />

@@ -24,6 +24,7 @@ import { fetchProductByBarcode, ScannedProductMetadata } from '../../services/op
 import { recordStockMovement } from '../../services/stock';
 import { addProduct } from '../../services/product';
 import { Product } from '@kirana-pro/shared';
+import { Feather } from '@expo/vector-icons';
 import { colors } from '../../theme';
 
 export const BarcodeScannerScreen: React.FC = () => {
@@ -295,7 +296,7 @@ export const BarcodeScannerScreen: React.FC = () => {
       });
 
       Alert.alert(
-        'Stock Updated! ✓',
+        'Stock Updated',
         `Added +${stockIncrement} ${existingProduct.unit} to ${existingProduct.name}.\nNew Total Stock: ${
           existingProduct.currentStock + stockIncrement
         } ${existingProduct.unit}.`
@@ -352,7 +353,7 @@ export const BarcodeScannerScreen: React.FC = () => {
 
       const { profit, margin } = calculateProfit(newSellingPrice, newPurchasePrice);
       Alert.alert(
-        'Product Added! 🎉',
+        'Product Added',
         `"${openFoodProduct.name}" added to catalog!\nBuying Price: ₹${pPrice.toFixed(2)} • Selling Price: ₹${sPrice.toFixed(2)}\nProfit: ₹${profit.toFixed(2)}/unit (${margin}% margin)`
       );
 
@@ -409,7 +410,7 @@ export const BarcodeScannerScreen: React.FC = () => {
 
       const { profit, margin } = calculateProfit(customSellingPrice, customPurchasePrice);
       Alert.alert(
-        'Product Saved! 🎉',
+        'Product Saved',
         `"${customName}" added to Dukaan!\nWholesale Buying: ₹${pPrice.toFixed(2)} | Selling: ₹${sPrice.toFixed(2)}\nProfit: ₹${profit.toFixed(2)}/unit (${margin}% margin)`
       );
 
@@ -479,20 +480,22 @@ export const BarcodeScannerScreen: React.FC = () => {
 
                 {/* Instruction Pill */}
                 <View style={styles.targetBadge}>
-                  <Text style={styles.targetBadgeText}>🎯 Keep Barcode Inside Box (बारकोड यहाँ रखें)</Text>
+                  <Feather name="crosshair" size={13} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.targetBadgeText}>Keep Barcode Inside Box (बारकोड यहाँ रखें)</Text>
                 </View>
               </View>
 
               {/* Stop Camera Button */}
               <TouchableOpacity style={styles.stopCameraBtn} onPress={handleStopCamera}>
-                <Text style={styles.stopCameraBtnText}>✕ Close Camera</Text>
+                <Feather name="x" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
+                <Text style={styles.stopCameraBtnText}>Close Camera</Text>
               </TouchableOpacity>
             </View>
           ) : (
             /* Standby Card with Click to Start CTA */
             <View style={styles.standbyCard}>
               <View style={styles.standbyIconBadge}>
-                <Text style={styles.standbyIcon}>📷</Text>
+                <Feather name="camera" size={28} color="#7367F0" />
               </View>
               <Text style={styles.standbyTitle}>Smart Product Barcode Scanner</Text>
               <Text style={styles.standbyDesc}>
@@ -501,16 +504,19 @@ export const BarcodeScannerScreen: React.FC = () => {
 
               {cameraError ? (
                 <View style={styles.cameraErrorBanner}>
-                  <Text style={styles.cameraErrorText}>⚠️ {cameraError}</Text>
+                  <Feather name="alert-circle" size={14} color="#EA5455" style={{ marginRight: 6 }} />
+                  <Text style={styles.cameraErrorText}>{cameraError}</Text>
                 </View>
               ) : null}
 
               <TouchableOpacity style={styles.startScanCTA} onPress={handleStartCamera}>
-                <Text style={styles.startScanCTAText}>📸 Click to Start Camera Scanner</Text>
+                <Feather name="camera" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
+                <Text style={styles.startScanCTAText}>Start Camera Scanner</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.galleryCTA} onPress={handlePickBarcodeImage}>
-                <Text style={styles.galleryCTAText}>🖼️ Or Pick Photo from Gallery</Text>
+                <Feather name="image" size={16} color="#6F6B7D" style={{ marginRight: 8 }} />
+                <Text style={styles.galleryCTAText}>Pick Photo from Gallery</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -531,7 +537,7 @@ export const BarcodeScannerScreen: React.FC = () => {
             <TextInput
               style={styles.barcodeInput}
               placeholder="e.g. 8901030000001"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#A8AAAE"
               keyboardType="numeric"
               value={manualCode}
               onChangeText={setManualCode}
@@ -546,7 +552,7 @@ export const BarcodeScannerScreen: React.FC = () => {
           </View>
 
           {/* Quick Barcode Demo Buttons */}
-          <Text style={styles.demoHeading}>💡 Quick FMCG Barcodes to Test:</Text>
+          <Text style={styles.demoHeading}>Quick FMCG Barcodes to Test:</Text>
           <View style={styles.demoChipsRow}>
             <TouchableOpacity
               style={styles.demoChip}
@@ -555,7 +561,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                 handleProcessBarcode('8901030000001');
               }}
             >
-              <Text style={styles.demoChipText}>🍜 Maggi (8901030000001)</Text>
+              <Text style={styles.demoChipText}>Maggi (8901030000001)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -565,7 +571,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                 handleProcessBarcode('8901491101837');
               }}
             >
-              <Text style={styles.demoChipText}>🥔 Lay's Chips</Text>
+              <Text style={styles.demoChipText}>Lay's Chips</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -575,7 +581,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                 handleProcessBarcode('8901719101037');
               }}
             >
-              <Text style={styles.demoChipText}>🍪 Parle-G</Text>
+              <Text style={styles.demoChipText}>Parle-G</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -585,7 +591,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                 handleProcessBarcode('8901030383708');
               }}
             >
-              <Text style={styles.demoChipText}>🧴 Dettol Soap</Text>
+              <Text style={styles.demoChipText}>Dettol Soap</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -603,11 +609,12 @@ export const BarcodeScannerScreen: React.FC = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
               <View style={styles.modalBadge}>
-                <Text style={styles.modalBadgeText}>✓ PRODUCT FOUND IN DUKAAN</Text>
+                <Feather name="check-circle" size={13} color="#28C76F" style={{ marginRight: 6 }} />
+                <Text style={styles.modalBadgeText}>PRODUCT FOUND IN DUKAAN</Text>
               </View>
               <Text style={styles.modalTitle}>{existingProduct?.name}</Text>
               <Text style={styles.modalSub}>
-                Current Stock: <Text style={{ fontWeight: '800' }}>{existingProduct?.currentStock} {existingProduct?.unit}</Text> • Retail Selling: <Text style={{ fontWeight: '800', color: colors.primaryDark }}>₹{existingProduct?.sellingPrice.toFixed(2)}</Text>
+                Current Stock: <Text style={{ fontWeight: '800' }}>{existingProduct?.currentStock} {existingProduct?.unit}</Text> • Retail Selling: <Text style={{ fontWeight: '800', color: '#7367F0' }}>₹{existingProduct?.sellingPrice.toFixed(2)}</Text>
               </Text>
 
               {/* Profit Insight */}
@@ -681,9 +688,10 @@ export const BarcodeScannerScreen: React.FC = () => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalCard}>
-              <View style={[styles.modalBadge, { backgroundColor: '#ECFDF5' }]}>
-                <Text style={[styles.modalBadgeText, { color: '#065F46' }]}>
-                  🌐 FOUND IN OPEN FOOD FACTS
+              <View style={[styles.modalBadge, { backgroundColor: '#EDEBFD' }]}>
+                <Feather name="globe" size={13} color="#7367F0" style={{ marginRight: 6 }} />
+                <Text style={[styles.modalBadgeText, { color: '#7367F0' }]}>
+                  FOUND IN OPEN FOOD FACTS
                 </Text>
               </View>
 
@@ -695,7 +703,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                   />
                 ) : (
                   <View style={styles.offPlaceholder}>
-                    <Text style={{ fontSize: 24 }}>📦</Text>
+                    <Feather name="package" size={24} color="#7367F0" />
                   </View>
                 )}
                 <View style={{ flex: 1 }}>
@@ -714,7 +722,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                   <TextInput
                     style={styles.miniInput}
                     placeholder="16"
-                    placeholderTextColor="#94A3B8"
+                    placeholderTextColor="#A8AAAE"
                     keyboardType="numeric"
                     value={newPurchasePrice}
                     onChangeText={setNewPurchasePrice}
@@ -727,7 +735,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                   <TextInput
                     style={styles.miniInput}
                     placeholder="20"
-                    placeholderTextColor="#94A3B8"
+                    placeholderTextColor="#A8AAAE"
                     keyboardType="numeric"
                     value={newSellingPrice}
                     onChangeText={setNewSellingPrice}
@@ -740,7 +748,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                   <TextInput
                     style={styles.miniInput}
                     placeholder="10"
-                    placeholderTextColor="#94A3B8"
+                    placeholderTextColor="#A8AAAE"
                     keyboardType="numeric"
                     value={newInitialStock}
                     onChangeText={setNewInitialStock}
@@ -757,9 +765,21 @@ export const BarcodeScannerScreen: React.FC = () => {
                 ]}
               >
                 <View style={styles.profitHeader}>
-                  <Text style={styles.profitTitle}>
-                    {offProfitCalc.profit < 0 ? '⚠️ SELLING AT LOSS' : '📊 PROFIT & MARGIN'}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather
+                      name={offProfitCalc.profit < 0 ? 'alert-triangle' : 'trending-up'}
+                      size={14}
+                      color={offProfitCalc.profit < 0 ? '#EA5455' : '#28C76F'}
+                    />
+                    <Text
+                      style={[
+                        styles.profitTitle,
+                        offProfitCalc.profit < 0 ? { color: '#EA5455' } : { color: '#28C76F' },
+                      ]}
+                    >
+                      {offProfitCalc.profit < 0 ? 'SELLING AT LOSS' : 'PROFIT & MARGIN'}
+                    </Text>
+                  </View>
                   <Text
                     style={[
                       styles.profitMarginBadge,
@@ -790,14 +810,14 @@ export const BarcodeScannerScreen: React.FC = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.confirmBtn, { backgroundColor: '#059669' }]}
+                  style={[styles.confirmBtn, { backgroundColor: '#7367F0' }]}
                   onPress={handleConfirmAddOpenFoodProduct}
                   disabled={addingNewProduct}
                 >
                   {addingNewProduct ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.confirmBtnText}>+ Save to Dukaan</Text>
+                    <Text style={styles.confirmBtnText}>Save to Dukaan</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -817,9 +837,10 @@ export const BarcodeScannerScreen: React.FC = () => {
         >
           <View style={styles.modalOverlay}>
             <ScrollView style={styles.customAddScroll} contentContainerStyle={styles.modalCard}>
-              <View style={[styles.modalBadge, { backgroundColor: '#FEF3C7' }]}>
-                <Text style={[styles.modalBadgeText, { color: '#92400E' }]}>
-                  📝 NEW BARCODE: {manualAddBarcode}
+              <View style={[styles.modalBadge, { backgroundColor: '#EDEBFD' }]}>
+                <Feather name="tag" size={13} color="#7367F0" style={{ marginRight: 6 }} />
+                <Text style={[styles.modalBadgeText, { color: '#7367F0' }]}>
+                  NEW BARCODE: {manualAddBarcode}
                 </Text>
               </View>
 
@@ -832,7 +853,7 @@ export const BarcodeScannerScreen: React.FC = () => {
               <TextInput
                 style={styles.textInputFull}
                 placeholder="e.g. Local Sweets / Rice 1kg"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor="#A8AAAE"
                 value={customName}
                 onChangeText={setCustomName}
               />
@@ -844,7 +865,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                   <TextInput
                     style={styles.miniInput}
                     placeholder="24"
-                    placeholderTextColor="#94A3B8"
+                    placeholderTextColor="#A8AAAE"
                     keyboardType="numeric"
                     value={customPurchasePrice}
                     onChangeText={setCustomPurchasePrice}
@@ -857,7 +878,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                   <TextInput
                     style={styles.miniInput}
                     placeholder="30"
-                    placeholderTextColor="#94A3B8"
+                    placeholderTextColor="#A8AAAE"
                     keyboardType="numeric"
                     value={customSellingPrice}
                     onChangeText={setCustomSellingPrice}
@@ -870,7 +891,7 @@ export const BarcodeScannerScreen: React.FC = () => {
                   <TextInput
                     style={styles.miniInput}
                     placeholder="10"
-                    placeholderTextColor="#94A3B8"
+                    placeholderTextColor="#A8AAAE"
                     keyboardType="numeric"
                     value={customStock}
                     onChangeText={setCustomStock}
@@ -888,9 +909,21 @@ export const BarcodeScannerScreen: React.FC = () => {
                 ]}
               >
                 <View style={styles.profitHeader}>
-                  <Text style={styles.profitTitle}>
-                    {customProfitCalc.profit < 0 ? '⚠️ SELLING AT LOSS' : '📊 PROFIT PER UNIT'}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Feather
+                      name={customProfitCalc.profit < 0 ? 'alert-triangle' : 'trending-up'}
+                      size={14}
+                      color={customProfitCalc.profit < 0 ? '#EA5455' : '#28C76F'}
+                    />
+                    <Text
+                      style={[
+                        styles.profitTitle,
+                        customProfitCalc.profit < 0 ? { color: '#EA5455' } : { color: '#28C76F' },
+                      ]}
+                    >
+                      {customProfitCalc.profit < 0 ? 'SELLING AT LOSS' : 'PROFIT PER UNIT'}
+                    </Text>
+                  </View>
                   <Text
                     style={[
                       styles.profitMarginBadge,
@@ -917,14 +950,14 @@ export const BarcodeScannerScreen: React.FC = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.confirmBtn, { backgroundColor: colors.primary }]}
+                  style={[styles.confirmBtn, { backgroundColor: '#7367F0' }]}
                   onPress={handleConfirmAddCustomProduct}
                   disabled={savingCustomProduct}
                 >
                   {savingCustomProduct ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.confirmBtnText}>✓ Save to Dukaan</Text>
+                    <Text style={styles.confirmBtnText}>Save to Dukaan</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -999,67 +1032,76 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   startScanCTA: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 14,
+    borderRadius: 10,
     width: '100%',
     maxWidth: 300,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#10B981',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
     marginBottom: 10,
   },
   startScanCTAText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 15,
+    fontWeight: '700',
+    fontSize: 14,
   },
   galleryCTA: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     width: '100%',
     maxWidth: 300,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
   },
   galleryCTAText: {
-    color: '#334155',
-    fontWeight: '700',
+    color: '#6F6B7D',
+    fontWeight: '600',
     fontSize: 13,
   },
   stopCameraBtn: {
     position: 'absolute',
     top: 14,
     right: 14,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: 'rgba(47, 43, 61, 0.85)',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
     zIndex: 30,
   },
   stopCameraBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   cameraErrorBanner: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
+    backgroundColor: '#FCE4E4',
+    borderColor: 'rgba(234, 84, 85, 0.25)',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 10,
     marginBottom: 14,
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cameraErrorText: {
-    color: '#DC2626',
+    color: '#EA5455',
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
@@ -1086,7 +1128,7 @@ const styles = StyleSheet.create({
     height: 28,
     borderTopWidth: 4,
     borderLeftWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderTopLeftRadius: 10,
   },
   cornerTR: {
@@ -1097,7 +1139,7 @@ const styles = StyleSheet.create({
     height: 28,
     borderTopWidth: 4,
     borderRightWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderTopRightRadius: 10,
   },
   cornerBL: {
@@ -1108,7 +1150,7 @@ const styles = StyleSheet.create({
     height: 28,
     borderBottomWidth: 4,
     borderLeftWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderBottomLeftRadius: 10,
   },
   cornerBR: {
@@ -1119,15 +1161,15 @@ const styles = StyleSheet.create({
     height: 28,
     borderBottomWidth: 4,
     borderRightWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderBottomRightRadius: 10,
   },
   redLaserLine: {
     width: '90%',
     height: 3,
-    backgroundColor: '#EF4444',
+    backgroundColor: '#7367F0',
     borderRadius: 2,
-    shadowColor: '#EF4444',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 8,
@@ -1136,17 +1178,19 @@ const styles = StyleSheet.create({
   targetBadge: {
     position: 'absolute',
     bottom: -40,
-    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    backgroundColor: 'rgba(47, 43, 61, 0.88)',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   targetBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     textAlign: 'center',
   },
   searchingBadge: {
@@ -1155,7 +1199,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
@@ -1170,17 +1214,17 @@ const styles = StyleSheet.create({
   },
   bottomControls: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 30,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: '#DBDADE',
   },
   controlHeader: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#2F2B3D',
     marginBottom: 8,
   },
   inputRow: {
@@ -1190,19 +1234,19 @@ const styles = StyleSheet.create({
   },
   barcodeInput: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
     paddingHorizontal: 14,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   processBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1307,8 +1351,8 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   stepperChipActive: {
-    backgroundColor: '#10B981',
-    borderColor: '#059669',
+    backgroundColor: '#7367F0',
+    borderColor: '#5E50EE',
   },
   stepperText: {
     fontSize: 14,
@@ -1325,25 +1369,30 @@ const styles = StyleSheet.create({
   cancelBtn: {
     paddingVertical: 14,
     paddingHorizontal: 20,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+    backgroundColor: '#F1F0F5',
     alignItems: 'center',
   },
   cancelBtnText: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#64748B',
+    fontWeight: '600',
+    color: '#6F6B7D',
   },
   confirmBtn: {
     flex: 1,
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   confirmBtnText: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
   },
   offRow: {
@@ -1355,25 +1404,25 @@ const styles = StyleSheet.create({
   offImage: {
     width: 60,
     height: 60,
-    borderRadius: 12,
-    backgroundColor: '#F8FAFC',
+    borderRadius: 8,
+    backgroundColor: '#F8F7FA',
   },
   offPlaceholder: {
     width: 60,
     height: 60,
-    borderRadius: 12,
-    backgroundColor: '#F8FAFC',
+    borderRadius: 8,
+    backgroundColor: '#EDEBFD',
     justifyContent: 'center',
     alignItems: 'center',
   },
   offBrand: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   offBarcode: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     marginTop: 2,
   },
   formRow: {
@@ -1383,50 +1432,50 @@ const styles = StyleSheet.create({
   inputMiniLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#6F6B7D',
     marginBottom: 4,
   },
   inputHint: {
     fontSize: 10,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     marginTop: 2,
   },
   miniInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 15,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   textInputFull: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
     fontWeight: '600',
-    color: '#0F172A',
+    color: '#2F2B3D',
     marginBottom: 10,
   },
   profitCard: {
-    borderRadius: 14,
+    borderRadius: 10,
     padding: 12,
     borderWidth: 1,
     marginBottom: 16,
   },
   gainCard: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
+    backgroundColor: '#DDF6E8',
+    borderColor: 'rgba(40, 199, 111, 0.3)',
   },
   lossCard: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
+    backgroundColor: '#FCE4E4',
+    borderColor: 'rgba(234, 84, 85, 0.3)',
   },
   profitHeader: {
     flexDirection: 'row',
@@ -1436,32 +1485,32 @@ const styles = StyleSheet.create({
   },
   profitTitle: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#065F46',
+    fontWeight: '700',
+    color: '#28C76F',
   },
   profitMarginBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 4,
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   gainBadge: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#28C76F',
     color: '#FFFFFF',
   },
   lossBadge: {
-    backgroundColor: '#EF4444',
+    backgroundColor: '#EA5455',
     color: '#FFFFFF',
   },
   profitMainText: {
     fontSize: 13,
-    color: '#065F46',
+    color: '#2F2B3D',
     fontWeight: '600',
   },
   profitSubText: {
     fontSize: 11,
-    color: '#047857',
+    color: '#6F6B7D',
     marginTop: 2,
   },
 });

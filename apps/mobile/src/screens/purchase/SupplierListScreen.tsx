@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useSupplierStore } from '../../store/supplierStore';
 import { useAuthStore } from '../../store/authStore';
 import { getSuppliers } from '../../services/supplier';
@@ -30,12 +31,16 @@ export const SupplierListScreen = ({ navigation }: any) => {
   const renderSupplierItem = ({ item }: { item: Supplier }) => (
     <TouchableOpacity
       style={styles.card}
+      activeOpacity={0.85}
       onPress={() => navigation.navigate('SupplierDetail', { supplierId: item.id, supplier: item })}
     >
       <View style={styles.cardHeader}>
         <View style={styles.nameBlock}>
           <Text style={styles.supplierName}>{item.name}</Text>
-          <Text style={styles.phoneText}>📞 {item.phone}</Text>
+          <View style={styles.phoneRow}>
+            <Feather name="phone" size={11} color={colors.textSecondary} style={{ marginRight: 4 }} />
+            <Text style={styles.phoneText}>{item.phone}</Text>
+          </View>
           {item.gstin ? (
             <Text style={styles.gstinText}>GST: {item.gstin}</Text>
           ) : null}
@@ -59,9 +64,11 @@ export const SupplierListScreen = ({ navigation }: any) => {
         </View>
         <TouchableOpacity
           style={styles.newBillBtn}
+          activeOpacity={0.8}
           onPress={() => navigation.navigate('ScanInvoice', { supplier: item })}
         >
-          <Text style={styles.newBillBtnText}>📷 Inward Bill</Text>
+          <Feather name="camera" size={13} color={colors.primary} style={{ marginRight: 4 }} />
+          <Text style={styles.newBillBtnText}>Inward Bill</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -77,21 +84,26 @@ export const SupplierListScreen = ({ navigation }: any) => {
         </View>
         <TouchableOpacity
           style={styles.addSupplierBtn}
+          activeOpacity={0.85}
           onPress={() => navigation.navigate('AddSupplier')}
         >
-          <Text style={styles.addSupplierBtnText}>+ Add Vendor</Text>
+          <Feather name="plus" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
+          <Text style={styles.addSupplierBtnText}>Add Vendor</Text>
         </TouchableOpacity>
       </View>
 
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search wholesaler name or phone..."
-          placeholderTextColor={colors.textMuted}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        <View style={styles.searchBox}>
+          <Feather name="search" size={15} color={colors.textSecondary} style={{ marginRight: 8 }} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search wholesaler name or phone..."
+            placeholderTextColor={colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
       </View>
 
       {/* Suppliers List */}
@@ -102,16 +114,20 @@ export const SupplierListScreen = ({ navigation }: any) => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🚚</Text>
+            <View style={styles.emptyIconCircle}>
+              <Feather name="truck" size={32} color={colors.primary} />
+            </View>
             <Text style={styles.emptyTitle}>No Wholesalers Found</Text>
             <Text style={styles.emptySubtitle}>
               Add distributors (like Parle, Britannia, ITC) or scan a bill to auto-create them.
             </Text>
             <TouchableOpacity
               style={styles.scanBillHeroBtn}
+              activeOpacity={0.88}
               onPress={() => navigation.navigate('ScanInvoice')}
             >
-              <Text style={styles.scanBillHeroBtnText}>📷 Scan First Distributor Bill</Text>
+              <Feather name="camera" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.scanBillHeroBtnText}>Scan First Distributor Bill</Text>
             </TouchableOpacity>
           </View>
         }
@@ -126,31 +142,38 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   banner: {
-    backgroundColor: '#0F172A',
-    padding: 20,
+    backgroundColor: '#2F2B3D',
+    padding: 18,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
   bannerLabel: {
-    color: '#94A3B8',
-    fontSize: 12,
-    fontWeight: '600',
+    color: colors.textMuted,
+    fontSize: 11,
+    fontWeight: '700',
     textTransform: 'uppercase',
   },
   bannerAmount: {
-    color: '#F59E0B',
-    fontSize: 26,
+    color: colors.systemOrange,
+    fontSize: 24,
     fontWeight: '800',
     marginTop: 4,
   },
   addSupplierBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.primary,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 9,
     borderRadius: 10,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
   addSupplierBtnText: {
     color: '#FFFFFF',
@@ -159,15 +182,20 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
-  searchInput: {
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  searchInput: {
+    flex: 1,
     fontSize: 14,
     color: colors.text,
   },
@@ -177,11 +205,16 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -192,14 +225,18 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   supplierName: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: colors.text,
   },
-  phoneText: {
-    fontSize: 13,
-    color: colors.textSecondary,
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 2,
+  },
+  phoneText: {
+    fontSize: 12,
+    color: colors.textSecondary,
   },
   gstinText: {
     fontSize: 11,
@@ -215,7 +252,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   balanceValue: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
     marginTop: 2,
   },
@@ -223,52 +260,59 @@ const styles = StyleSheet.create({
     color: colors.danger,
   },
   balanceClean: {
-    color: colors.primary,
+    color: colors.systemGreen,
   },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 10,
+    marginTop: 10,
+    paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: colors.divider,
+    borderTopColor: colors.border,
   },
   badge: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: colors.primaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   badgeText: {
-    fontSize: 12,
-    color: colors.textSecondary,
+    fontSize: 11,
+    color: colors.primary,
     fontWeight: '600',
   },
   newBillBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.primaryLight,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.primaryBorder,
   },
   newBillBtnText: {
-    color: colors.primaryDark,
+    color: colors.primary,
     fontSize: 12,
     fontWeight: '700',
   },
   emptyContainer: {
     alignItems: 'center',
-    paddingTop: 50,
-    paddingHorizontal: 30,
+    paddingTop: 40,
+    paddingHorizontal: 24,
   },
-  emptyIcon: {
-    fontSize: 48,
+  emptyIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: colors.text,
   },
@@ -280,15 +324,22 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   scanBillHeroBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.primary,
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 20,
+    borderRadius: 10,
+    marginTop: 18,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   scanBillHeroBtnText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: 13,
   },
 });

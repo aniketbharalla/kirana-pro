@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useStaffStore } from '../../store/staffStore';
 import { colors } from '../../theme';
+import { Feather } from '@expo/vector-icons';
 
 export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation }) => {
   const {
@@ -42,7 +43,7 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
     openShift(selectedCounter, float);
     setIsOpeningShift(false);
     Alert.alert(
-      'Shift Started! 🏁',
+      'Shift Started',
       `Counter ${selectedCounter} shift opened with ₹${float} cash float.`
     );
   };
@@ -56,7 +57,7 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
     const closed = closeShift(actualClosingCash, shiftNotes.trim());
     if (closed) {
       Alert.alert(
-        'Shift Closed & Settled! ✓',
+        'Shift Closed & Settled',
         `Counter ${closed.counterNumber} shift completed.\nExpected: ₹${expectedCash}\nActual: ₹${actualClosingCash}\nVariance: ${
           variance >= 0 ? `+₹${variance} (Surplus)` : `-₹${Math.abs(variance)} (Shortage)`
         }\nTotal Bills: ${closed.invoiceCount}`
@@ -89,7 +90,7 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
                 isShiftActive ? styles.statusTextActive : styles.statusTextClosed,
               ]}
             >
-              {isShiftActive ? `🟢 Counter ${session.counterNumber} Active` : '🔴 Shift Closed'}
+              {isShiftActive ? `Counter ${session.counterNumber} Active` : 'Shift Closed'}
             </Text>
           </View>
         </View>
@@ -97,7 +98,11 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
         {/* Counter & Staff Badge */}
         <View style={styles.staffCard}>
           <View style={styles.staffAvatar}>
-            <Text style={{ fontSize: 24 }}>🧑‍💼</Text>
+            <Feather
+              name={activeStaff?.role === 'owner' ? 'shield' : 'user'}
+              size={22}
+              color="#7367F0"
+            />
           </View>
           <View style={{ flex: 1, marginLeft: 12 }}>
             <Text style={styles.staffName}>{activeStaff?.name}</Text>
@@ -109,7 +114,10 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
             style={styles.changeCounterBtn}
             onPress={() => setIsOpeningShift(true)}
           >
-            <Text style={styles.changeCounterText}>🔄 New Shift</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Feather name="rotate-cw" size={12} color="#7367F0" />
+              <Text style={styles.changeCounterText}>New Shift</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -162,7 +170,10 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
                 style={[styles.actionBtn, styles.primaryBtn]}
                 onPress={handleStartShift}
               >
-                <Text style={styles.primaryText}>Start Shift ➔</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Feather name="play" size={14} color="#FFFFFF" />
+                  <Text style={styles.primaryText}>Start Shift</Text>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
@@ -249,7 +260,7 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
                 >
                   <Text style={styles.varianceText}>
                     {variance === 0
-                      ? '✓ Cash perfectly matches expected amount!'
+                      ? 'Cash perfectly matches expected amount!'
                       : variance > 0
                       ? `Surplus: +₹${variance} extra in drawer`
                       : `Shortage: -₹${Math.abs(variance)} missing in drawer`}
@@ -273,9 +284,12 @@ export const CounterShiftScreen: React.FC<{ navigation?: any }> = ({ navigation 
                 activeOpacity={0.88}
                 onPress={handleCloseShift}
               >
-                <Text style={styles.closeBtnText}>
-                  🔒 Complete Handover & Close Shift
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Feather name="lock" size={15} color="#FFFFFF" />
+                  <Text style={styles.closeBtnText}>
+                    Complete Handover & Close Shift
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
           </>

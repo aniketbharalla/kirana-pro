@@ -1,70 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
 
 :root {
-  /* Typography Stacks */
-  --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  /* MasterX Design System Typography (Public Sans) */
+  --font-display: "Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-family: var(--font-body);
 
-  /* MasterX Design System Color Palette */
-  --mx-bg: #F8FAFC;                 /* Canvas background */
-  --mx-surface: #FFFFFF;            /* Pure white cards / panels */
-  --mx-surface-subtle: #F1F5F9;     /* Secondary / header surface */
-  --mx-border: #E2E8F0;             /* Hairline card & input border */
-  --mx-border-focus: #6366F1;       /* Indigo focus ring */
-  --mx-border-subtle: rgba(15, 23, 42, 0.06);
+  /* MasterX Signature Royal Purple & CTA Tokens */
+  --mx-primary: #7367F0;                 /* Signature MasterX Primary CTA */
+  --mx-primary-hover: #655bd3;
+  --mx-primary-dark: #5e50ee;
+  --mx-primary-tint: #EDEBFD;
+  --mx-primary-border: rgba(115, 103, 240, 0.28);
 
-  /* Brand Accents */
-  --mx-primary: #4F46E5;            /* Electric Indigo */
-  --mx-primary-hover: #4338CA;
-  --mx-primary-tint: #EEF2FF;
-  --mx-primary-border: rgba(79, 70, 229, 0.2);
+  /* MasterX Canvas & Surface */
+  --mx-bg: #F8F7FA;                     /* Soft Canvas Off-White */
+  --mx-surface: #FFFFFF;                /* Card & Panel Surface */
+  --mx-surface-subtle: #F1F0F5;
+  --mx-border: #DBDADE;                 /* MasterX Hairline Border */
+  --mx-border-focus: #7367F0;
+  --mx-border-subtle: rgba(47, 43, 61, 0.08);
 
-  --mx-emerald: #10B981;            /* POS & Financial Green */
-  --mx-emerald-hover: #059669;
-  --mx-emerald-tint: #ECFDF5;
-  --mx-emerald-border: rgba(16, 185, 129, 0.25);
+  /* MasterX Text Palette */
+  --mx-text-primary: #2F2B3D;           /* Deep Charcoal High-Contrast */
+  --mx-text-secondary: #6F6B7D;         /* Secondary Label */
+  --mx-text-muted: #A8AAAE;             /* Placeholder / Tertiary */
 
-  --mx-amber: #F59E0B;              /* Low Stock Caution */
-  --mx-amber-hover: #D97706;
-  --mx-amber-tint: #FFFBEB;
-  --mx-amber-border: rgba(245, 158, 11, 0.25);
+  /* MasterX Semantic Feedback Colors */
+  --mx-success: #28C76F;                /* In-Stock / Completed */
+  --mx-success-hover: #24b263;
+  --mx-success-tint: #DDF6E8;
+  --mx-success-border: rgba(40, 199, 111, 0.24);
 
-  --mx-rose: #EF4444;               /* Out of Stock / Destructive */
-  --mx-rose-hover: #DC2626;
-  --mx-rose-tint: #FEF2F2;
-  --mx-rose-border: rgba(239, 68, 68, 0.25);
+  --mx-warning: #FF9F43;                /* Low Stock / Warning */
+  --mx-warning-hover: #e58d38;
+  --mx-warning-tint: #FFF1E3;
+  --mx-warning-border: rgba(255, 159, 67, 0.25);
 
-  /* Text & Labels */
-  --mx-text-primary: #0F172A;       /* Slate 900 */
-  --mx-text-secondary: #475569;     /* Slate 600 */
-  --mx-text-muted: #94A3B8;         /* Slate 400 */
+  --mx-danger: #EA5455;                 /* Out of Stock / Destructive */
+  --mx-danger-hover: #d34546;
+  --mx-danger-tint: #FCE4E4;
+  --mx-danger-border: rgba(234, 84, 85, 0.25);
 
-  /* MasterX Shadows & Elevation */
-  --mx-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --mx-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-  --mx-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
-  --mx-shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  --mx-shadow-glow-indigo: 0 0 20px rgba(99, 102, 241, 0.18);
-
-  /* MasterX Radii */
-  --radius-xs: 8px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
-  --radius-pill: 9999px;
+  --mx-info: #00CFE8;                   /* Info / Cyan */
+  --mx-info-tint: #D6F7FB;
 
   /* Backward Compatibility Aliases */
+  --mx-emerald: var(--mx-success);
+  --mx-emerald-hover: var(--mx-success-hover);
+  --mx-emerald-tint: var(--mx-success-tint);
+  --mx-emerald-border: var(--mx-success-border);
+  --mx-amber: var(--mx-warning);
+  --mx-amber-tint: var(--mx-warning-tint);
+  --mx-rose: var(--mx-danger);
+  --mx-rose-tint: var(--mx-danger-tint);
+
+  /* MasterX Elevations & Shadows */
+  --mx-shadow-sm: 0 1px 3px rgba(47, 43, 61, 0.06);
+  --mx-shadow-card: 0 2px 6px rgba(47, 43, 61, 0.08);
+  --mx-shadow-hover: 0 8px 18px rgba(47, 43, 61, 0.12);
+  --mx-shadow-modal: 0 16px 36px rgba(47, 43, 61, 0.16);
+  --mx-shadow-primary: 0 4px 14px rgba(115, 103, 240, 0.38);
+
+  /* Radii */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Legacy Apple Aliases */
   --apple-bg: var(--mx-bg);
   --apple-surface: var(--mx-surface);
   --apple-border: var(--mx-border);
   --apple-label-primary: var(--mx-text-primary);
   --apple-label-secondary: var(--mx-text-secondary);
   --apple-label-tertiary: var(--mx-text-muted);
-  --apple-emerald: var(--mx-emerald);
-  --apple-emerald-tint: var(--mx-emerald-tint);
-  --apple-emerald-border: var(--mx-emerald-border);
+  --apple-emerald: var(--mx-success);
+  --apple-emerald-tint: var(--mx-success-tint);
   --apple-blue: var(--mx-primary);
   --apple-blue-tint: var(--mx-primary-tint);
   --apple-shadow-card: var(--mx-shadow-card);
@@ -96,18 +110,18 @@ button:active:not(:disabled), .mx-press:active {
   transform: scale(0.98);
 }
 
-/* Typography Utility Classes */
+/* MasterX Typography Utilities */
 .mx-display {
   font-family: var(--font-display);
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   font-weight: 700;
   color: var(--mx-text-primary);
 }
 
 .mx-headline {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
-  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-weight: 600;
   color: var(--mx-text-primary);
 }
 
@@ -137,13 +151,25 @@ button:active:not(:disabled), .mx-press:active {
   box-shadow: var(--mx-shadow-hover);
 }
 
-/* Frosted Glass Utilities */
-.mx-glass {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: var(--mx-shadow-modal);
+/* MasterX CTA Button */
+.mx-btn-primary {
+  background-color: var(--mx-primary);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--mx-shadow-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mx-btn-primary:hover {
+  background-color: var(--mx-primary-hover);
 }
 
 /* Custom Scrollbar */
@@ -157,10 +183,54 @@ button:active:not(:disabled), .mx-press:active {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #DBDADE;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #A8AAAE;
 }
+
+/* MasterX POS Responsive Layout Classes */
+.pos-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 84px);
+  gap: 12px;
+}
+
+.pos-main-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 1024px) {
+  .pos-container {
+    height: auto;
+    min-height: calc(100vh - 84px);
+    padding-bottom: 24px;
+  }
+  .pos-main-grid {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 16px;
+  }
+}
+
+/* MasterX Floating Toaster Keyframes */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+

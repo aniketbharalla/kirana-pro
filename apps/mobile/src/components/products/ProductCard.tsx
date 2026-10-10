@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { Product } from '@kirana-pro/shared';
-import { colors } from '../../theme';
 
 export interface ProductCardProps {
   product: Product;
@@ -20,17 +20,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const isLowStock = !isOutOfStock && currentStock <= minStockAlert;
   const unit = product?.unit || 'unit';
 
-  let stockBadgeBg = '#ECFDF5';
-  let stockBadgeText = '#065F46';
+  let stockBadgeBg = '#E8FADF';
+  let stockBadgeText = '#28C76F';
   let stockLabel = `${currentStock} ${unit}`;
 
   if (isOutOfStock) {
-    stockBadgeBg = '#FEF2F2';
-    stockBadgeText = '#DC2626';
+    stockBadgeBg = '#FCE4E4';
+    stockBadgeText = '#EA5455';
     stockLabel = 'Out of Stock';
   } else if (isLowStock) {
-    stockBadgeBg = '#FFFBEB';
-    stockBadgeText = '#B45309';
+    stockBadgeBg = '#FFF0E1';
+    stockBadgeText = '#FF9F43';
     stockLabel = `${currentStock} ${unit} (Low)`;
   }
 
@@ -53,7 +53,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {product?.isLoose && (
           <View style={styles.looseBadge}>
-            <Text style={styles.looseText}>⚖️ Loose</Text>
+            <Feather name="sliders" size={10} color="#7367F0" style={{ marginRight: 3 }} />
+            <Text style={styles.looseText}>Loose</Text>
           </View>
         )}
       </View>
@@ -67,9 +68,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             resizeMode="contain"
           />
         ) : (
-          <Text style={styles.fallbackEmoji}>
-            {product?.isLoose ? '🌾' : '📦'}
-          </Text>
+          <Feather
+            name={product?.isLoose ? 'sliders' : 'package'}
+            size={32}
+            color="#7367F0"
+          />
         )}
       </View>
 
@@ -106,9 +109,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           ) : null}
 
           {displayBarcode ? (
-            <Text style={styles.barcodeText} numberOfLines={1}>
-              📷 {displayBarcode}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+              <Feather name="maximize" size={10} color="#82808B" style={{ marginRight: 3 }} />
+              <Text style={styles.barcodeText} numberOfLines={1}>
+                {displayBarcode}
+              </Text>
+            </View>
           ) : null}
         </View>
 
@@ -121,7 +127,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               onQuickStockIn();
             }}
           >
-            <Text style={styles.quickAddPlus}>+</Text>
+            <Feather name="plus" size={16} color="#FFFFFF" />
           </TouchableOpacity>
         )}
       </View>
@@ -132,14 +138,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 10,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
+    borderColor: '#DBDADE',
+    shadowColor: '#2F2B3D',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 2,
     marginVertical: 6,
     flex: 1,
@@ -154,29 +160,31 @@ const styles = StyleSheet.create({
   stockBadge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   stockText: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   looseBadge: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#EDEBFD',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 4,
   },
   looseText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#4F46E5',
+    fontWeight: '600',
+    color: '#7367F0',
   },
   imageBox: {
     height: 90,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     marginBottom: 10,
     overflow: 'hidden',
   },
@@ -184,18 +192,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  fallbackEmoji: {
-    fontSize: 38,
-  },
   productName: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: '#4B465C',
     minHeight: 36,
   },
   hindiName: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#82808B',
     marginBottom: 6,
   },
   bottomRow: {
@@ -212,50 +217,44 @@ const styles = StyleSheet.create({
   costText: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#64748B',
-    backgroundColor: '#F1F5F9',
+    color: '#82808B',
+    backgroundColor: '#F8F7FA',
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: 4,
   },
   profitText: {
     fontSize: 10,
-    fontWeight: '700',
-    color: '#059669',
+    fontWeight: '600',
+    color: '#28C76F',
     marginTop: 2,
   },
   priceText: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
   },
   unitText: {
     fontSize: 11,
     fontWeight: '500',
-    color: '#64748B',
+    color: '#82808B',
   },
   barcodeText: {
     fontSize: 10,
-    color: '#94A3B8',
-    marginTop: 2,
+    color: '#82808B',
   },
   quickAddBtn: {
     width: 32,
     height: 32,
-    borderRadius: 10,
-    backgroundColor: '#10B981',
+    borderRadius: 6,
+    backgroundColor: '#7367F0',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#10B981',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },
-  quickAddPlus: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '800',
-    marginTop: -1,
-  },
 });
+

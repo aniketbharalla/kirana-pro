@@ -10,6 +10,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import {
   processInvoiceImage,
@@ -17,7 +18,6 @@ import {
   OCRProgress,
   SAMPLE_PARLE_BILL_TEXT,
 } from '../../services/ocrService';
-import { colors } from '../../theme';
 import { Supplier } from '@kirana-pro/shared';
 
 export const ScanInvoiceScreen = ({ route, navigation }: any) => {
@@ -153,11 +153,16 @@ export const ScanInvoiceScreen = ({ route, navigation }: any) => {
         {selectedImageUri ? (
           <View style={styles.imagePreviewContainer}>
             <Image source={{ uri: selectedImageUri }} style={styles.imagePreview} resizeMode="contain" />
-            <Text style={styles.imagePreviewBadge}>📸 Selected Bill Photo</Text>
+            <View style={styles.imagePreviewBadge}>
+              <Feather name="camera" size={12} color="#FFFFFF" style={{ marginRight: 4 }} />
+              <Text style={styles.imagePreviewBadgeText}>Selected Bill Photo</Text>
+            </View>
           </View>
         ) : (
           <View style={styles.placeholderContainer}>
-            <Text style={styles.cameraIcon}>🧾</Text>
+            <View style={styles.iconCircle}>
+              <Feather name="file-text" size={32} color="#7367F0" />
+            </View>
             <Text style={styles.captureTitle}>Real Wholesaler Bill Scanner</Text>
             <Text style={styles.captureDesc}>
               Upload any real printed invoice photo (Parle, Britannia, ITC, Mandi receipt).
@@ -169,40 +174,46 @@ export const ScanInvoiceScreen = ({ route, navigation }: any) => {
         {/* Real OCR Progress Indicator */}
         {isProcessing ? (
           <View style={styles.progressContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
+            <ActivityIndicator size="large" color="#7367F0" />
             <Text style={styles.progressStatus}>{ocrProgress.status || 'Scanning characters...'}</Text>
             <View style={styles.progressBarBg}>
               <View style={[styles.progressBarFill, { width: `${Math.max(10, ocrProgress.progress)}%` }]} />
             </View>
-            <Text style={styles.progressSubtext}>Powered by client-side Tesseract WASM (100% Free)</Text>
+            <Text style={styles.progressSubtext}>Powered by client-side Tesseract WASM</Text>
           </View>
         ) : (
           <View style={styles.buttonGroup}>
-            <TouchableOpacity style={styles.cameraBtn} onPress={handleTakePhoto}>
-              <Text style={styles.cameraBtnText}>📸 Take Photo with Camera</Text>
+            <TouchableOpacity style={styles.cameraBtn} onPress={handleTakePhoto} activeOpacity={0.85}>
+              <Feather name="camera" size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
+              <Text style={styles.cameraBtnText}>Take Photo with Camera</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.galleryBtn} onPress={handlePickFromGallery}>
-              <Text style={styles.galleryBtnText}>🖼️ Choose Bill from Gallery / Files</Text>
+            <TouchableOpacity style={styles.galleryBtn} onPress={handlePickFromGallery} activeOpacity={0.85}>
+              <Feather name="image" size={16} color="#4B465C" style={{ marginRight: 8 }} />
+              <Text style={styles.galleryBtnText}>Choose Bill from Gallery</Text>
             </TouchableOpacity>
 
             {selectedImageUri ? (
               <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.rotateBtn} onPress={handleRotateImage}>
-                  <Text style={styles.rotateBtnText}>🔄 Rotate 90°</Text>
+                <TouchableOpacity style={styles.rotateBtn} onPress={handleRotateImage} activeOpacity={0.85}>
+                  <Feather name="rotate-cw" size={15} color="#5D596C" style={{ marginRight: 6 }} />
+                  <Text style={styles.rotateBtnText}>Rotate 90°</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.reScanBtn}
                   onPress={() => handleExecuteRealOCR(selectedImageUri)}
+                  activeOpacity={0.85}
                 >
-                  <Text style={styles.reScanBtnText}>⚡ Run OCR on Bill</Text>
+                  <Feather name="zap" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.reScanBtnText}>Run OCR on Bill</Text>
                 </TouchableOpacity>
               </View>
             ) : null}
 
-            <TouchableOpacity style={styles.sampleBtn} onPress={handleLoadRealParleBill}>
-              <Text style={styles.sampleBtnText}>📑 Test with Real Parle Bill (15 Items)</Text>
+            <TouchableOpacity style={styles.sampleBtn} onPress={handleLoadRealParleBill} activeOpacity={0.85}>
+              <Feather name="file-text" size={15} color="#7367F0" style={{ marginRight: 6 }} />
+              <Text style={styles.sampleBtnText}>Test with Real Parle Bill (15 Items)</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -222,13 +233,15 @@ export const ScanInvoiceScreen = ({ route, navigation }: any) => {
             value={extractedRawText}
             onChangeText={setExtractedRawText}
             placeholder="Extracted text will appear here..."
-            placeholderTextColor={colors.textMuted}
+            placeholderTextColor="#82808B"
           />
           <TouchableOpacity
             style={styles.parseRawBtn}
             onPress={() => handleExecuteRealOCR(undefined, extractedRawText)}
+            activeOpacity={0.85}
           >
-            <Text style={styles.parseRawBtnText}>Parse Line Items from This Text ➔</Text>
+            <Text style={styles.parseRawBtnText}>Parse Line Items from This Text</Text>
+            <Feather name="arrow-right" size={15} color="#FFFFFF" style={{ marginLeft: 6 }} />
           </TouchableOpacity>
         </View>
       ) : null}
@@ -239,37 +252,42 @@ export const ScanInvoiceScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#F8F7FA',
   },
   content: {
-    padding: 20,
+    padding: 16,
     paddingBottom: 60,
   },
   captureCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 20,
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
     borderStyle: 'dashed',
-    borderColor: colors.primaryBorder,
   },
   placeholderContainer: {
     alignItems: 'center',
     paddingVertical: 12,
   },
-  cameraIcon: {
-    fontSize: 54,
-    marginBottom: 8,
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#EDEBFD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   captureTitle: {
     fontSize: 18,
-    fontWeight: '800',
-    color: colors.text,
+    fontWeight: '700',
+    color: '#4B465C',
   },
   captureDesc: {
     fontSize: 13,
-    color: colors.textSecondary,
+    color: '#82808B',
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 18,
@@ -278,9 +296,9 @@ const styles = StyleSheet.create({
   imagePreviewContainer: {
     width: '100%',
     height: 240,
-    borderRadius: 14,
+    borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#2F2B3D',
     marginBottom: 16,
     position: 'relative',
   },
@@ -292,13 +310,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 10,
-    backgroundColor: 'rgba(15, 23, 42, 0.8)',
-    color: '#FFFFFF',
-    paddingHorizontal: 8,
+    backgroundColor: 'rgba(47, 43, 61, 0.85)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
+  },
+  imagePreviewBadgeText: {
+    color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   progressContainer: {
     width: '100%',
@@ -307,26 +329,26 @@ const styles = StyleSheet.create({
   },
   progressStatus: {
     fontSize: 14,
-    fontWeight: '700',
-    color: colors.primaryDark,
+    fontWeight: '600',
+    color: '#7367F0',
     marginTop: 12,
   },
   progressBarBg: {
     width: '100%',
-    height: 8,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 4,
+    height: 6,
+    backgroundColor: '#DBDADE',
+    borderRadius: 3,
     marginTop: 10,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: 4,
+    backgroundColor: '#7367F0',
+    borderRadius: 3,
   },
   progressSubtext: {
     fontSize: 11,
-    color: colors.textMuted,
+    color: '#82808B',
     marginTop: 8,
   },
   buttonGroup: {
@@ -335,27 +357,36 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   cameraBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#7367F0',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   cameraBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 15,
+    fontWeight: '600',
+    fontSize: 14,
   },
   galleryBtn: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F8F7FA',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#DBDADE',
   },
   galleryBtnText: {
-    color: colors.text,
-    fontWeight: '700',
+    color: '#4B465C',
+    fontWeight: '600',
     fontSize: 14,
   },
   actionRow: {
@@ -365,85 +396,94 @@ const styles = StyleSheet.create({
   },
   rotateBtn: {
     flex: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#F8F7FA',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#DBDADE',
   },
   rotateBtnText: {
-    color: colors.text,
-    fontWeight: '700',
+    color: '#5D596C',
+    fontWeight: '600',
     fontSize: 13,
   },
   reScanBtn: {
     flex: 2,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#7367F0',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   reScanBtnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 14,
   },
   sampleBtn: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDEBFD',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: 'rgba(115, 103, 240, 0.2)',
     marginTop: 4,
   },
   sampleBtnText: {
-    color: '#92400E',
-    fontWeight: '700',
+    color: '#7367F0',
+    fontWeight: '600',
     fontSize: 13,
   },
   rawTextCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#DBDADE',
   },
   rawTextHeader: {
     fontSize: 14,
-    fontWeight: '800',
-    color: colors.text,
+    fontWeight: '700',
+    color: '#4B465C',
   },
   rawTextSub: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: '#82808B',
     marginTop: 2,
     marginBottom: 8,
   },
   rawTextArea: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     padding: 12,
     fontSize: 12,
     fontFamily: 'monospace',
-    color: colors.text,
+    color: '#4B465C',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#DBDADE',
     minHeight: 120,
     textAlignVertical: 'top',
   },
   parseRawBtn: {
-    backgroundColor: colors.text,
+    backgroundColor: '#7367F0',
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 10,
   },
   parseRawBtnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 13,
   },
 });
+

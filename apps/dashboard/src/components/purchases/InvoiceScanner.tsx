@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Product, PurchaseInvoiceDraft } from '@kirana-pro/shared';
 import { recognizeInvoice } from '../../lib/ocr/tesseract';
 import { parseInvoiceText, getReferenceParleInvoiceDraft } from '../../lib/ocr/parser';
+import { FileText, X, ScanLine, AlertTriangle, Sparkles, UploadCloud, FolderOpen, Camera, Paperclip, RotateCw } from 'lucide-react';
+import { Toast } from '../common/Toast';
 
 interface InvoiceScannerProps {
   existingProducts?: Product[];
@@ -119,7 +121,10 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
     <div style={styles.card}>
       <div style={styles.headerRow}>
         <div>
-          <h2 style={styles.title}>📷 Wholesaler Bill OCR Scanner</h2>
+          <h2 style={styles.title}>
+            <ScanLine size={20} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle', color: '#7367F0' }} />
+            Wholesaler Bill OCR Scanner
+          </h2>
           <p style={styles.subtitle}>
             Upload or drop your distributor invoice (e.g. Parle / N R ENTERPRISES). 100% free client-side WASM OCR.
           </p>
@@ -130,7 +135,7 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
           style={styles.sampleBtn}
           title="Instantly test with the 13-item reference Parle bill"
         >
-          📄 Load Parle Reference (13 Items)
+          <FileText size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Load Parle Reference (13 Items)
         </button>
       </div>
 
@@ -163,11 +168,13 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
           onClick={() => fileInputRef.current?.click()}
           style={{
             ...styles.dropzone,
-            backgroundColor: isDragging ? '#F0FDF4' : '#F8FAFC',
-            borderColor: isDragging ? '#10B981' : '#CBD5E1',
+            backgroundColor: isDragging ? '#EDEBFD' : '#F8F7FA',
+            borderColor: isDragging ? '#7367F0' : '#DBDADE',
           }}
         >
-          <div style={styles.dropIcon}>📑</div>
+          <div style={styles.dropIcon}>
+            <UploadCloud size={44} color="#7367F0" />
+          </div>
           <h3 style={styles.dropTitle}>Drag & Drop Invoice Image Here</h3>
           <p style={styles.dropHint}>Supports JPG, PNG, WEBP receipts & bills</p>
 
@@ -180,7 +187,7 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
               }}
               style={styles.primaryUploadBtn}
             >
-              📁 Browse Files
+              <FolderOpen size={16} /> Browse Files
             </button>
             <button
               type="button"
@@ -190,7 +197,7 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
               }}
               style={styles.secondaryUploadBtn}
             >
-              📸 Capture with Camera
+              <Camera size={16} /> Capture with Camera
             </button>
           </div>
         </div>
@@ -198,7 +205,8 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
         <div style={styles.previewContainer}>
           <div style={styles.previewToolbar}>
             <span style={styles.fileNameBadge}>
-              📎 {selectedFile?.name || 'Invoice Image'} ({rotationAngle}°)
+              <Paperclip size={13} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} />
+              {selectedFile?.name || 'Invoice Image'} ({rotationAngle}°)
             </span>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
@@ -207,7 +215,8 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
                 disabled={isProcessing}
                 style={styles.toolBtn}
               >
-                🔄 Rotate 90°
+                <RotateCw size={13} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} />
+                Rotate 90°
               </button>
               <button
                 type="button"
@@ -219,7 +228,7 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
                 disabled={isProcessing}
                 style={styles.toolBtnDanger}
               >
-                ✕ Clear
+                <X size={14} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} /> Clear
               </button>
             </div>
           </div>
@@ -247,7 +256,13 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
                 cursor: isProcessing ? 'not-allowed' : 'pointer',
               }}
             >
-              {isProcessing ? '⚡ Scanning Invoice...' : '🚀 Scan & Extract Bill Items'}
+              {isProcessing ? (
+                'Scanning Invoice...'
+              ) : (
+                <>
+                  <ScanLine size={16} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> Scan & Extract Bill Items
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -276,8 +291,13 @@ export default function InvoiceScanner({ existingProducts = [], onParsed }: Invo
 
       {/* Error Message */}
       {errorMsg && (
-        <div style={styles.errorBox}>
-          <span>⚠️ {errorMsg}</span>
+        <div style={{ marginTop: '16px' }}>
+          <Toast
+            type="error"
+            title="Invoice Scan Failed"
+            message={errorMsg}
+            onClose={() => setErrorMsg('')}
+          />
         </div>
       )}
     </div>
@@ -362,27 +382,33 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
   },
   primaryUploadBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
-    padding: '10px 18px',
+    borderRadius: '8px',
+    padding: '9px 18px',
     fontSize: '13px',
-    fontWeight: 700,
+    fontWeight: 600,
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
   secondaryUploadBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: '#CBD5E1',
-    color: '#334155',
-    borderRadius: '10px',
-    padding: '10px 18px',
+    borderColor: '#DBDADE',
+    color: '#2F2B3D',
+    borderRadius: '8px',
+    padding: '9px 18px',
     fontSize: '13px',
     fontWeight: 600,
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   },
   previewContainer: {
     display: 'flex',
@@ -456,20 +482,20 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: '6px',
   },
   startOcrBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '8px',
     padding: '12px 24px',
     fontSize: '14px',
     fontWeight: 700,
-    boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.3)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   progressCard: {
-    backgroundColor: '#F8FAFC',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#E2E8F0',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
     borderRadius: '12px',
     padding: '16px',
     display: 'flex',
@@ -481,25 +507,25 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     fontSize: '13px',
     fontWeight: 600,
-    color: '#334155',
+    color: '#2F2B3D',
   },
   progressStatus: {
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   progressNumber: {
-    color: '#10B981',
+    color: '#7367F0',
     fontWeight: 700,
   },
   progressBarBg: {
     height: '8px',
     width: '100%',
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#EDEBFD',
     borderRadius: '999px',
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     transition: 'width 0.2s ease',
   },
   progressSubtext: {

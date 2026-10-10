@@ -70,7 +70,7 @@ describe('useLanguageStore – i18n', () => {
     const { t } = useLanguageStore.getState();
     // 'total_items' is defined without params; use welcome_greeting which is static
     const result = t('welcome_greeting');
-    expect(result).toContain('🙏');
+    expect(result).toBe('Namaste');
   });
 
   it('can switch between all three languages repeatedly', () => {

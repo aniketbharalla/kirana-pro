@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Product, PurchaseInvoiceDraft, PurchaseItem } from '@kirana-pro/shared';
+import { Package, Plus, Trash2, ArrowLeft, CheckCircle2, Building2 } from 'lucide-react';
 
 interface ReviewInvoiceTableProps {
   draft: PurchaseInvoiceDraft;
@@ -138,7 +139,10 @@ export default function ReviewInvoiceTable({
       {/* Supplier & Invoice Metadata Header */}
       <div style={styles.card}>
         <div style={styles.cardHeader}>
-          <h3 style={styles.cardTitle}>🏢 Supplier & Invoice Details</h3>
+          <h3 style={styles.cardTitle}>
+            <Building2 size={18} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle', color: '#7367F0' }} />
+            Supplier & Invoice Details
+          </h3>
           <span style={styles.badge}>{items.length} Extracted Items</span>
         </div>
         <div style={styles.grid4}>
@@ -189,13 +193,15 @@ export default function ReviewInvoiceTable({
       <div style={styles.card}>
         <div style={styles.tableHeaderRow}>
           <div>
-            <h3 style={styles.cardTitle}>📦 Line Items & Tax Breakdown</h3>
+            <h3 style={styles.cardTitle}>
+              <Package size={16} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Line Items & Tax Breakdown
+            </h3>
             <p style={styles.tableSubtitle}>
               Formula applied: <code>totalQty = Gross / Rate</code> | CGST 2.5% + SGST 2.5%
             </p>
           </div>
           <button type="button" onClick={handleAddItem} style={styles.addItemBtn}>
-            + Add Line Item
+            <Plus size={14} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} /> Add Line Item
           </button>
         </div>
 
@@ -235,7 +241,7 @@ export default function ReviewInvoiceTable({
                       onChange={(e) => handleProductMatch(idx, e.target.value)}
                       style={styles.cellSelect}
                     >
-                      <option value="__new__">✨ New Product (+)</option>
+                      <option value="__new__">+ New Product (Catalog Entry)</option>
                       {existingProducts.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name} ({p.currentStock} in stock)
@@ -301,7 +307,7 @@ export default function ReviewInvoiceTable({
                       style={styles.deleteRowBtn}
                       title="Remove Item"
                     >
-                      🗑️
+                      <Trash2 size={15} color="#EA5455" />
                     </button>
                   </td>
                 </tr>
@@ -329,9 +335,9 @@ export default function ReviewInvoiceTable({
           <span style={styles.kpiLabel}>SGST 2.5%</span>
           <span style={styles.kpiValue}>₹{totalSGST.toFixed(2)}</span>
         </div>
-        <div style={{ ...styles.kpiCard, backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' }}>
-          <span style={{ ...styles.kpiLabel, color: '#065F46' }}>Net Payable (Total)</span>
-          <span style={{ ...styles.kpiValue, color: '#047857', fontSize: '20px' }}>
+        <div style={{ ...styles.kpiCard, backgroundColor: '#EDEBFD', borderColor: '#DBDADE' }}>
+          <span style={{ ...styles.kpiLabel, color: '#7367F0' }}>Net Payable (Total)</span>
+          <span style={{ ...styles.kpiValue, color: '#7367F0', fontSize: '20px' }}>
             ₹{netPayable.toFixed(2)}
           </span>
         </div>
@@ -345,7 +351,7 @@ export default function ReviewInvoiceTable({
           disabled={isSaving}
           style={styles.cancelBtn}
         >
-          ← Cancel / Scan Another
+          <ArrowLeft size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Cancel / Scan Another
         </button>
         <button
           type="button"
@@ -357,7 +363,13 @@ export default function ReviewInvoiceTable({
             cursor: isSaving || items.length === 0 ? 'not-allowed' : 'pointer',
           }}
         >
-          {isSaving ? '⏳ Updating Inventory & Ledger...' : `✅ Confirm & Inward ${items.length} Items to Stock`}
+          {isSaving ? (
+            'Updating Inventory & Ledger...'
+          ) : (
+            <>
+              <CheckCircle2 size={16} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> Confirm & Inward {items.length} Items to Stock
+            </>
+          )}
         </button>
       </div>
     </div>
@@ -572,14 +584,16 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   confirmBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '8px',
     padding: '12px 28px',
     fontSize: '14px',
     fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.3)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
 };

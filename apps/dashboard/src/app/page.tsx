@@ -8,6 +8,7 @@ import { StockLog } from '../components/StockLog';
 import { useAuth } from '../context/AuthContext';
 import { subscribeStoreProducts, subscribeStoreMovements } from '../lib/storeService';
 import { Product, StockMovement } from '@kirana-pro/shared';
+import { Zap, Plus, Camera, Receipt, BookOpen, Package, ArrowRight } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
   const { profile, store } = useAuth();
@@ -55,7 +56,7 @@ export default function DashboardOverviewPage() {
       {/* MasterX Command Center Hero Card */}
       <div style={styles.banner}>
         <div style={styles.bannerContent}>
-          <div style={styles.pill}>✨ STORE COMMAND CENTER</div>
+          <div style={styles.pill}>STORE COMMAND CENTER</div>
           <h2 style={styles.bannerTitle}>
             Welcome, {profile?.displayName || 'Store Owner'}
           </h2>
@@ -66,20 +67,26 @@ export default function DashboardOverviewPage() {
         </div>
 
         <div style={styles.bannerActions}>
-          <Link href="/pos" style={styles.posPrimaryBtn}>
-            ⚡ POS Quick Billing (F4)
+          {/* MasterX Primary CTA Button */}
+          <Link href="/pos" style={styles.primaryCtaBtn}>
+            <Zap size={16} strokeWidth={2.2} />
+            <span>POS Quick Billing (F4)</span>
           </Link>
           <Link href="/products" style={styles.darkActionBtn}>
-            ➕ Add Product
+            <Plus size={16} strokeWidth={2.2} />
+            <span>Add Product</span>
           </Link>
           <Link href="/purchases/new" style={styles.indigoActionBtn}>
-            ⚡ Inward via OCR
+            <Camera size={16} strokeWidth={2.2} />
+            <span>Inward via OCR</span>
           </Link>
           <Link href="/bills" style={styles.outlineActionBtn}>
-            🧾 Sales Invoices
+            <Receipt size={16} strokeWidth={1.8} />
+            <span>Sales Invoices</span>
           </Link>
           <Link href="/khata" style={styles.outlineActionBtn}>
-            📒 Khata Ledger
+            <BookOpen size={16} strokeWidth={1.8} />
+            <span>Khata Ledger</span>
           </Link>
         </div>
       </div>
@@ -100,15 +107,18 @@ export default function DashboardOverviewPage() {
         </div>
       ) : products.length === 0 ? (
         <div style={styles.emptyCard}>
-          <div style={styles.emptyIcon}>📦</div>
+          <div style={styles.emptyIconBox}>
+            <Package size={36} color="#7367F0" />
+          </div>
           <h3 style={styles.emptyTitle}>Your Catalog is Ready for Products</h3>
           <p style={styles.emptyDesc}>
             No items have been added to this store yet. Start adding items to track stock, scan
             barcodes, and print customer bills.
           </p>
           <div style={styles.emptyActions}>
-            <Link href="/products" style={styles.posPrimaryBtn}>
-              ➕ Add First Product
+            <Link href="/products" style={styles.primaryCtaBtn}>
+              <Plus size={16} strokeWidth={2.2} />
+              <span>Add First Product</span>
             </Link>
           </div>
         </div>
@@ -123,7 +133,8 @@ export default function DashboardOverviewPage() {
                 <p style={styles.sectionSub}>Latest items synchronized with cloud database</p>
               </div>
               <Link href="/products" style={styles.linkMore}>
-                View All Catalog →
+                <span>View All Catalog</span>
+                <ArrowRight size={14} />
               </Link>
             </div>
             <ProductsTable
@@ -142,7 +153,8 @@ export default function DashboardOverviewPage() {
                 <p style={styles.sectionSub}>Live audit log of sales, purchases, and manual updates</p>
               </div>
               <Link href="/stock" style={styles.linkMore}>
-                View Full Log →
+                <span>View Full Log</span>
+                <ArrowRight size={14} />
               </Link>
             </div>
             <StockLog
@@ -168,16 +180,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   banner: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '18px',
-    padding: '28px 28px',
-    marginBottom: '24px',
+    border: '1px solid #DBDADE',
+    borderRadius: '14px',
+    padding: '24px 26px',
+    marginBottom: '20px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '20px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    gap: '18px',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.05)',
   },
   bannerContent: {
     maxWidth: '680px',
@@ -185,87 +197,103 @@ const styles: Record<string, React.CSSProperties> = {
   pill: {
     display: 'inline-block',
     fontSize: '10px',
-    fontWeight: 800,
+    fontWeight: 700,
     letterSpacing: '0.06em',
-    color: '#4F46E5',
-    backgroundColor: '#EEF2FF',
-    border: '1px solid rgba(79, 70, 229, 0.2)',
-    padding: '3px 10px',
-    borderRadius: '999px',
-    marginBottom: '10px',
+    color: '#7367F0',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.25)',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    marginBottom: '8px',
     textTransform: 'uppercase',
   },
   bannerTitle: {
-    fontSize: '26px',
-    fontWeight: 800,
-    color: '#0F172A',
+    fontSize: '24px',
+    fontWeight: 700,
+    color: '#2F2B3D',
     fontFamily: 'var(--font-display)',
-    margin: '0 0 8px 0',
-    letterSpacing: '-0.03em',
+    margin: '0 0 6px 0',
+    letterSpacing: '-0.02em',
     lineHeight: 1.2,
   },
   bannerSub: {
     fontSize: '13px',
-    color: '#475569',
+    color: '#6F6B7D',
     margin: 0,
-    lineHeight: 1.55,
+    lineHeight: 1.5,
   },
   bannerActions: {
     display: 'flex',
-    gap: '10px',
+    gap: '8px',
     flexWrap: 'wrap',
   },
-  posPrimaryBtn: {
-    backgroundColor: '#10B981',
+  primaryCtaBtn: {
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
-    padding: '10px 18px',
-    borderRadius: '12px',
-    fontSize: '13px',
-    fontWeight: 700,
-    textDecoration: 'none',
-    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
-  },
-  darkActionBtn: {
-    backgroundColor: '#18181B',
-    color: '#FFFFFF',
-    padding: '10px 18px',
-    borderRadius: '12px',
-    fontSize: '13px',
-    fontWeight: 700,
-    textDecoration: 'none',
-    boxShadow: '0 2px 8px rgba(24, 24, 27, 0.2)',
-  },
-  indigoActionBtn: {
-    backgroundColor: '#4F46E5',
-    color: '#FFFFFF',
-    padding: '10px 18px',
-    borderRadius: '12px',
-    fontSize: '13px',
-    fontWeight: 700,
-    textDecoration: 'none',
-    boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)',
-  },
-  outlineActionBtn: {
-    backgroundColor: '#FFFFFF',
-    color: '#334155',
-    padding: '10px 16px',
-    borderRadius: '12px',
+    padding: '9px 16px',
+    borderRadius: '8px',
     fontSize: '13px',
     fontWeight: 600,
     textDecoration: 'none',
-    border: '1px solid #CBD5E1',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 4px 12px rgba(115, 103, 240, 0.35)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    transition: 'all 0.15s ease',
+  },
+  darkActionBtn: {
+    backgroundColor: '#2F2B3D',
+    color: '#FFFFFF',
+    padding: '9px 16px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: 600,
+    textDecoration: 'none',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.15)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    transition: 'all 0.15s ease',
+  },
+  indigoActionBtn: {
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
+    border: '1px solid rgba(115, 103, 240, 0.25)',
+    padding: '9px 16px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: 600,
+    textDecoration: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    transition: 'all 0.15s ease',
+  },
+  outlineActionBtn: {
+    backgroundColor: '#FFFFFF',
+    color: '#4B465C',
+    padding: '9px 14px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: 500,
+    textDecoration: 'none',
+    border: '1px solid #DBDADE',
+    boxShadow: '0 1px 2px rgba(47, 43, 61, 0.04)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    transition: 'all 0.15s ease',
   },
   loadingBox: {
-    padding: '60px',
+    padding: '50px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '12px',
     backgroundColor: '#FFFFFF',
-    borderRadius: '18px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
   },
   spinner: {
     width: '32px',
@@ -273,94 +301,103 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '50%',
     borderWidth: '3px',
     borderStyle: 'solid',
-    borderColor: '#E2E8F0',
-    borderTopColor: '#4F46E5',
+    borderColor: '#DBDADE',
+    borderTopColor: '#7367F0',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '13px',
-    fontWeight: 600,
-    color: '#64748B',
+    fontWeight: 500,
+    color: '#6F6B7D',
   },
   emptyCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '18px',
-    padding: '48px 32px',
+    borderRadius: '14px',
+    padding: '40px 24px',
     textAlign: 'center',
-    border: '1px solid #E2E8F0',
+    border: '1px solid #DBDADE',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.05)',
   },
-  emptyIcon: {
-    fontSize: '44px',
-    marginBottom: '12px',
+  emptyIconBox: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '16px',
+    backgroundColor: '#EDEBFD',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '14px',
   },
   emptyTitle: {
-    fontSize: '18px',
-    fontWeight: 800,
-    color: '#0F172A',
+    fontSize: '17px',
+    fontWeight: 700,
+    color: '#2F2B3D',
     fontFamily: 'var(--font-display)',
     marginBottom: '6px',
-    letterSpacing: '-0.02em',
+    letterSpacing: '-0.01em',
   },
   emptyDesc: {
     fontSize: '13px',
-    color: '#64748B',
-    maxWidth: '460px',
+    color: '#6F6B7D',
+    maxWidth: '440px',
     lineHeight: 1.5,
-    marginBottom: '20px',
+    marginBottom: '18px',
   },
   emptyActions: {
     display: 'flex',
-    gap: '12px',
+    gap: '10px',
   },
   contentGrid: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '24px',
+    gap: '20px',
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '18px',
-    border: '1px solid #E2E8F0',
-    padding: '24px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    borderRadius: '14px',
+    border: '1px solid #DBDADE',
+    padding: '20px',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.05)',
   },
   sectionHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: '18px',
+    marginBottom: '16px',
   },
   sectionCaption: {
     fontSize: '10px',
-    fontWeight: 800,
+    fontWeight: 700,
     letterSpacing: '0.06em',
-    color: '#94A3B8',
+    color: '#A8AAAE',
     textTransform: 'uppercase',
   },
   sectionTitle: {
-    fontSize: '17px',
-    fontWeight: 800,
-    color: '#0F172A',
+    fontSize: '16px',
+    fontWeight: 700,
+    color: '#2F2B3D',
     fontFamily: 'var(--font-display)',
     margin: '2px 0',
-    letterSpacing: '-0.02em',
+    letterSpacing: '-0.01em',
   },
   sectionSub: {
     fontSize: '12px',
-    color: '#64748B',
+    color: '#6F6B7D',
     margin: 0,
   },
   linkMore: {
     fontSize: '12px',
-    fontWeight: 700,
-    color: '#4F46E5',
+    fontWeight: 600,
+    color: '#7367F0',
     textDecoration: 'none',
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#EDEBFD',
     padding: '6px 12px',
-    borderRadius: '8px',
+    borderRadius: '6px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
   },
 };

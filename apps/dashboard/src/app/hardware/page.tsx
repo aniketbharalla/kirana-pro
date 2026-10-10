@@ -8,6 +8,7 @@ import {
   Invoice,
 } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
+import { Wallet, Printer, Scale, CheckCircle2, Monitor, Bluetooth, Usb } from 'lucide-react';
 
 export default function HardwarePage() {
   const { store } = useAuth();
@@ -102,7 +103,7 @@ export default function HardwarePage() {
           printWindow.print();
           printWindow.close();
         }, 250);
-        setStatusMsg('✓ Test receipt sent to printer queue!');
+        setStatusMsg('Test receipt sent to printer queue!');
         setTimeout(() => setStatusMsg(null), 4000);
       }
     }
@@ -110,7 +111,7 @@ export default function HardwarePage() {
 
   // Trigger Cash Drawer Kick
   const handleTestDrawerKick = () => {
-    setStatusMsg('✓ Cash drawer kick pulse (ESC p 0 25 250) triggered successfully!');
+    setStatusMsg('Cash drawer kick pulse (ESC p 0 25 250) triggered successfully!');
     setTimeout(() => setStatusMsg(null), 4000);
   };
 
@@ -121,7 +122,10 @@ export default function HardwarePage() {
         <div>
           <div style={styles.badgeRow}>
             <span style={styles.hardwareBadge}>COUNTER PERIPHERALS</span>
-            <span style={styles.statusBadge}>✓ POS Hardware Active</span>
+            <span style={styles.statusBadge}>
+              <CheckCircle2 size={12} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} />
+              POS Hardware Active
+            </span>
           </div>
           <h1 style={styles.title}>Hardware & Thermal Printer Hub</h1>
           <p style={styles.subtitle}>
@@ -132,10 +136,10 @@ export default function HardwarePage() {
         {/* Action Buttons */}
         <div style={styles.actionsRow}>
           <button style={styles.btnSecondary} onClick={handleTestDrawerKick}>
-            💰 Test Drawer Kick
+            <Wallet size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Test Drawer Kick
           </button>
           <button style={styles.btnPrimary} onClick={handleTestPrint}>
-            🖨️ Print Test Receipt
+            <Printer size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Print Test Receipt
           </button>
         </div>
       </div>
@@ -187,8 +191,9 @@ export default function HardwarePage() {
                   }}
                   onClick={() => setConnection(c)}
                 >
-                  <span style={{ fontWeight: 700, fontSize: '13px', textTransform: 'capitalize' }}>
-                    {c === 'system' ? '💻 System' : c === 'bluetooth' ? '📶 Bluetooth' : '🔌 USB'}
+                  <span style={{ fontWeight: 700, fontSize: '13px', textTransform: 'capitalize', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    {c === 'system' ? <Monitor size={14} /> : c === 'bluetooth' ? <Bluetooth size={14} /> : <Usb size={14} />}
+                    {c}
                   </span>
                   <span style={{ fontSize: '11px', color: connection === c ? 'rgba(255,255,255,0.85)' : '#86868B' }}>
                     {c === 'system' ? 'Universal' : c === 'bluetooth' ? 'Web BLE 4.0' : 'WebUSB'}
@@ -240,8 +245,8 @@ export default function HardwarePage() {
           {/* Digital Weighing Scale Subsystem Info */}
           <div style={styles.scaleInfoBox}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '20px' }}>⚖️</span>
-              <span style={{ fontWeight: 700, fontSize: '14px', color: '#1D1D1F' }}>
+              <Scale size={20} color="#7367F0" />
+              <span style={{ fontWeight: 700, fontSize: '14px', color: '#2F2B3D' }}>
                 Electronic Weighing Scale (तराजू)
               </span>
             </div>
@@ -297,8 +302,8 @@ const styles: Record<string, React.CSSProperties> = {
   hardwareBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    color: '#7367F0',
+    backgroundColor: 'rgba(115, 103, 240, 0.12)',
     padding: '4px 10px',
     borderRadius: '9999px',
     letterSpacing: '0.04em',
@@ -306,8 +311,8 @@ const styles: Record<string, React.CSSProperties> = {
   statusBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#059669',
-    backgroundColor: 'rgba(5, 150, 105, 0.12)',
+    color: '#28C76F',
+    backgroundColor: 'rgba(40, 199, 111, 0.12)',
     padding: '4px 10px',
     borderRadius: '9999px',
   },
@@ -332,29 +337,26 @@ const styles: Record<string, React.CSSProperties> = {
   },
   btnSecondary: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.12)',
-    borderRadius: '9999px',
+    border: '1px solid #DBDADE',
+    borderRadius: '8px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 600,
-    color: '#1D1D1F',
+    color: '#2F2B3D',
     cursor: 'pointer',
-    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
     transition: 'all 0.15s ease',
   },
   btnPrimary: {
-    backgroundColor: '#1D1D1F',
-    borderWidth: 0,
-    borderStyle: 'none',
-    borderRadius: '9999px',
-    padding: '11px 20px',
+    backgroundColor: '#7367F0',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '10px 20px',
     fontSize: '13px',
     fontWeight: 700,
     color: '#FFFFFF',
     cursor: 'pointer',
-    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
     transition: 'all 0.15s ease',
   },
   alertBox: {
@@ -375,20 +377,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
   configCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
     padding: '24px',
     display: 'flex',
     flexDirection: 'column',
     gap: '20px',
-    boxShadow: '0 2px 14px rgba(0, 0, 0, 0.02)',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   cardTitle: {
     fontSize: '17px',
     fontWeight: 700,
-    color: '#1D1D1F',
+    color: '#2F2B3D',
     margin: 0,
     letterSpacing: '-0.02em',
   },
@@ -400,7 +400,7 @@ const styles: Record<string, React.CSSProperties> = {
   label: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#86868B',
+    color: '#6F6B7D',
     letterSpacing: '0.04em',
   },
   toggleRow: {
@@ -409,35 +409,33 @@ const styles: Record<string, React.CSSProperties> = {
   },
   toggleBtn: {
     flex: 1,
-    backgroundColor: '#FBFBFC',
-    borderWidth: 1,
+    backgroundColor: '#F8F7FA',
+    borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderRadius: '14px',
+    borderColor: '#DBDADE',
+    borderRadius: '8px',
     padding: '14px',
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
     cursor: 'pointer',
     textAlign: 'left',
-    color: '#1D1D1F',
+    color: '#2F2B3D',
     transition: 'all 0.15s ease',
   },
   toggleBtnActive: {
-    backgroundColor: '#1D1D1F',
-    borderColor: '#1D1D1F',
-    color: '#FFFFFF',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#EDEBFD',
+    borderColor: '#7367F0',
+    color: '#7367F0',
+    boxShadow: '0 2px 6px rgba(115, 103, 240, 0.2)',
   },
   input: {
-    backgroundColor: '#FBFBFC',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderRadius: '12px',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DBDADE',
+    borderRadius: '8px',
     padding: '12px 16px',
     fontSize: '14px',
-    color: '#1D1D1F',
+    color: '#2F2B3D',
     outline: 'none',
   },
   switchRow: {
@@ -445,18 +443,16 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: '16px',
-    borderTopWidth: 1,
-    borderTopStyle: 'solid',
-    borderTopColor: 'rgba(0, 0, 0, 0.06)',
+    borderTop: '1px solid #DBDADE',
   },
   switchTitle: {
     fontSize: '14px',
     fontWeight: 600,
-    color: '#1D1D1F',
+    color: '#2F2B3D',
   },
   switchSub: {
     fontSize: '12px',
-    color: '#86868B',
+    color: '#6F6B7D',
     margin: 0,
     marginTop: '2px',
   },
@@ -464,11 +460,12 @@ const styles: Record<string, React.CSSProperties> = {
     width: '20px',
     height: '20px',
     cursor: 'pointer',
-    accentColor: '#10B981',
+    accentColor: '#7367F0',
   },
   scaleInfoBox: {
-    backgroundColor: 'rgba(118, 118, 128, 0.06)',
-    borderRadius: '16px',
+    backgroundColor: '#F8F7FA',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
     padding: '18px',
     display: 'flex',
     flexDirection: 'column',
@@ -476,15 +473,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   previewCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
     padding: '24px',
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
-    boxShadow: '0 2px 14px rgba(0, 0, 0, 0.02)',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   previewHeader: {
     display: 'flex',
@@ -500,8 +495,8 @@ const styles: Record<string, React.CSSProperties> = {
   previewBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    color: '#28C76F',
+    backgroundColor: 'rgba(40, 199, 111, 0.12)',
     padding: '4px 10px',
     borderRadius: '9999px',
   },

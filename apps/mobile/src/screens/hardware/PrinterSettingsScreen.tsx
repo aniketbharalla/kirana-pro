@@ -10,6 +10,7 @@ import {
   Alert,
   SafeAreaView,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useHardwareStore } from '../../store/hardwareStore';
 import { useStoreStore } from '../../store/storeStore';
 import { printTestReceipt, kickCashDrawer } from '../../services/printerService';
@@ -54,7 +55,7 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
     setPrinting(false);
 
     Alert.alert(
-      result.success ? 'Print Success! 🖨️' : 'Print Error',
+      result.success ? 'Print Success' : 'Print Error',
       result.message
     );
   };
@@ -62,12 +63,12 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
   const handleTestDrawerKick = async () => {
     const settings = useHardwareStore.getState().getPrinterSettings();
     await kickCashDrawer(settings);
-    Alert.alert('Drawer Pulse Sent! 💰', 'Triggered pulse to open physical cash drawer.');
+    Alert.alert('Drawer Pulse Sent', 'Triggered pulse to open physical cash drawer.');
   };
 
   const handleConnectScale = async () => {
     const res = await connectSerialScale();
-    Alert.alert(res.success ? 'Scale Connected ⚖️' : 'Scale Notice', res.message);
+    Alert.alert(res.success ? 'Scale Connected' : 'Scale Notice', res.message);
   };
 
   const handleToggleSimulatedScale = () => {
@@ -77,7 +78,7 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
     } else {
       const w = parseFloat(simWeightInput) || 1.25;
       startSimulatedScale(w);
-      Alert.alert('Simulated Scale Active ⚖️', `Simulating scale streaming at ${w.toFixed(3)} kg.`);
+      Alert.alert('Simulated Scale Active', `Simulating scale streaming at ${w.toFixed(3)} kg.`);
     }
   };
 
@@ -102,7 +103,10 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
         {/* SECTION 1: ESC/POS Thermal Receipt Printer */}
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}>🖨️ Thermal Receipt Printer</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Feather name="printer" size={18} color="#7367F0" />
+              <Text style={styles.cardTitle}>Thermal Receipt Printer</Text>
+            </View>
             <View style={styles.badgeSuccess}>
               <Text style={styles.badgeText}>Ready</Text>
             </View>
@@ -133,9 +137,16 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
                 style={[styles.toggleBtn, connectionType === c && styles.toggleBtnActive]}
                 onPress={() => setConnectionType(c)}
               >
-                <Text style={[styles.toggleText, connectionType === c && styles.toggleTextActive]}>
-                  {c === 'system' ? '💻 System' : c === 'bluetooth' ? '📶 Bluetooth' : '🔌 USB'}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Feather
+                    name={c === 'system' ? 'monitor' : c === 'bluetooth' ? 'radio' : 'cpu'}
+                    size={14}
+                    color={connectionType === c ? '#FFFFFF' : '#6F6B7D'}
+                  />
+                  <Text style={[styles.toggleText, connectionType === c && styles.toggleTextActive]}>
+                    {c === 'system' ? 'System' : c === 'bluetooth' ? 'Bluetooth' : 'USB'}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -147,6 +158,7 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
             value={printerName}
             onChangeText={setPrinterName}
             placeholder="e.g. Everycom POS 58 or NGX NXR-80"
+            placeholderTextColor="#A8AAAE"
           />
 
           {/* Toggles */}
@@ -158,7 +170,7 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
             <Switch
               value={autoCut}
               onValueChange={setAutoCut}
-              trackColor={{ false: '#CBD5E1', true: colors.primary }}
+              trackColor={{ false: '#DBDADE', true: '#7367F0' }}
             />
           </View>
 
@@ -170,7 +182,7 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
             <Switch
               value={autoKickDrawer}
               onValueChange={setAutoKickDrawer}
-              trackColor={{ false: '#CBD5E1', true: colors.primary }}
+              trackColor={{ false: '#DBDADE', true: '#7367F0' }}
             />
           </View>
 
@@ -182,9 +194,12 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
               onPress={handleTestPrint}
               disabled={printing}
             >
-              <Text style={styles.testPrintText}>
-                {printing ? 'Printing...' : '🖨️ Print Test Receipt'}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather name="printer" size={14} color="#7367F0" />
+                <Text style={styles.testPrintText}>
+                  {printing ? 'Printing...' : 'Print Test Receipt'}
+                </Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -192,7 +207,10 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
               activeOpacity={0.85}
               onPress={handleTestDrawerKick}
             >
-              <Text style={styles.testKickText}>💰 Test Drawer Kick</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather name="dollar-sign" size={14} color="#7367F0" />
+                <Text style={styles.testKickText}>Test Drawer Kick</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -200,11 +218,21 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
         {/* SECTION 2: Electronic Weighing Scale (Taraju) */}
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}>⚖️ Electronic Weighing Scale (तराजू)</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Feather name="sliders" size={18} color="#7367F0" />
+              <Text style={styles.cardTitle}>Electronic Weighing Scale (तराजू)</Text>
+            </View>
             <View style={isScaleConnected ? styles.badgeSuccess : styles.badgeOffline}>
-              <Text style={styles.badgeText}>
-                {isScaleConnected ? '🟢 Live Connected' : '⚪ Disconnected'}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather
+                  name={isScaleConnected ? "check-circle" : "circle"}
+                  size={10}
+                  color={isScaleConnected ? "#28C76F" : "#6F6B7D"}
+                />
+                <Text style={[styles.badgeText, !isScaleConnected && { color: '#6F6B7D' }]}>
+                  {isScaleConnected ? 'Live Connected' : 'Disconnected'}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -213,13 +241,13 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
             <View>
               <Text style={styles.scaleDisplayLabel}>LIVE SENSOR WEIGHT</Text>
               <Text style={styles.scaleDisplayVal}>
-                {scaleWeight.toFixed(3)} <Text style={{ fontSize: 18, color: '#94A3B8' }}>kg</Text>
+                {scaleWeight.toFixed(3)} <Text style={{ fontSize: 18, color: '#A8AAAE' }}>kg</Text>
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end', gap: 6 }}>
               <View style={[styles.stablePill, isScaleStable ? styles.stablePillOn : styles.stablePillOff]}>
                 <Text style={styles.stableText}>
-                  {isScaleStable ? 'STABLE ✓' : 'UNSTABLE ~'}
+                  {isScaleStable ? 'STABLE' : 'UNSTABLE'}
                 </Text>
               </View>
               <TouchableOpacity style={styles.tareBtn} onPress={tareScale}>
@@ -238,7 +266,10 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
               style={[styles.actionBtn, styles.connectScaleBtn]}
               onPress={handleConnectScale}
             >
-              <Text style={styles.connectScaleText}>🔌 Connect USB / Serial Scale</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather name="link" size={14} color="#7367F0" />
+                <Text style={styles.connectScaleText}>Connect USB / Serial Scale</Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -258,13 +289,14 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
 
             {isSimulatedScale && (
               <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, alignItems: 'center' }}>
-                <Text style={{ fontSize: 12, color: '#64748B' }}>Set Weight (kg):</Text>
+                <Text style={{ fontSize: 12, color: '#6F6B7D' }}>Set Weight (kg):</Text>
                 <TextInput
                   style={styles.simInput}
                   value={simWeightInput}
                   onChangeText={setSimWeightInput}
                   keyboardType="numeric"
                   placeholder="1.500"
+                  placeholderTextColor="#A8AAAE"
                 />
                 <TouchableOpacity style={styles.applyBtn} onPress={handleUpdateSimWeight}>
                   <Text style={styles.applyBtnText}>Set Weight</Text>
@@ -281,7 +313,7 @@ export const PrinterSettingsScreen: React.FC<{ navigation?: any }> = ({ navigati
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   container: {
     padding: 16,
@@ -291,21 +323,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   sub: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     marginBottom: 16,
   },
   cardHeaderRow: {
@@ -315,31 +347,31 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   badgeSuccess: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#DDF6E8',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 10,
+    borderRadius: 6,
   },
   badgeOffline: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F1F0F5',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 10,
+    borderRadius: 6,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#15803D',
+    color: '#28C76F',
   },
   label: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#6F6B7D',
     letterSpacing: 0.5,
     marginBottom: 6,
   },
@@ -349,37 +381,38 @@ const styles = StyleSheet.create({
   },
   toggleBtn: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 10,
+    borderColor: '#DBDADE',
+    borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   toggleBtnActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: '#7367F0',
+    borderColor: '#7367F0',
   },
   toggleText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#475569',
+    fontWeight: '600',
+    color: '#6F6B7D',
     textAlign: 'center',
   },
   toggleTextActive: {
     color: '#FFFFFF',
+    fontWeight: '700',
   },
   input: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 10,
+    borderColor: '#DBDADE',
+    borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
     fontSize: 13,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   switchRow: {
     flexDirection: 'row',
@@ -387,16 +420,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: '#F1F0F5',
   },
   switchTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#2F2B3D',
   },
   switchSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 1,
   },
   btnRow: {
@@ -407,138 +440,139 @@ const styles = StyleSheet.create({
   actionBtn: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   testPrintBtn: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#EDEBFD',
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: 'rgba(115, 103, 240, 0.25)',
   },
   testPrintText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#92400E',
+    fontWeight: '700',
+    color: '#7367F0',
   },
   testKickBtn: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#EDEBFD',
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: 'rgba(115, 103, 240, 0.25)',
   },
   testKickText: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#1D4ED8',
+    fontWeight: '700',
+    color: '#7367F0',
   },
   scaleDisplayBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#0F172A',
-    borderRadius: 14,
+    backgroundColor: '#2F2B3D',
+    borderRadius: 10,
     padding: 16,
     marginVertical: 10,
   },
   scaleDisplayLabel: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    fontWeight: '700',
+    color: '#A8AAAE',
     letterSpacing: 0.5,
   },
   scaleDisplayVal: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#38BDF8',
+    color: '#7367F0',
     marginTop: 2,
   },
   stablePill: {
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   stablePillOn: {
-    backgroundColor: '#166534',
+    backgroundColor: '#28C76F',
   },
   stablePillOff: {
-    backgroundColor: '#854D0E',
+    backgroundColor: '#FF9F43',
   },
   stableText: {
     color: '#FFFFFF',
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   tareBtn: {
-    backgroundColor: '#334155',
+    backgroundColor: '#4B465C',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   tareBtnText: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   scaleProtocolsText: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 4,
     lineHeight: 16,
   },
   connectScaleBtn: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EDEBFD',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(115, 103, 240, 0.25)',
   },
   connectScaleText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#334155',
+    color: '#7367F0',
   },
   simBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     marginTop: 12,
   },
   simTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#475569',
+    color: '#2F2B3D',
   },
   simToggleBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 6,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#F1F0F5',
   },
   simToggleBtnActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#7367F0',
   },
   simToggleText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
+    fontWeight: '600',
+    color: '#6F6B7D',
   },
   simToggleTextActive: {
     color: '#FFFFFF',
+    fontWeight: '700',
   },
   simInput: {
     width: 80,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#DBDADE',
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,
     fontSize: 13,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   applyBtn: {
-    backgroundColor: '#334155',
-    paddingHorizontal: 10,
+    backgroundColor: '#7367F0',
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
   },

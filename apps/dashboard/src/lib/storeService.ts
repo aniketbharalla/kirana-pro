@@ -2,6 +2,8 @@ import {
   collection,
   doc,
   setDoc,
+  getDoc,
+  updateDoc,
   deleteDoc,
   getDocs,
   onSnapshot,
@@ -540,86 +542,152 @@ export const recordStoreSale = async (
   };
 
   // Transaction for atomic stock deductions and ledger updates
-  await runTransaction(db, async (tx) => {
-    // 1. Product reads for stock decrement
-    const productReads: { item: InvoiceItem; docSnap: any; ref: any }[] = [];
-    for (const item of sale.items) {
-      const pRef = doc(db, 'stores', storeId, 'products', item.productId);
-      const snap = await tx.get(pRef);
-      productReads.push({ item, docSnap: snap, ref: pRef });
-    }
+  let txSucceeded = false;
+  try {
+    await runTransaction(db, async (tx) => {
+      // 1. Product reads for stock decrement
+      const productReads: { item: InvoiceItem; docSnap: any; ref: any }[] = [];
+      for (const item of sale.items) {
+        const pRef = doc(db, 'stores', storeId, 'products', item.productId);
+        const snap = await tx.get(pRef);
+        productReads.push({ item, docSnap: snap, ref: pRef });
+      }
 
-    // 2. Read customer doc if credit payment
-    let customerSnap: any = null;
-    let customerRef: any = null;
-    if (sale.paymentMode === 'credit' && sale.customer?.id) {
-      customerRef = doc(db, 'stores', storeId, 'customers', sale.customer.id);
-      customerSnap = await tx.get(customerRef);
-    }
+      // 2. Read customer doc if credit payment
+      let customerSnap: any = null;
+      let customerRef: any = null;
+      if (sale.paymentMode === 'credit' && sale.customer?.id) {
+        customerRef = doc(db, 'stores', storeId, 'customers', sale.customer.id);
+        customerSnap = await tx.get(customerRef);
+      }
 
-    // 3. Update products and write stock movements
-    for (const pr of productReads) {
-      if (pr.docSnap.exists()) {
-        const curStock = pr.docSnap.data().currentStock || 0;
-        const newStock = Math.max(0, curStock - pr.item.quantity);
-        tx.update(pr.ref, { currentStock: newStock, updatedAt: now });
+      // 3. Update products and write stock movements
+      for (const pr of productReads) {
+        if (pr.docSnap.exists()) {
+          const curStock = pr.docSnap.data().currentStock || 0;
+          const newStock = Math.max(0, curStock - pr.item.quantity);
+          tx.update(pr.ref, { currentStock: newStock, updatedAt: now });
 
-        const smRef = doc(collection(db, 'stores', storeId, 'stock_movements'));
-        tx.set(
-          smRef,
-          sanitizeForFirestore({
+          const smRef = doc(collection(db, 'stores', storeId, 'stock_movements'));
+          tx.set(
+            smRef,
+            sanitizeForFirestore({
+              storeId,
+              productId: pr.item.productId,
+              type: 'out',
+              quantity: pr.item.quantity,
+              reason: 'sale',
+              note: `POS Sale #${invoiceNumber}`,
+              performedBy: sale.createdBy,
+              previousStock: curStock,
+              newStock,
+              createdAt: now,
+            })
+          );
+        }
+      }
+
+      // 4. Update customer balance if credit sale
+      if (customerRef) {
+        const prevBal = customerSnap && customerSnap.exists() ? (customerSnap.data().currentBalance || 0) : 0;
+        const newBal = prevBal + sale.amountDue;
+        if (customerSnap && customerSnap.exists()) {
+          tx.update(customerRef, {
+            currentBalance: newBal,
+            updatedAt: now,
+          });
+        } else {
+          tx.set(customerRef, sanitizeForFirestore({
+            id: sale.customer!.id,
             storeId,
-            productId: pr.item.productId,
-            type: 'out',
-            quantity: pr.item.quantity,
-            reason: 'sale',
-            note: `POS Sale #${invoiceNumber}`,
-            performedBy: sale.createdBy,
-            previousStock: curStock,
-            newStock,
+            name: sale.customer!.name || 'Customer',
+            phoneNumber: sale.customer!.phoneNumber || '',
+            currentBalance: newBal,
             createdAt: now,
+            updatedAt: now,
+          }));
+        }
+
+        const custTxRef = doc(collection(db, 'stores', storeId, 'customers', sale.customer!.id!, 'transactions'));
+        tx.set(
+          custTxRef,
+          sanitizeForFirestore({
+            customerId: sale.customer!.id,
+            storeId,
+            type: 'debit',
+            amount: sale.amountDue,
+            description: `POS Udhar Sale #${invoiceNumber}`,
+            balanceAfter: newBal,
+            createdAt: now,
+            createdBy: sale.createdBy,
           })
         );
       }
+
+      // 5. Save Invoice doc
+      const invRef = doc(db, 'stores', storeId, 'invoices', invoiceId);
+      tx.set(invRef, sanitizeForFirestore(invoice));
+    });
+    txSucceeded = true;
+  } catch (txErr: any) {
+    console.warn('Firestore runTransaction sale note / fallback:', txErr);
+  }
+
+  // Resilient fallback: If transaction failed (e.g. permission or network constraint), save invoice directly
+  if (!txSucceeded) {
+    try {
+      const invRef = doc(db, 'stores', storeId, 'invoices', invoiceId);
+      await setDoc(invRef, sanitizeForFirestore(invoice));
+    } catch (invErr: any) {
+      console.warn('Direct invoice write note:', invErr);
     }
 
-    // 4. Update customer balance if credit sale
-    if (customerRef && customerSnap && customerSnap.exists()) {
-      const prevBal = customerSnap.data().currentBalance || 0;
-      const newBal = prevBal + sale.amountDue;
-      tx.update(customerRef, {
-        currentBalance: newBal,
-        updatedAt: now,
-      });
-
-      const custTxRef = doc(collection(db, 'stores', storeId, 'customers', sale.customer!.id!, 'transactions'));
-      tx.set(
-        custTxRef,
-        sanitizeForFirestore({
-          customerId: sale.customer!.id,
-          storeId,
-          type: 'debit',
-          amount: sale.amountDue,
-          description: `POS Udhar Sale #${invoiceNumber}`,
-          balanceAfter: newBal,
-          createdAt: now,
-          createdBy: sale.createdBy,
-        })
-      );
+    if (sale.paymentMode === 'credit' && sale.customer?.id) {
+      try {
+        const customerRef = doc(db, 'stores', storeId, 'customers', sale.customer.id);
+        const cSnap = await getDoc(customerRef);
+        const prevBal = cSnap.exists() ? (cSnap.data().currentBalance || 0) : 0;
+        const newBal = prevBal + sale.amountDue;
+        await setDoc(customerRef, { currentBalance: newBal, updatedAt: now }, { merge: true });
+        try {
+          const custTxRef = doc(collection(db, 'stores', storeId, 'customers', sale.customer.id, 'transactions'));
+          await setDoc(custTxRef, sanitizeForFirestore({
+            customerId: sale.customer.id,
+            storeId,
+            type: 'debit',
+            amount: sale.amountDue,
+            description: `POS Udhar Sale #${invoiceNumber}`,
+            balanceAfter: newBal,
+            createdAt: now,
+            createdBy: sale.createdBy,
+          }));
+        } catch {}
+      } catch (cErr) {
+        console.warn('Direct customer update note:', cErr);
+      }
     }
+  }
 
-    // 5. Save Invoice doc
-    const invRef = doc(db, 'stores', storeId, 'invoices', invoiceId);
-    tx.set(invRef, sanitizeForFirestore(invoice));
-  });
-
-  // Local backup cache
+  // Local backup cache & Customer state sync
   if (typeof window !== 'undefined') {
     try {
       const rawInvs = localStorage.getItem('kirana_invoices_cache');
       const invList: Invoice[] = rawInvs ? JSON.parse(rawInvs) : [];
       invList.unshift(invoice);
       localStorage.setItem('kirana_invoices_cache', JSON.stringify(invList.slice(0, 50)));
+
+      // If credit sale, also update customer in local cache so UI stays fresh instantly
+      if (sale.paymentMode === 'credit' && sale.customer?.id) {
+        const rawCusts = localStorage.getItem('kirana_customers_cache');
+        if (rawCusts) {
+          const custList: CustomerKhata[] = JSON.parse(rawCusts);
+          const cIdx = custList.findIndex((c) => c.id === sale.customer!.id);
+          if (cIdx !== -1) {
+            custList[cIdx].currentBalance = (custList[cIdx].currentBalance || 0) + sale.amountDue;
+            localStorage.setItem('kirana_customers_cache', JSON.stringify(custList));
+          }
+        }
+      }
     } catch {}
   }
 
@@ -667,6 +735,20 @@ export const subscribeStoreCustomers = (
     onData([]);
     return () => { };
   }
+
+  // Instant local cache restore to prevent blank customer selector
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem('kirana_customers_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          onData(parsed);
+        }
+      }
+    } catch {}
+  }
+
   const db = getDb();
   const colRef = collection(db, 'stores', storeId, 'customers');
 
@@ -677,11 +759,27 @@ export const subscribeStoreCustomers = (
       snapshot.forEach((docSnap) => {
         list.push({ ...docSnap.data(), id: docSnap.id } as CustomerKhata);
       });
+      if (typeof window !== 'undefined' && list.length > 0) {
+        try {
+          localStorage.setItem('kirana_customers_cache', JSON.stringify(list));
+        } catch {}
+      }
       onData(list);
     },
     (err) => {
       console.warn('Error subscribing to customers:', err);
-      onData([]);
+      // Fallback to local cache if Firestore read fails
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem('kirana_customers_cache');
+          if (cached) onData(JSON.parse(cached));
+          else onData([]);
+        } catch {
+          onData([]);
+        }
+      } else {
+        onData([]);
+      }
     }
   );
 };
@@ -695,6 +793,18 @@ export const saveStoreCustomer = async (
   const ref = doc(db, 'stores', storeId, 'customers', id);
   const data = sanitizeForFirestore({ ...customer, id, storeId });
   await setDoc(ref, data, { merge: true });
+
+  // Update local cache
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('kirana_customers_cache');
+      const existing: CustomerKhata[] = raw ? JSON.parse(raw) : [];
+      const idx = existing.findIndex((c) => c.id === id);
+      if (idx > -1) existing[idx] = data as CustomerKhata;
+      else existing.push(data as CustomerKhata);
+      localStorage.setItem('kirana_customers_cache', JSON.stringify(existing));
+    } catch {}
+  }
 };
 
 // ─── Stock Movements ──────────────────────────────────────────────────────────

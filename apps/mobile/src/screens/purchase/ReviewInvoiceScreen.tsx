@@ -9,11 +9,11 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import { useProductStore } from '../../store/productStore';
 import { useSupplierStore } from '../../store/supplierStore';
 import { recordPurchaseInvoice } from '../../services/purchase';
-import { colors } from '../../theme';
 import {
   PurchaseInvoiceDraft,
   PurchaseItem,
@@ -122,11 +122,12 @@ export const ReviewInvoiceScreen = ({ route, navigation }: any) => {
         </Text>
         {item.isNewProduct ? (
           <View style={styles.newBadge}>
-            <Text style={styles.newBadgeText}>+ New Item</Text>
+            <Text style={styles.newBadgeText}>New Item</Text>
           </View>
         ) : (
           <View style={styles.matchedBadge}>
-            <Text style={styles.matchedBadgeText}>✓ Matched</Text>
+            <Feather name="check" size={10} color="#7367F0" style={{ marginRight: 3 }} />
+            <Text style={styles.matchedBadgeText}>Matched</Text>
           </View>
         )}
       </View>
@@ -168,7 +169,8 @@ export const ReviewInvoiceScreen = ({ route, navigation }: any) => {
             <Text style={styles.summaryInvNo}>Bill: {invoiceNo}</Text>
           </View>
           <View style={styles.confidenceBadge}>
-            <Text style={styles.confidenceText}>🎯 88% Match</Text>
+            <Feather name="check-circle" size={12} color="#28C76F" style={{ marginRight: 4 }} />
+            <Text style={styles.confidenceText}>88% Match</Text>
           </View>
         </View>
 
@@ -210,13 +212,17 @@ export const ReviewInvoiceScreen = ({ route, navigation }: any) => {
           style={[styles.confirmBtn, isSubmitting && styles.confirmBtnDisabled]}
           onPress={handleConfirmInwarding}
           disabled={isSubmitting}
+          activeOpacity={0.85}
         >
           {isSubmitting ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.confirmBtnText}>
-              ✓ Confirm & Inward to Stock ({items.length} items)
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Feather name="check" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.confirmBtnText}>
+                Confirm & Inward to Stock ({items.length} items)
+              </Text>
+            </View>
           )}
         </TouchableOpacity>
       </View>
@@ -234,12 +240,12 @@ export const ReviewInvoiceScreen = ({ route, navigation }: any) => {
         <View style={styles.successModalOverlay}>
           <View style={styles.successModalCard}>
             <View style={styles.successIconBadge}>
-              <Text style={styles.successIcon}>🎉</Text>
+              <Feather name="check-circle" size={32} color="#28C76F" />
             </View>
 
-            <Text style={styles.successTitle}>Stock Inwarded Successfully!</Text>
+            <Text style={styles.successTitle}>Stock Inwarded Successfully</Text>
             <Text style={styles.successSubtitle}>
-              Catalog inventory updated for <Text style={{ fontWeight: '800' }}>{items.length} FMCG items</Text>.
+              Catalog inventory updated for <Text style={{ fontWeight: '700' }}>{items.length} FMCG items</Text>.
             </Text>
 
             <View style={styles.successDetailsBox}>
@@ -267,10 +273,13 @@ export const ReviewInvoiceScreen = ({ route, navigation }: any) => {
                 setIsSuccessModalVisible(false);
                 navigation.replace('SupplierDetail', { supplierId: resolvedSupplierId });
               }}
+              activeOpacity={0.85}
             >
+              <Feather name="credit-card" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
               <Text style={styles.goToLedgerBtnText}>
-                💳 View Vendor Ledger & Pay Dues ➔
+                View Vendor Ledger & Pay Dues
               </Text>
+              <Feather name="chevron-right" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -279,9 +288,10 @@ export const ReviewInvoiceScreen = ({ route, navigation }: any) => {
                 setIsSuccessModalVisible(false);
                 navigation.replace('SupplierList');
               }}
+              activeOpacity={0.85}
             >
               <Text style={styles.backToSuppliersBtnText}>
-                ✓ Done (Back to Wholesalers)
+                Done (Back to Wholesalers)
               </Text>
             </TouchableOpacity>
           </View>
@@ -294,13 +304,13 @@ export const ReviewInvoiceScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#F8F7FA',
   },
   summaryCard: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#2F2B3D',
     padding: 16,
-    borderBottomLeftRadius: 18,
-    borderBottomRightRadius: 18,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   summaryTopRow: {
     flexDirection: 'row',
@@ -308,32 +318,34 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   summaryLabel: {
-    fontSize: 11,
-    color: '#94A3B8',
+    fontSize: 10,
+    color: '#A8AAAE',
     textTransform: 'uppercase',
     fontWeight: '700',
   },
   summarySupplier: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
     marginTop: 2,
   },
   summaryInvNo: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     marginTop: 2,
   },
   confidenceBadge: {
-    backgroundColor: '#065F46',
+    backgroundColor: '#E8FADF',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   confidenceText: {
-    color: '#34D399',
+    color: '#28C76F',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   taxSplitRow: {
     flexDirection: 'row',
@@ -341,32 +353,33 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#334155',
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   taxCol: {
     alignItems: 'center',
   },
   taxLabel: {
     fontSize: 10,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     textTransform: 'uppercase',
+    fontWeight: '600',
   },
   taxVal: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     marginTop: 2,
   },
   netPayableVal: {
     fontSize: 14,
-    fontWeight: '800',
-    color: '#F59E0B',
+    fontWeight: '700',
+    color: '#FF9F43',
     marginTop: 2,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
+    fontWeight: '600',
+    color: '#4B465C',
     paddingHorizontal: 16,
     marginTop: 14,
     marginBottom: 8,
@@ -377,11 +390,11 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 12,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#DBDADE',
   },
   itemHeader: {
     flexDirection: 'row',
@@ -389,37 +402,39 @@ const styles = StyleSheet.create({
   },
   itemIndex: {
     fontSize: 12,
-    color: colors.textMuted,
-    fontWeight: '700',
+    color: '#82808B',
+    fontWeight: '600',
     marginRight: 6,
   },
   itemName: {
     flex: 1,
     fontSize: 14,
-    fontWeight: '700',
-    color: colors.text,
+    fontWeight: '600',
+    color: '#4B465C',
   },
   newBadge: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: '#EDEBFD',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 4,
   },
   newBadgeText: {
-    color: colors.primaryDark,
+    color: '#7367F0',
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   matchedBadge: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#EDEBFD',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 4,
   },
   matchedBadgeText: {
-    color: colors.secondary,
+    color: '#7367F0',
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   itemDetails: {
     flexDirection: 'row',
@@ -427,29 +442,29 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: colors.divider,
+    borderTopColor: '#F1F0F2',
   },
   detailCol: {
     alignItems: 'flex-start',
   },
   detailLabel: {
     fontSize: 10,
-    color: colors.textMuted,
+    color: '#82808B',
   },
   detailVal: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: '#5D596C',
     marginTop: 2,
   },
   detailValBold: {
     fontSize: 12,
-    color: colors.text,
-    fontWeight: '700',
+    color: '#4B465C',
+    fontWeight: '600',
     marginTop: 2,
   },
   detailValHighlight: {
     fontSize: 12,
-    color: colors.primaryDark,
+    color: '#7367F0',
     fontWeight: '700',
     marginTop: 2,
   },
@@ -461,74 +476,77 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: '#DBDADE',
   },
   confirmBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#7367F0',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   confirmBtnDisabled: {
     opacity: 0.7,
   },
   confirmBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 15,
+    fontWeight: '600',
+    fontSize: 14,
   },
   successModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    backgroundColor: 'rgba(47, 43, 61, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   successModalCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
+    borderRadius: 12,
     padding: 24,
     width: '100%',
     maxWidth: 420,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#2F2B3D',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 20,
     elevation: 10,
   },
   successIconBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#DCFCE7',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#E8FADF',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
-  successIcon: {
-    fontSize: 32,
-  },
   successTitle: {
     fontSize: 18,
-    fontWeight: '900',
-    color: colors.text,
+    fontWeight: '700',
+    color: '#4B465C',
     textAlign: 'center',
   },
   successSubtitle: {
     fontSize: 13,
-    color: colors.textSecondary,
+    color: '#82808B',
     textAlign: 'center',
     marginTop: 4,
     marginBottom: 16,
   },
   successDetailsBox: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     padding: 14,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#DBDADE',
     marginBottom: 18,
     gap: 8,
   },
@@ -539,59 +557,67 @@ const styles = StyleSheet.create({
   },
   successDetailLabel: {
     fontSize: 12,
-    color: colors.textMuted,
+    color: '#82808B',
   },
   successDetailVal: {
     fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
+    fontWeight: '600',
+    color: '#4B465C',
   },
   successDetailValBold: {
     fontSize: 13,
-    fontWeight: '800',
-    color: colors.primaryDark,
+    fontWeight: '700',
+    color: '#7367F0',
   },
   pendingRow: {
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: '#DBDADE',
     paddingTop: 8,
     marginTop: 4,
   },
   pendingLabel: {
     fontSize: 13,
-    fontWeight: '800',
-    color: colors.danger,
+    fontWeight: '700',
+    color: '#EA5455',
   },
   pendingVal: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: colors.danger,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#EA5455',
   },
   goToLedgerBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#7367F0',
     width: '100%',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   goToLedgerBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '600',
     fontSize: 14,
   },
   backToSuppliersBtn: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F8F7FA',
     width: '100%',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#DBDADE',
   },
   backToSuppliersBtnText: {
-    color: colors.text,
-    fontWeight: '700',
+    color: '#4B465C',
+    fontWeight: '600',
     fontSize: 13,
   },
 });
+

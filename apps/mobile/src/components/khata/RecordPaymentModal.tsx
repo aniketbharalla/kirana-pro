@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { recordKhataTransaction } from '../../services/khata';
 import { CustomerKhata } from '@kirana-pro/shared';
 import { useAuthStore } from '../../store/authStore';
@@ -72,8 +73,8 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
               <Text style={styles.title}>Record Payment (जमा)</Text>
               <Text style={styles.sub}>{customer.name}</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeText}>✕</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
+              <Feather name="x" size={18} color="#82808B" />
             </TouchableOpacity>
           </View>
 
@@ -194,15 +195,15 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   amountInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 24,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
     textAlign: 'center',
   },
   quickRow: {
@@ -211,34 +212,39 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   quickChip: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#EDEBFD',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: 'rgba(115, 103, 240, 0.2)',
   },
   quickChipText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#065F46',
+    fontWeight: '600',
+    color: '#7367F0',
   },
   input: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 14,
-    color: '#0F172A',
+    color: '#4B465C',
   },
   saveBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   saveBtnDisabled: {
     opacity: 0.6,
@@ -246,6 +252,6 @@ const styles = StyleSheet.create({
   saveBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

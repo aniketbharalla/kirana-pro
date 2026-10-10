@@ -166,13 +166,13 @@ export const formatWhatsAppPurchaseOrder = (
     year: 'numeric',
   });
 
-  const header = `📦 *${storeName} - PURCHASE ORDER (ऑर्डर)*\n📅 Date: ${dateStr}\n👤 Supplier: ${supplierName}\n----------------------------------\n`;
+  const header = `*${storeName} - PURCHASE ORDER (ऑर्डर)*\nDate: ${dateStr}\nSupplier: ${supplierName}\n----------------------------------\n`;
 
   const itemsList = items
     .map((item, idx) => `${idx + 1}. *${item.name}* : ${item.quantity} ${item.unit}`)
     .join('\n');
 
-  const footer = `\n----------------------------------\n📝 Note: ${deliveryNote}\n🙏 धन्यवाद!`;
+  const footer = `\n----------------------------------\nNote: ${deliveryNote}\nधन्यवाद!`;
 
   return `${header}${itemsList}${footer}`;
 };

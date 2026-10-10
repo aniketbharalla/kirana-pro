@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { BillingScreen } from '../screens/bills/BillingScreen';
 import { BillReceiptScreen } from '../screens/bills/BillReceiptScreen';
 import { BillsHistoryScreen } from '../screens/bills/BillsHistoryScreen';
@@ -47,10 +48,10 @@ export const BillsNavigator: React.FC = () => {
     <Stack.Navigator
       initialRouteName="BillingScreen"
       screenOptions={{
-        headerTintColor: '#10B981',
-        headerTitleStyle: { fontWeight: '800', color: '#0F172A' },
-        headerStyle: { backgroundColor: '#F8FAFC' },
-        contentStyle: { backgroundColor: '#F8FAFC' },
+        headerTintColor: '#7367F0',
+        headerTitleStyle: { fontWeight: '700', color: '#4B465C' },
+        headerStyle: { backgroundColor: '#F8F7FA' },
+        contentStyle: { backgroundColor: '#F8F7FA' },
       }}
     >
       <Stack.Screen
@@ -63,20 +64,26 @@ export const BillsNavigator: React.FC = () => {
               <TouchableOpacity
                 style={styles.historyBtn}
                 onPress={() => navigation.navigate('Analytics')}
+                activeOpacity={0.8}
               >
-                <Text style={styles.historyBtnText}>📊 Profit</Text>
+                <Feather name="bar-chart-2" size={13} color="#7367F0" style={{ marginRight: 4 }} />
+                <Text style={styles.historyBtnText}>Profit</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.historyBtn}
                 onPress={() => navigation.navigate('Khata')}
+                activeOpacity={0.8}
               >
-                <Text style={styles.historyBtnText}>📒 Khata</Text>
+                <Feather name="book" size={13} color="#7367F0" style={{ marginRight: 4 }} />
+                <Text style={styles.historyBtnText}>Khata</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.historyBtn}
                 onPress={() => navigation.navigate('BillsHistory')}
+                activeOpacity={0.8}
               >
-                <Text style={styles.historyBtnText}>📜 Bills</Text>
+                <Feather name="file-text" size={13} color="#7367F0" style={{ marginRight: 4 }} />
+                <Text style={styles.historyBtnText}>Bills</Text>
               </TouchableOpacity>
             </View>
           ),
@@ -102,7 +109,7 @@ export const BillsNavigator: React.FC = () => {
         name="Khata"
         component={KhataScreen}
         options={{
-          title: 'Customer Khata (उधार)',
+          title: 'Customer Khata',
           headerBackTitle: 'POS',
         }}
       />
@@ -136,16 +143,19 @@ export const BillsNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   historyBtn: {
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 12,
+    backgroundColor: '#EDEBFD',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: 'rgba(115, 103, 240, 0.2)',
   },
   historyBtnText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#065F46',
+    fontWeight: '600',
+    color: '#7367F0',
   },
 });
+

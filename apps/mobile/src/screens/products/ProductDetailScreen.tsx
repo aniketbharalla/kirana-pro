@@ -9,13 +9,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useProductStore } from '../../store/productStore';
 import { useAuthStore } from '../../store/authStore';
 import { softDeleteProduct } from '../../services/product';
 import { fetchStockHistory } from '../../services/stock';
 import { Product, StockMovement } from '@kirana-pro/shared';
-import { colors } from '../../theme';
 
 export const ProductDetailScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -47,6 +47,7 @@ export const ProductDetailScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => navigation.goBack()}
+            activeOpacity={0.85}
           >
             <Text style={styles.backBtnText}>Go Back</Text>
           </TouchableOpacity>
@@ -100,7 +101,8 @@ export const ProductDetailScreen: React.FC = () => {
 
           {product.barcode && (
             <View style={styles.barcodeBox}>
-              <Text style={styles.barcodeLabel}>📷 Barcode:</Text>
+              <Feather name="maximize" size={14} color="#82808B" style={{ marginRight: 6 }} />
+              <Text style={styles.barcodeLabel}>Barcode:</Text>
               <Text style={styles.barcodeValue}>{product.barcode}</Text>
             </View>
           )}
@@ -125,7 +127,8 @@ export const ProductDetailScreen: React.FC = () => {
               activeOpacity={0.85}
               onPress={() => navigation.navigate('StockIn', { productId: product.id })}
             >
-              <Text style={styles.stockInBtnText}>+ Inward Stock</Text>
+              <Feather name="plus" size={15} color="#FFFFFF" style={{ marginRight: 4 }} />
+              <Text style={styles.stockInBtnText}>Inward Stock</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -146,7 +149,7 @@ export const ProductDetailScreen: React.FC = () => {
 
             <View style={styles.priceItem}>
               <Text style={styles.priceLabel}>Net Margin</Text>
-              <Text style={[styles.priceValue, { color: '#059669' }]}>
+              <Text style={[styles.priceValue, { color: '#28C76F' }]}>
                 +{marginPercent}% (₹{marginAmount})
               </Text>
             </View>
@@ -156,7 +159,9 @@ export const ProductDetailScreen: React.FC = () => {
         {/* Loose Scale / Taraju Info */}
         {product.isLoose && (
           <View style={styles.tarajuNotice}>
-            <Text style={styles.tarajuEmoji}>⚖️</Text>
+            <View style={styles.tarajuIconBox}>
+              <Feather name="sliders" size={18} color="#7367F0" />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.tarajuTitle}>Taraju Smart Scale Enabled</Text>
               <Text style={styles.tarajuSub}>
@@ -170,7 +175,7 @@ export const ProductDetailScreen: React.FC = () => {
         <View style={styles.card}>
           <Text style={styles.sectionHeader}>Recent Stock Audit Log</Text>
           {loadingHistory ? (
-            <ActivityIndicator color={colors.primary} />
+            <ActivityIndicator color="#7367F0" />
           ) : history.length === 0 ? (
             <Text style={styles.emptyHistoryText}>
               No recent movements logged. Inward stock to start audit history.
@@ -179,9 +184,17 @@ export const ProductDetailScreen: React.FC = () => {
             history.map((m) => (
               <View key={m.id} style={styles.historyRow}>
                 <View>
-                  <Text style={styles.historyType}>
-                    {m.type === 'in' ? '🟢 Stock In' : '🔴 Stock Out'} ({m.reason})
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Feather
+                      name={m.type === 'in' ? 'arrow-down-left' : 'arrow-up-right'}
+                      size={14}
+                      color={m.type === 'in' ? '#28C76F' : '#EA5455'}
+                      style={{ marginRight: 4 }}
+                    />
+                    <Text style={styles.historyType}>
+                      {m.type === 'in' ? 'Stock In' : 'Stock Out'} ({m.reason})
+                    </Text>
+                  </View>
                   <Text style={styles.historyDate}>
                     {new Date(m.createdAt).toLocaleDateString()} • By {m.performedBy.slice(0, 8)}
                   </Text>
@@ -189,7 +202,7 @@ export const ProductDetailScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.historyQty,
-                    { color: m.type === 'in' ? '#059669' : '#DC2626' },
+                    { color: m.type === 'in' ? '#28C76F' : '#EA5455' },
                   ]}
                 >
                   {m.type === 'in' ? '+' : '-'}{m.quantity} {product.unit}
@@ -203,8 +216,10 @@ export const ProductDetailScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.deleteBtn}
           onPress={handleDelete}
+          activeOpacity={0.85}
         >
-          <Text style={styles.deleteBtnText}>🗑️ Remove from Catalog</Text>
+          <Feather name="trash-2" size={16} color="#EA5455" style={{ marginRight: 6 }} />
+          <Text style={styles.deleteBtnText}>Remove from Catalog</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -214,10 +229,10 @@ export const ProductDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   scroll: {
-    padding: 18,
+    padding: 16,
     paddingBottom: 40,
   },
   center: {
@@ -229,25 +244,25 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#4B465C',
     marginBottom: 12,
   },
   backBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   backBtnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 10,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     marginBottom: 14,
   },
   titleRow: {
@@ -257,24 +272,24 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
   },
   hindiName: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#82808B',
     marginTop: 2,
   },
   categoryBadge: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EDEBFD',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 6,
   },
   categoryText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
+    fontWeight: '600',
+    color: '#7367F0',
   },
   barcodeBox: {
     flexDirection: 'row',
@@ -282,22 +297,22 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: '#F1F0F2',
   },
   barcodeLabel: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#82808B',
     marginRight: 6,
   },
   barcodeValue: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: '#4B465C',
   },
   sectionHeader: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#64748B',
+    fontWeight: '600',
+    color: '#82808B',
     marginBottom: 10,
   },
   stockRow: {
@@ -307,28 +322,35 @@ const styles = StyleSheet.create({
   },
   stockLarge: {
     fontSize: 28,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
   },
   stockUnit: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#82808B',
   },
   alertThreshold: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     marginTop: 2,
   },
   stockInBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   stockInBtnText: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
     fontSize: 13,
   },
   priceGrid: {
@@ -340,59 +362,64 @@ const styles = StyleSheet.create({
   },
   priceLabel: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#82808B',
   },
   priceValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#4B465C',
     marginTop: 4,
   },
   tarajuNotice: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EEF2FF',
-    borderRadius: 14,
+    backgroundColor: '#EDEBFD',
+    borderRadius: 8,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#C7D2FE',
+    borderColor: 'rgba(115, 103, 240, 0.2)',
     marginBottom: 14,
   },
-  tarajuEmoji: {
-    fontSize: 26,
+  tarajuIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 12,
   },
   tarajuTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#3730A3',
+    fontWeight: '600',
+    color: '#7367F0',
   },
   tarajuSub: {
     fontSize: 11,
-    color: '#4F46E5',
+    color: '#5D596C',
     marginTop: 2,
   },
   emptyHistoryText: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: '#82808B',
     fontStyle: 'italic',
   },
   historyRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F8FAFC',
+    borderBottomColor: '#F1F0F2',
   },
   historyType: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1E293B',
+    color: '#4B465C',
   },
   historyDate: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#82808B',
     marginTop: 2,
   },
   historyQty: {
@@ -400,17 +427,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   deleteBtn: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#FCE4E4',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: '#EA5455',
     marginTop: 10,
   },
   deleteBtnText: {
-    color: '#DC2626',
-    fontWeight: '700',
+    color: '#EA5455',
+    fontWeight: '600',
     fontSize: 14,
   },
 });

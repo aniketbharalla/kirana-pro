@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { signInWithGooglePopup } from '../../services/auth';
+import { Feather } from '@expo/vector-icons';
 
 export const WelcomeScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -27,12 +28,12 @@ export const WelcomeScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F7FA" />
       <View style={styles.container}>
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.logoBadge}>
-            <Text style={styles.logoEmoji}>🏪</Text>
+            <Feather name="shopping-bag" size={38} color="#7367F0" />
           </View>
           <Text style={styles.brandTitle}>Kirana Pro</Text>
           <Text style={styles.tagline}>Apni dukaan, apne haath mein</Text>
@@ -44,7 +45,9 @@ export const WelcomeScreen: React.FC = () => {
         {/* Feature Highlights */}
         <View style={styles.featuresCard}>
           <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>⚖️</Text>
+            <View style={styles.featureIconBox}>
+              <Feather name="sliders" size={18} color="#7367F0" />
+            </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Taraju Price-to-Weight</Text>
               <Text style={styles.featureSub}>₹5 ka chawal? Grams calculated in 1-tap</Text>
@@ -52,7 +55,9 @@ export const WelcomeScreen: React.FC = () => {
           </View>
           <View style={styles.featureDivider} />
           <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>📷</Text>
+            <View style={styles.featureIconBox}>
+              <Feather name="camera" size={18} color="#7367F0" />
+            </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Instant Camera Barcode</Text>
               <Text style={styles.featureSub}>Auto-filled via Open Food Facts catalog</Text>
@@ -60,7 +65,9 @@ export const WelcomeScreen: React.FC = () => {
           </View>
           <View style={styles.featureDivider} />
           <View style={styles.featureItem}>
-            <Text style={styles.featureBullet}>⚡</Text>
+            <View style={styles.featureIconBox}>
+              <Feather name="zap" size={18} color="#7367F0" />
+            </View>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Instant POS & Stock Sync</Text>
               <Text style={styles.featureSub}>Real-time stock alerts & free billing</Text>
@@ -76,7 +83,10 @@ export const WelcomeScreen: React.FC = () => {
             activeOpacity={0.88}
             onPress={() => navigation.navigate('PhoneLogin')}
           >
-            <Text style={styles.primaryButtonText}>👑 Store Owner Login (Mobile)</Text>
+            <View style={styles.btnRow}>
+              <Feather name="shield" size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
+              <Text style={styles.primaryButtonText}>Store Owner Login (Mobile)</Text>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -86,9 +96,12 @@ export const WelcomeScreen: React.FC = () => {
             onPress={handleGoogleSignIn}
           >
             {isGoogleLoading ? (
-              <ActivityIndicator color="#10B981" />
+              <ActivityIndicator color="#7367F0" />
             ) : (
-              <Text style={styles.googleButtonText}>🌐 Continue with Google</Text>
+              <View style={styles.btnRow}>
+                <Feather name="globe" size={16} color="#2F2B3D" style={{ marginRight: 8 }} />
+                <Text style={styles.googleButtonText}>Continue with Google</Text>
+              </View>
             )}
           </TouchableOpacity>
 
@@ -105,7 +118,10 @@ export const WelcomeScreen: React.FC = () => {
             activeOpacity={0.88}
             onPress={() => navigation.navigate('StaffLogin')}
           >
-            <Text style={styles.staffButtonText}>🧑‍💼 Staff Counter Login (Phone + PIN)</Text>
+            <View style={styles.btnRow}>
+              <Feather name="user" size={16} color="#7367F0" style={{ marginRight: 8 }} />
+              <Text style={styles.staffButtonText}>Staff Counter Login (Phone + PIN)</Text>
+            </View>
             <Text style={styles.staffButtonSub}>Open counter shift register & galla</Text>
           </TouchableOpacity>
 
@@ -121,7 +137,7 @@ export const WelcomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   container: {
     flex: 1,
@@ -131,65 +147,67 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 20,
   },
   logoBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    backgroundColor: '#ECFDF5',
+    width: 76,
+    height: 76,
+    borderRadius: 16,
+    backgroundColor: '#EDEBFD',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  logoEmoji: {
-    fontSize: 40,
+    borderColor: 'rgba(115, 103, 240, 0.25)',
   },
   brandTitle: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#2F2B3D',
     letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: 16,
-    color: '#64748B',
-    marginTop: 6,
+    fontSize: 15,
+    color: '#6F6B7D',
+    marginTop: 4,
     fontWeight: '500',
   },
   pillBadge: {
-    marginTop: 12,
-    backgroundColor: '#F1F5F9',
+    marginTop: 10,
+    backgroundColor: '#EDEBFD',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingVertical: 5,
+    borderRadius: 6,
   },
   pillText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#10B981',
+    color: '#7367F0',
   },
   featuresCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: '#2F2B3D',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
   },
-  featureBullet: {
-    fontSize: 24,
+  featureIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#EDEBFD',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 14,
   },
   featureContent: {
@@ -198,49 +216,54 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#2F2B3D',
   },
   featureSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   featureDivider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F8F7FA',
     marginVertical: 4,
   },
   actionSection: {
-    gap: 12,
-    marginBottom: 10,
+    gap: 10,
+    marginBottom: 6,
+  },
+  btnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   primaryButton: {
-    backgroundColor: '#10B981',
-    paddingVertical: 15,
-    borderRadius: 14,
+    backgroundColor: '#7367F0',
+    paddingVertical: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    shadowColor: '#10B981',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
     elevation: 3,
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
   googleButton: {
     backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 13,
+    borderRadius: 8,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderWidth: 1,
+    borderColor: '#DBDADE',
   },
   googleButtonText: {
-    color: '#1E293B',
-    fontSize: 15,
+    color: '#2F2B3D',
+    fontSize: 14,
     fontWeight: '600',
   },
   orDividerContainer: {
@@ -252,37 +275,37 @@ const styles = StyleSheet.create({
   orDividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#DBDADE',
   },
   orDividerText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#94A3B8',
+    color: '#A8AAAE',
     letterSpacing: 0.8,
   },
   staffButton: {
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 12,
+    backgroundColor: '#EDEBFD',
+    paddingVertical: 11,
     paddingHorizontal: 16,
-    borderRadius: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#A7F3D0',
+    borderWidth: 1,
+    borderColor: 'rgba(115, 103, 240, 0.25)',
   },
   staffButtonText: {
-    color: '#065F46',
+    color: '#7367F0',
     fontSize: 14,
     fontWeight: '700',
   },
   staffButtonSub: {
-    color: '#059669',
+    color: '#5E50EE',
     fontSize: 11,
     fontWeight: '500',
     marginTop: 2,
   },
   disclaimerText: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     textAlign: 'center',
     marginTop: 4,
   },

@@ -14,6 +14,7 @@ import { useProductStore } from '../../store/productStore';
 import { StatCard } from '../../components/common/StatCard';
 import { CounterHeaderPill } from '../../components/staff/CounterHeaderPill';
 import { colors } from '../../theme';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export interface HomeScreenProps {
   onNavigateToProducts?: () => void;
@@ -47,12 +48,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F7FA" />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Top Header */}
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.greeting}>Namaste 🙏</Text>
+            <Text style={styles.greeting}>Namaste</Text>
             <Text style={styles.storeName} numberOfLines={1}>
               {user?.displayName ? `${user.displayName}'s Dukaan` : 'Sharma Kirana Store'}
             </Text>
@@ -64,7 +65,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               activeOpacity={0.8}
               onPress={handleGoToScanner}
             >
-              <Text style={styles.scannerEmoji}>📷</Text>
+              <Feather name="maximize" size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
               <Text style={styles.scannerBadgeText}>Scan</Text>
             </TouchableOpacity>
           </View>
@@ -78,7 +79,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         >
           <View style={styles.tarajuContent}>
             <View style={styles.tarajuTag}>
-              <Text style={styles.tarajuTagText}>⚡ INSTANT CALCULATOR</Text>
+              <Text style={styles.tarajuTagText}>INSTANT SCALE</Text>
             </View>
             <Text style={styles.tarajuTitle}>Taraju Smart Scale</Text>
             <Text style={styles.tarajuSubtitle}>
@@ -86,7 +87,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </Text>
           </View>
           <View style={styles.tarajuIconBox}>
-            <Text style={styles.tarajuIcon}>⚖️</Text>
+            <MaterialCommunityIcons name="scale-balance" size={28} color="#7367F0" />
           </View>
         </TouchableOpacity>
 
@@ -98,8 +99,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             onPress={handleGoToScanner}
             activeOpacity={0.85}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#ECFDF5' }]}>
-              <Text style={styles.actionEmoji}>📷</Text>
+            <View style={[styles.actionIconBox, { backgroundColor: '#EDEBFD', borderColor: 'rgba(115, 103, 240, 0.2)' }]}>
+              <Feather name="camera" size={22} color="#7367F0" />
             </View>
             <Text style={styles.actionLabel}>Barcode Scan</Text>
           </TouchableOpacity>
@@ -109,8 +110,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             onPress={handleGoToTaraju}
             activeOpacity={0.85}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#FEF3C7' }]}>
-              <Text style={styles.actionEmoji}>⚖️</Text>
+            <View style={[styles.actionIconBox, { backgroundColor: '#FFF3E8', borderColor: 'rgba(255, 159, 67, 0.2)' }]}>
+              <MaterialCommunityIcons name="scale-balance" size={22} color="#FF9F43" />
             </View>
             <Text style={styles.actionLabel}>Taraju</Text>
           </TouchableOpacity>
@@ -120,8 +121,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             onPress={handleGoToProducts}
             activeOpacity={0.85}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#EFF6FF' }]}>
-              <Text style={styles.actionEmoji}>📦</Text>
+            <View style={[styles.actionIconBox, { backgroundColor: '#E0F8FC', borderColor: 'rgba(0, 207, 232, 0.2)' }]}>
+              <Feather name="package" size={22} color="#00CFE8" />
             </View>
             <Text style={styles.actionLabel}>Products</Text>
           </TouchableOpacity>
@@ -131,8 +132,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             onPress={() => navigation.navigate('Bills')}
             activeOpacity={0.85}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#F3E8FF' }]}>
-              <Text style={styles.actionEmoji}>🧾</Text>
+            <View style={[styles.actionIconBox, { backgroundColor: '#E8FADF', borderColor: 'rgba(40, 199, 111, 0.2)' }]}>
+              <MaterialCommunityIcons name="receipt" size={22} color="#28C76F" />
             </View>
             <Text style={styles.actionLabel}>New Bill</Text>
           </TouchableOpacity>
@@ -141,29 +142,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         {/* Business Intelligence & Smart Procurement Banners */}
         <View style={styles.promoRow}>
           <TouchableOpacity
-            style={[styles.promoCard, { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' }]}
+            style={[styles.promoCard, { backgroundColor: '#FFFFFF', borderColor: '#DBDADE' }]}
             activeOpacity={0.88}
             onPress={() => navigation.navigate('Bills', { screen: 'Analytics' })}
           >
-            <Text style={styles.promoEmoji}>📊</Text>
+            <View style={[styles.promoIconBox, { backgroundColor: '#E8FADF' }]}>
+              <Feather name="trending-up" size={18} color="#28C76F" />
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.promoTitle, { color: '#065F46' }]}>Dukaan Profit & GST</Text>
+              <Text style={[styles.promoTitle, { color: '#2F2B3D' }]}>Dukaan Profit & GST</Text>
               <Text style={styles.promoSub}>Daily sales, net margins & CA tax report</Text>
             </View>
-            <Text style={styles.promoArrow}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#A8AAAE" />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.promoCard, { backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }]}
+            style={[styles.promoCard, { backgroundColor: '#FFFFFF', borderColor: '#DBDADE' }]}
             activeOpacity={0.88}
             onPress={() => navigation.navigate('Purchases', { screen: 'SmartReorder' })}
           >
-            <Text style={styles.promoEmoji}>⚡</Text>
+            <View style={[styles.promoIconBox, { backgroundColor: '#EDEBFD' }]}>
+              <Feather name="zap" size={18} color="#7367F0" />
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.promoTitle, { color: '#1E40AF' }]}>Smart AI Reorder</Text>
+              <Text style={[styles.promoTitle, { color: '#2F2B3D' }]}>Smart AI Reorder</Text>
               <Text style={styles.promoSub}>Burn velocity & 1-tap WhatsApp order</Text>
             </View>
-            <Text style={styles.promoArrow}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#A8AAAE" />
           </TouchableOpacity>
         </View>
 
@@ -173,7 +178,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <StatCard
             title="Total Items"
             value={products.length}
-            icon="📦"
+            icon={<Feather name="package" size={18} color={colors.primary} />}
             color={colors.primary}
             subtext="In active catalog"
             onPress={handleGoToProducts}
@@ -181,7 +186,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <StatCard
             title="Low Stock"
             value={getLowStockProducts().length}
-            icon="⚠️"
+            icon={<Feather name="alert-triangle" size={18} color={colors.accent} />}
             color={colors.accent}
             subtext="Needs restock"
             onPress={() => navigation.navigate('Purchases', { screen: 'SmartReorder' })}
@@ -189,7 +194,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <StatCard
             title="Out of Stock"
             value={products.filter((p) => p.currentStock === 0).length}
-            icon="❌"
+            icon={<Feather name="alert-circle" size={18} color={colors.danger} />}
             color={colors.danger}
             subtext="Depleted items"
             onPress={handleGoToProducts}
@@ -197,8 +202,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <StatCard
             title="Loose (Taraju)"
             value={getLooseProducts().length}
-            icon="⚖️"
-            color="#6366F1"
+            icon={<MaterialCommunityIcons name="scale-balance" size={18} color="#7367F0" />}
+            color="#7367F0"
             subtext="By weight (kg/g)"
             onPress={handleGoToTaraju}
           />
@@ -206,7 +211,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
         {/* Free Cloud Sync Status */}
         <View style={styles.cloudBadge}>
-          <Text style={styles.cloudEmoji}>☁️</Text>
+          <Feather name="cloud" size={14} color="#28C76F" style={{ marginRight: 6 }} />
           <Text style={styles.cloudText}>
             Cloud Sync Active • Firebase Free Tier (0 ₹)
           </Text>
@@ -248,11 +253,11 @@ const styles = StyleSheet.create({
   scannerBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 16,
     paddingVertical: 9,
-    borderRadius: 999,
-    shadowColor: '#10B981',
+    borderRadius: 8,
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -352,8 +357,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  promoEmoji: {
-    fontSize: 24,
+  promoIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   promoTitle: {
     fontSize: 14,

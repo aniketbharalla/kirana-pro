@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { parseInvoiceText, PurchaseInvoiceDraft } from '@kirana-pro/shared';
+import { Camera, X, AlertTriangle, FileText, FolderOpen, Search, Zap, CheckCircle2, RotateCw, Check, ArrowLeft } from 'lucide-react';
 
 interface BillUploadModalProps {
   isOpen: boolean;
@@ -157,19 +158,25 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
         {/* Header */}
         <div style={styles.header}>
           <div>
-            <h2 style={styles.title}>📷 OCR Distributor Bill Inwarding</h2>
+            <h2 style={styles.title}>
+              <Camera size={18} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> OCR Distributor Bill Inwarding
+            </h2>
             <p style={styles.subtitle}>
               Upload invoice photo or PDF to auto-extract items, HSN, rates, and GST into store inventory.
             </p>
           </div>
           <button style={styles.closeBtn} onClick={onClose}>
-            ✕
+            <X size={18} />
           </button>
         </div>
 
         {/* Content Body */}
         <div style={styles.body}>
-          {errorMsg && <div style={styles.errorBanner}>⚠️ {errorMsg}</div>}
+          {errorMsg && (
+            <div style={styles.errorBanner}>
+              <AlertTriangle size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> {errorMsg}
+            </div>
+          )}
 
           {!draft ? (
             <div>
@@ -182,7 +189,7 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                   }}
                   onClick={() => setActiveTab('upload')}
                 >
-                  📸 Upload / Scan Bill Image
+                  <Camera size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Upload / Scan Bill Image
                 </button>
                 <button
                   style={{
@@ -191,7 +198,7 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                   }}
                   onClick={() => setActiveTab('text')}
                 >
-                  📝 Paste Invoice Text
+                  <FileText size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Paste Invoice Text
                 </button>
               </div>
 
@@ -219,7 +226,9 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                   >
                     {!imagePreview ? (
                       <>
-                        <div style={styles.dropzoneIcon}>📄</div>
+                        <div style={styles.dropzoneIcon}>
+                          <FileText size={36} color="#7367F0" />
+                        </div>
                         <div style={styles.dropzoneTitle}>
                           Click to browse or Drag & drop distributor bill image here
                         </div>
@@ -234,7 +243,7 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                             fileInputRef.current?.click();
                           }}
                         >
-                          📂 Select Bill Image File
+                          <FolderOpen size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Select Bill Image File
                         </button>
                       </>
                     ) : (
@@ -263,7 +272,8 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                               style={styles.previewBtn}
                               onClick={handleRotateImage}
                             >
-                              🔄 Rotate 90°
+                              <RotateCw size={13} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} />
+                              Rotate 90°
                             </button>
                             <button
                               type="button"
@@ -273,7 +283,7 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                                 setImageFile(null);
                               }}
                             >
-                              ✕ Remove
+                              <X size={13} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} /> Remove
                             </button>
                           </div>
                         </div>
@@ -306,9 +316,13 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                       onClick={handleRunOcr}
                       disabled={isProcessing || !imagePreview}
                     >
-                      {isProcessing
-                        ? '⏳ Scanning Bill with OCR...'
-                        : '🔍 Run OCR & Extract Line Items'}
+                      {isProcessing ? (
+                        'Scanning Bill with OCR...'
+                      ) : (
+                        <>
+                          <Search size={15} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> Run OCR & Extract Line Items
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -328,7 +342,13 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                     onClick={handleParseText}
                     disabled={isProcessing}
                   >
-                    {isProcessing ? '⏳ Parsing...' : '⚡ Run Fast Parser'}
+                    {isProcessing ? (
+                      'Parsing...'
+                    ) : (
+                      <>
+                        <Zap size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Run Fast Parser
+                      </>
+                    )}
                   </button>
                 </div>
               )}
@@ -348,7 +368,7 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                 </div>
                 <div style={styles.payableBadge}>
                   <div style={{ fontSize: '11px', color: '#94A3B8' }}>NET PAYABLE</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: '#10B981' }}>
+                  <div style={{ fontSize: '22px', fontWeight: '800', color: '#28C76F' }}>
                     ₹{draft.netPayable.toFixed(2)}
                   </div>
                 </div>
@@ -412,7 +432,8 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                   style={styles.backBtn}
                   onClick={() => setDraft(null)}
                 >
-                  ← Rescan / Edit
+                  <ArrowLeft size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} />
+                  Rescan / Edit
                 </button>
                 <button
                   style={styles.confirmBtn}
@@ -421,7 +442,8 @@ export const BillUploadModal: React.FC<BillUploadModalProps> = ({
                     onClose();
                   }}
                 >
-                  ✓ Confirm & Inward {draft.items.length} Products to Stock
+                  <Check size={16} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} />
+                  Confirm & Inward {draft.items.length} Products to Stock
                 </button>
               </div>
             </div>
@@ -504,16 +526,16 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   tabBtnActive: {
-    backgroundColor: '#10B981',
-    borderColor: '#10B981',
+    backgroundColor: '#7367F0',
+    borderColor: '#7367F0',
     color: '#FFFFFF',
   },
   dropzone: {
     borderWidth: '2px',
     borderStyle: 'dashed',
-    borderColor: '#CBD5E1',
-    backgroundColor: '#F8FAFC',
-    borderRadius: '16px',
+    borderColor: '#DBDADE',
+    backgroundColor: '#F8F7FA',
+    borderRadius: '12px',
     padding: '32px 20px',
     display: 'flex',
     flexDirection: 'column',
@@ -524,8 +546,8 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.2s ease',
   },
   dropzoneDragging: {
-    borderColor: '#10B981',
-    backgroundColor: '#ECFDF5',
+    borderColor: '#7367F0',
+    backgroundColor: '#EDEBFD',
   },
   dropzoneIcon: {
     fontSize: '44px',
@@ -627,7 +649,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     transition: 'width 0.2s ease',
   },
   actionRow: {
@@ -644,24 +666,24 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     padding: '12px',
     borderRadius: '12px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid #DBDADE',
     fontSize: '12px',
     fontFamily: 'monospace',
-    color: '#0F172A',
-    backgroundColor: '#F8FAFC',
+    color: '#2F2B3D',
+    backgroundColor: '#F8F7FA',
     resize: 'vertical',
   },
   parseBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: '14px',
     padding: '13px 20px',
-    borderRadius: '12px',
+    borderRadius: '8px',
     border: 'none',
     cursor: 'pointer',
     width: '100%',
-    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
   errorBanner: {
     backgroundColor: '#FEF2F2',
@@ -739,13 +761,13 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   confirmBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     fontWeight: '800',
     padding: '12px 24px',
-    borderRadius: '10px',
+    borderRadius: '8px',
     border: 'none',
     cursor: 'pointer',
-    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.25)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
 };

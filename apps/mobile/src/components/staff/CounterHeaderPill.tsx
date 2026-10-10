@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useStaffStore } from '../../store/staffStore';
 import { StaffPINLockModal } from './StaffPINLockModal';
-import { colors } from '../../theme';
 
 export const CounterHeaderPill: React.FC = () => {
   const { activeStaff, counterNumber } = useStaffStore();
   const [showModal, setShowModal] = useState(false);
 
-  const roleEmoji =
-    activeStaff?.role === 'owner' ? '👑' : activeStaff?.role === 'manager' ? '💼' : '🧑‍💼';
+  const roleIcon =
+    activeStaff?.role === 'owner' ? 'award' : activeStaff?.role === 'manager' ? 'briefcase' : 'user';
 
   return (
     <>
@@ -20,10 +20,13 @@ export const CounterHeaderPill: React.FC = () => {
       >
         <Text style={styles.counterText}>C{counterNumber}</Text>
         <View style={styles.divider} />
-        <Text style={styles.nameText} numberOfLines={1}>
-          {roleEmoji} {activeStaff?.name?.split(' ')[0] || 'Staff'}
-        </Text>
-        <Text style={styles.lockIcon}>🔒</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <Feather name={roleIcon as any} size={11} color="#7367F0" />
+          <Text style={styles.nameText} numberOfLines={1}>
+            {activeStaff?.name?.split(' ')[0] || 'Staff'}
+          </Text>
+        </View>
+        <Feather name="lock" size={10} color="#82808B" />
       </TouchableOpacity>
 
       <StaffPINLockModal
@@ -39,32 +42,29 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EDEBFD',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 16,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(115, 103, 240, 0.2)',
     gap: 6,
   },
   counterText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: colors.primary,
+    fontWeight: '700',
+    color: '#7367F0',
   },
   divider: {
     width: 1,
     height: 12,
-    backgroundColor: '#CBD5E1',
+    backgroundColor: '#DBDADE',
   },
   nameText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#1E293B',
+    fontWeight: '600',
+    color: '#4B465C',
     maxWidth: 90,
   },
-  lockIcon: {
-    fontSize: 10,
-    opacity: 0.7,
-  },
 });
+

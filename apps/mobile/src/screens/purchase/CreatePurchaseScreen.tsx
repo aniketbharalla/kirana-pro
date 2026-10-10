@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { colors } from '../../theme';
 import { Supplier } from '@kirana-pro/shared';
 
@@ -12,7 +13,10 @@ export const CreatePurchaseScreen = ({ route, navigation }: any) => {
         <View style={styles.supplierBanner}>
           <Text style={styles.supplierBannerLabel}>Inwarding for Wholesaler</Text>
           <Text style={styles.supplierBannerName}>{supplier.name}</Text>
-          <Text style={styles.supplierBannerPhone}>📞 {supplier.phone}</Text>
+          <View style={styles.phoneRow}>
+            <Feather name="phone" size={12} color={colors.textSecondary} style={{ marginRight: 4 }} />
+            <Text style={styles.supplierBannerPhone}>{supplier.phone}</Text>
+          </View>
         </View>
       ) : null}
 
@@ -24,10 +28,11 @@ export const CreatePurchaseScreen = ({ route, navigation }: any) => {
       {/* Option 1: Real OCR Bill Scanner */}
       <TouchableOpacity
         style={styles.optionCard}
+        activeOpacity={0.85}
         onPress={() => navigation.navigate('ScanInvoice', { supplier })}
       >
         <View style={styles.optionIconContainer}>
-          <Text style={styles.optionIcon}>📸</Text>
+          <Feather name="camera" size={22} color={colors.primary} />
         </View>
         <View style={styles.optionContent}>
           <Text style={styles.optionTitle}>Real Bill Scanner (Camera / Photo)</Text>
@@ -35,7 +40,8 @@ export const CreatePurchaseScreen = ({ route, navigation }: any) => {
             Capture a live camera photo or pick an invoice image from your phone/files. On-device Tesseract OCR scans the physical bill directly.
           </Text>
           <View style={styles.recommendedBadge}>
-            <Text style={styles.recommendedBadgeText}>⚡ Real OCR • Zero Paid APIs</Text>
+            <Feather name="zap" size={11} color={colors.primary} style={{ marginRight: 4 }} />
+            <Text style={styles.recommendedBadgeText}>Real OCR • Zero Paid APIs</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -43,6 +49,7 @@ export const CreatePurchaseScreen = ({ route, navigation }: any) => {
       {/* Option 2: Paste Bill Text */}
       <TouchableOpacity
         style={[styles.optionCard, styles.optionCardSecondary]}
+        activeOpacity={0.85}
         onPress={() =>
           navigation.navigate('ScanInvoice', {
             supplier,
@@ -51,7 +58,7 @@ export const CreatePurchaseScreen = ({ route, navigation }: any) => {
         }
       >
         <View style={styles.optionIconContainer}>
-          <Text style={styles.optionIcon}>📝</Text>
+          <Feather name="file-text" size={22} color={colors.textSecondary} />
         </View>
         <View style={styles.optionContent}>
           <Text style={styles.optionTitle}>Paste Bill Text / Manual Raw Review</Text>
@@ -68,15 +75,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    padding: 20,
+    padding: 16,
   },
   supplierBanner: {
     backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 14,
+    padding: 14,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.primaryBorder,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   supplierBannerLabel: {
     fontSize: 11,
@@ -85,58 +92,66 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   supplierBannerName: {
-    fontSize: 17,
-    fontWeight: '800',
+    fontSize: 16,
+    fontWeight: '700',
     color: colors.text,
     marginTop: 2,
   },
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 3,
+  },
   supplierBannerPhone: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
-    marginTop: 2,
   },
   title: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '700',
     color: colors.text,
   },
   subtitle: {
     fontSize: 13,
     color: colors.textSecondary,
     marginTop: 4,
-    marginBottom: 20,
+    marginBottom: 16,
     lineHeight: 18,
   },
   optionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 14,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: colors.primary,
-    marginBottom: 16,
+    marginBottom: 12,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 2,
   },
   optionCardSecondary: {
     borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
   },
   optionIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 10,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
-  },
-  optionIcon: {
-    fontSize: 24,
+    marginRight: 12,
   },
   optionContent: {
     flex: 1,
   },
   optionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     color: colors.text,
   },
@@ -147,7 +162,9 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   recommendedBadge: {
-    backgroundColor: '#ECFDF5',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primaryLight,
     alignSelf: 'flex-start',
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -155,7 +172,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   recommendedBadgeText: {
-    color: colors.primaryDark,
+    color: colors.primary,
     fontSize: 11,
     fontWeight: '700',
   },

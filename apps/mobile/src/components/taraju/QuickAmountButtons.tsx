@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { colors } from '../../theme';
 
 export interface QuickAmountButtonsProps {
   onSelectAmount: (amount: number) => void;
@@ -43,7 +44,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: colors.textSecondary,
     marginBottom: 8,
     letterSpacing: 0.5,
   },
@@ -57,17 +58,22 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   chipSelected: {
-    backgroundColor: '#10B981',
-    borderColor: '#059669',
+    backgroundColor: colors.primary,
+    borderColor: colors.primaryDark,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   chipText: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#1E293B',
+    fontWeight: '700',
+    color: colors.text,
   },
   chipTextSelected: {
     color: '#FFFFFF',

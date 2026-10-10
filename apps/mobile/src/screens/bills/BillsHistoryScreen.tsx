@@ -11,9 +11,11 @@ import {
   StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import { fetchInvoices, subscribeToInvoices } from '../../services/invoice';
 import { Invoice } from '@kirana-pro/shared';
+import { colors } from '../../theme';
 
 export const BillsHistoryScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -52,7 +54,7 @@ export const BillsHistoryScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Header Banner */}
       <View style={styles.summaryCard}>
@@ -67,17 +69,17 @@ export const BillsHistoryScreen: React.FC = () => {
 
       {/* Search Bar */}
       <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Feather name="search" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search by invoice number, customer, or mode..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={colors.textMuted}
           value={search}
           onChangeText={setSearch}
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch('')}>
-            <Text style={styles.clearText}>✕</Text>
+            <Feather name="x" size={16} color={colors.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -85,11 +87,13 @@ export const BillsHistoryScreen: React.FC = () => {
       {/* Invoices List */}
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator size="large" color="#10B981" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : filtered.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyEmoji}>🧾</Text>
+          <View style={styles.emptyIconCircle}>
+            <Feather name="file-text" size={32} color={colors.primary} />
+          </View>
           <Text style={styles.emptyTitle}>No Bills Recorded Yet</Text>
           <Text style={styles.emptySubtitle}>
             Completed sales and bills will automatically appear in this history log.
@@ -152,7 +156,10 @@ export const BillsHistoryScreen: React.FC = () => {
                   {item.items.length} items •{' '}
                   {item.customer?.name ? `Customer: ${item.customer.name}` : 'Counter Sale'}
                 </Text>
-                <Text style={styles.viewLink}>View Bill ➔</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.viewLink}>View Bill</Text>
+                  <Feather name="chevron-right" size={14} color={colors.primary} style={{ marginLeft: 2 }} />
+                </View>
               </View>
             </TouchableOpacity>
           )}
@@ -165,7 +172,7 @@ export const BillsHistoryScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   summaryCard: {
     flexDirection: 'row',
@@ -176,39 +183,37 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 8,
     padding: 16,
-    borderRadius: 18,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 2,
   },
   summaryLabel: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '700',
+    color: colors.textSecondary,
     letterSpacing: 0.5,
   },
   summaryAmount: {
     fontSize: 24,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontWeight: '800',
+    color: colors.text,
     marginTop: 2,
   },
   summaryBadge: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primaryLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderRadius: 12,
   },
   summaryCount: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#065F46',
+    fontWeight: '700',
+    color: colors.primary,
   },
   searchBox: {
     flexDirection: 'row',
@@ -216,26 +221,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
     marginVertical: 8,
-    borderRadius: 14,
+    borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-  },
-  searchIcon: {
-    fontSize: 15,
-    marginRight: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
     fontWeight: '500',
-    color: '#0F172A',
-  },
-  clearText: {
-    fontSize: 14,
-    color: '#94A3B8',
-    padding: 4,
+    color: colors.text,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -243,14 +239,14 @@ const styles = StyleSheet.create({
   },
   invoiceCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.03,
     shadowRadius: 4,
     elevation: 1,
   },
@@ -262,12 +258,12 @@ const styles = StyleSheet.create({
   },
   invNumber: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: colors.text,
   },
   invDate: {
     fontSize: 12,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   amountCol: {
@@ -275,8 +271,8 @@ const styles = StyleSheet.create({
   },
   invAmount: {
     fontSize: 16,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontWeight: '800',
+    color: colors.text,
   },
   modeBadge: {
     paddingHorizontal: 8,
@@ -286,31 +282,25 @@ const styles = StyleSheet.create({
   },
   modeBadgeText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   modeBadgeCash: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(40, 199, 111, 0.12)',
   },
   modeTextCash: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#065F46',
+    color: colors.systemGreen,
   },
   modeBadgeUpi: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(0, 207, 232, 0.12)',
   },
   modeTextUpi: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#1D4ED8',
+    color: '#0097A7',
   },
   modeBadgeCredit: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(234, 84, 85, 0.12)',
   },
   modeTextCredit: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#DC2626',
+    color: colors.danger,
   },
   cardBottom: {
     flexDirection: 'row',
@@ -318,16 +308,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: colors.border,
   },
   itemsSummary: {
     fontSize: 12,
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   viewLink: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#10B981',
+    color: colors.primary,
   },
   center: {
     flex: 1,
@@ -341,19 +331,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 36,
   },
-  emptyEmoji: {
-    fontSize: 48,
+  emptyIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: colors.text,
     marginBottom: 4,
   },
   emptySubtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
   },

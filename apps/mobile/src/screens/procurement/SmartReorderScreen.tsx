@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { useProductStore } from '../../store/productStore';
 import { useSupplierStore } from '../../store/supplierStore';
 import { useAuthStore } from '../../store/authStore';
@@ -20,11 +21,11 @@ import {
   computeReorderRecommendations,
   formatWhatsAppPurchaseOrder,
   generateWhatsAppOrderUrl,
-  ReorderItemRecommendation,
 } from '../../services/reorder';
 import { Invoice } from '@kirana-pro/shared';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { getFirestoreDb } from '@kirana-pro/shared';
+import { colors } from '../../theme';
 
 export const SmartReorderScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -157,21 +158,27 @@ export const SmartReorderScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>⚡ Smart Reorder Engine</Text>
-          <Text style={styles.headerSub}>
-            AI stock burn rate & 1-tap WhatsApp purchase orders
-          </Text>
+        <View style={styles.headerTitleRow}>
+          <View style={styles.headerIconCircle}>
+            <Feather name="zap" size={18} color={colors.primary} />
+          </View>
+          <View>
+            <Text style={styles.headerTitle}>Smart Reorder Engine</Text>
+            <Text style={styles.headerSub}>
+              Stock burn velocity & 1-tap WhatsApp purchase orders
+            </Text>
+          </View>
         </View>
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backBtnText}>✕ Close</Text>
+          <Feather name="x" size={14} color={colors.textSecondary} style={{ marginRight: 4 }} />
+          <Text style={styles.backBtnText}>Close</Text>
         </TouchableOpacity>
       </View>
 
@@ -179,7 +186,7 @@ export const SmartReorderScreen: React.FC = () => {
         {/* KPI Alert Banner */}
         <View style={styles.alertBanner}>
           <View style={styles.alertIconBadge}>
-            <Text style={styles.alertIcon}>🚨</Text>
+            <Feather name="alert-triangle" size={18} color={colors.danger} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.alertTitle}>
@@ -207,13 +214,19 @@ export const SmartReorderScreen: React.FC = () => {
                   style={[styles.supplierPill, isSelected && styles.supplierPillActive]}
                   onPress={() => handleSelectSupplier(supp.id)}
                 >
+                  <Feather
+                    name="briefcase"
+                    size={12}
+                    color={isSelected ? '#FFFFFF' : colors.textSecondary}
+                    style={{ marginRight: 6 }}
+                  />
                   <Text
                     style={[
                       styles.supplierPillText,
                       isSelected && styles.supplierPillTextActive,
                     ]}
                   >
-                    🏢 {supp.name}
+                    {supp.name}
                   </Text>
                 </TouchableOpacity>
               );
@@ -228,6 +241,7 @@ export const SmartReorderScreen: React.FC = () => {
               value={customPhone}
               onChangeText={setCustomPhone}
               placeholder="10-digit mobile..."
+              placeholderTextColor={colors.textMuted}
             />
           </View>
         </View>
@@ -237,12 +251,12 @@ export const SmartReorderScreen: React.FC = () => {
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>2. Replenishment Recommendations</Text>
             <Text style={styles.selectedCountBadge}>
-              {itemsToOrder.length} items in order (₹{totalPOCost.toLocaleString('en-IN')})
+              {itemsToOrder.length} items (₹{totalPOCost.toLocaleString('en-IN')})
             </Text>
           </View>
 
           {loading ? (
-            <ActivityIndicator size="small" color="#10B981" style={{ marginVertical: 20 }} />
+            <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 20 }} />
           ) : (
             reorderSummary.recommendations.map((rec) => {
               const qty = orderQuantities.get(rec.product.id) || 0;
@@ -288,10 +302,10 @@ export const SmartReorderScreen: React.FC = () => {
                         ]}
                       >
                         {isCritical
-                          ? '🚨 CRITICAL'
+                          ? 'CRITICAL'
                           : isHigh
-                          ? '⚠️ LOW STOCK'
-                          : '🟢 SUFFICIENT'}
+                          ? 'LOW STOCK'
+                          : 'SUFFICIENT'}
                       </Text>
                     </View>
                   </View>
@@ -300,15 +314,15 @@ export const SmartReorderScreen: React.FC = () => {
                   <View style={styles.metricRow}>
                     <Text style={styles.metricText}>
                       Stock:{' '}
-                      <Text style={{ fontWeight: '800', color: '#0F172A' }}>
+                      <Text style={{ fontWeight: '700', color: colors.text }}>
                         {rec.product.currentStock} {rec.product.unit}
                       </Text>
                     </Text>
                     <Text style={styles.metricDot}>•</Text>
                     <Text style={styles.metricText}>
                       Velocity:{' '}
-                      <Text style={{ fontWeight: '700', color: '#059669' }}>
-                        ⚡ {rec.dailyVelocity}/day
+                      <Text style={{ fontWeight: '700', color: colors.primary }}>
+                        {rec.dailyVelocity}/day
                       </Text>
                     </Text>
                     <Text style={styles.metricDot}>•</Text>
@@ -316,8 +330,8 @@ export const SmartReorderScreen: React.FC = () => {
                       Runs out in:{' '}
                       <Text
                         style={{
-                          fontWeight: '800',
-                          color: isCritical ? '#DC2626' : '#B45309',
+                          fontWeight: '700',
+                          color: isCritical ? colors.danger : colors.systemOrange,
                         }}
                       >
                         {rec.daysRemaining !== null ? `${rec.daysRemaining} days` : 'N/A'}
@@ -385,6 +399,7 @@ export const SmartReorderScreen: React.FC = () => {
             value={deliveryNote}
             onChangeText={setDeliveryNote}
             placeholder="e.g. Please deliver before 3 PM, dispatch with invoice..."
+            placeholderTextColor={colors.textMuted}
             multiline
           />
         </View>
@@ -395,7 +410,7 @@ export const SmartReorderScreen: React.FC = () => {
           activeOpacity={0.88}
           onPress={handleSendWhatsAppOrder}
         >
-          <Text style={styles.dispatchBtnIcon}>📲</Text>
+          <Feather name="share-2" size={20} color="#FFFFFF" style={{ marginRight: 10 }} />
           <View style={{ alignItems: 'center' }}>
             <Text style={styles.dispatchBtnTitle}>
               Send WhatsApp Purchase Order (₹{totalPOCost.toLocaleString('en-IN')})
@@ -413,39 +428,56 @@ export const SmartReorderScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 10,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: colors.border,
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  headerIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 8,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 17,
+    fontWeight: '700',
+    color: colors.text,
   },
   headerSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   backBtn: {
-    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   backBtnText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#475569',
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
   scrollContent: {
     padding: 16,
@@ -453,42 +485,39 @@ const styles = StyleSheet.create({
   },
   alertBanner: {
     flexDirection: 'row',
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(234, 84, 85, 0.08)',
     borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 16,
+    borderColor: 'rgba(234, 84, 85, 0.25)',
+    borderRadius: 12,
     padding: 14,
     alignItems: 'center',
     gap: 12,
   },
   alertIconBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FEE2E2',
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'rgba(234, 84, 85, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  alertIcon: {
-    fontSize: 22,
-  },
   alertTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#991B1B',
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.danger,
   },
   alertDesc: {
     fontSize: 11,
-    color: '#B91C1C',
+    color: colors.textSecondary,
     marginTop: 2,
     lineHeight: 16,
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -497,40 +526,42 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.text,
     marginBottom: 10,
   },
   selectedCountBadge: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#059669',
-    backgroundColor: '#ECFDF5',
+    color: colors.primary,
+    backgroundColor: colors.primaryLight,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   supplierScroll: {
     gap: 8,
     paddingBottom: 8,
   },
   supplierPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: colors.border,
   },
   supplierPillActive: {
-    backgroundColor: '#0F172A',
-    borderColor: '#0F172A',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   supplierPillText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#334155',
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
   supplierPillTextActive: {
     color: '#FFFFFF',
@@ -538,41 +569,41 @@ const styles = StyleSheet.create({
   phoneInputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: colors.background,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     paddingHorizontal: 12,
     marginTop: 6,
   },
   inputPrefix: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#64748B',
+    fontWeight: '600',
+    color: colors.textSecondary,
     marginRight: 6,
   },
   phoneInput: {
     flex: 1,
     fontSize: 13,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: colors.text,
     paddingVertical: 8,
   },
   itemCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    backgroundColor: colors.background,
+    borderRadius: 10,
     padding: 12,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   itemCardCritical: {
-    borderColor: '#FECACA',
-    backgroundColor: '#FFF5F5',
+    borderColor: 'rgba(234, 84, 85, 0.4)',
+    backgroundColor: 'rgba(234, 84, 85, 0.04)',
   },
   itemCardHigh: {
-    borderColor: '#FDE68A',
-    backgroundColor: '#FFFDF5',
+    borderColor: 'rgba(255, 159, 67, 0.4)',
+    backgroundColor: 'rgba(255, 159, 67, 0.04)',
   },
   itemHeader: {
     flexDirection: 'row',
@@ -581,40 +612,40 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontSize: 14,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: colors.text,
   },
   itemHindi: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 1,
   },
   urgencyBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   badgeCritical: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(234, 84, 85, 0.12)',
   },
   badgeHigh: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: 'rgba(255, 159, 67, 0.12)',
   },
   badgeNormal: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(40, 199, 111, 0.12)',
   },
   urgencyText: {
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   textCritical: {
-    color: '#DC2626',
+    color: colors.danger,
   },
   textHigh: {
-    color: '#B45309',
+    color: colors.systemOrange,
   },
   textNormal: {
-    color: '#065F46',
+    color: colors.systemGreen,
   },
   metricRow: {
     flexDirection: 'row',
@@ -624,11 +655,11 @@ const styles = StyleSheet.create({
   },
   metricText: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   metricDot: {
     fontSize: 11,
-    color: '#CBD5E1',
+    color: colors.border,
   },
   qtyControlRow: {
     flexDirection: 'row',
@@ -637,16 +668,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingTop: 8,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.05)',
+    borderTopColor: colors.border,
   },
   costLabel: {
     fontSize: 10,
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   totalLineCost: {
     fontSize: 12,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: colors.text,
     marginTop: 1,
   },
   stepperContainer: {
@@ -657,68 +688,64 @@ const styles = StyleSheet.create({
   stepBtn: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: colors.border,
     paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
   stepBtnText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#334155',
+    fontWeight: '600',
+    color: colors.text,
   },
   qtyDisplay: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.primary,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
     alignItems: 'center',
-    minWidth: 44,
+    minWidth: 42,
   },
   qtyDisplayText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 13,
   },
   qtyUnitText: {
-    color: '#FFFFFF',
+    color: 'rgba(255, 255, 255, 0.8)',
     fontSize: 9,
     fontWeight: '600',
   },
   noteInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: colors.background,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     padding: 10,
     fontSize: 12,
-    color: '#0F172A',
+    color: colors.text,
     minHeight: 50,
   },
   dispatchBtn: {
-    backgroundColor: '#25D366', // Official WhatsApp brand color
+    backgroundColor: '#25D366',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
     paddingHorizontal: 20,
-    borderRadius: 16,
-    gap: 10,
+    borderRadius: 12,
     shadowColor: '#25D366',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 4,
     marginTop: 6,
     marginBottom: 24,
   },
-  dispatchBtnIcon: {
-    fontSize: 22,
-  },
   dispatchBtnTitle: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 15,
+    fontWeight: '700',
+    fontSize: 14,
   },
   dispatchBtnSub: {
     color: 'rgba(255, 255, 255, 0.9)',

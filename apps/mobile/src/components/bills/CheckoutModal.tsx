@@ -19,6 +19,7 @@ import { kickCashDrawer } from '../../services/printerService';
 import { UpiQrView } from './UpiQrView';
 import { createInvoice } from '../../services/invoice';
 import { fetchCustomers, createCustomer } from '../../services/khata';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   CustomerKhata,
   Invoice,
@@ -193,7 +194,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <Feather name="x" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -209,12 +210,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             activeOpacity={0.8}
             onPress={() => setIsB2B(!isB2B)}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={{ fontSize: 16 }}>🏛️</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Feather name="briefcase" size={16} color={colors.primary} />
               <Text style={styles.b2bToggleText}>B2B Tax Invoice (व्यापार बिल / GST)</Text>
             </View>
             <View style={[styles.checkbox, isB2B && styles.checkboxActive]}>
-              <Text style={styles.checkboxCheck}>{isB2B ? '✓' : ''}</Text>
+              {isB2B && <Feather name="check" size={14} color="#FFFFFF" />}
             </View>
           </TouchableOpacity>
 
@@ -224,7 +225,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <TextInput
                 style={styles.gstinInput}
                 placeholder="e.g. 07AABCK1234F1Z5"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={colors.textMuted}
                 value={buyerGstin}
                 onChangeText={setBuyerGstin}
                 autoCapitalize="characters"
@@ -239,7 +240,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               style={[styles.tab, paymentMode === 'cash' && styles.tabActive]}
               onPress={() => setPaymentMode('cash')}
             >
-              <Text style={styles.tabIcon}>💵</Text>
+              <Feather
+                name="dollar-sign"
+                size={15}
+                color={paymentMode === 'cash' ? colors.primary : colors.textSecondary}
+              />
               <Text style={[styles.tabText, paymentMode === 'cash' && styles.tabTextActive]}>
                 Cash (नकद)
               </Text>
@@ -249,7 +254,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               style={[styles.tab, paymentMode === 'upi' && styles.tabActive]}
               onPress={() => setPaymentMode('upi')}
             >
-              <Text style={styles.tabIcon}>📲</Text>
+              <MaterialCommunityIcons
+                name="qrcode-scan"
+                size={15}
+                color={paymentMode === 'upi' ? colors.primary : colors.textSecondary}
+              />
               <Text style={[styles.tabText, paymentMode === 'upi' && styles.tabTextActive]}>
                 UPI QR
               </Text>
@@ -259,7 +268,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               style={[styles.tab, paymentMode === 'credit' && styles.tabActive]}
               onPress={() => setPaymentMode('credit')}
             >
-              <Text style={styles.tabIcon}>📒</Text>
+              <Feather
+                name="book-open"
+                size={15}
+                color={paymentMode === 'credit' ? colors.primary : colors.textSecondary}
+              />
               <Text style={[styles.tabText, paymentMode === 'credit' && styles.tabTextActive]}>
                 Khata (उधार)
               </Text>
@@ -399,11 +412,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.finishBtnText}>
-                {paymentMode === 'credit'
-                  ? `Record Udhar (₹${grandTotal}) ➔`
-                  : `Complete & Generate Bill (₹${grandTotal}) ➔`}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.finishBtnText}>
+                  {paymentMode === 'credit'
+                    ? `Record Udhar (₹${grandTotal})`
+                    : `Complete & Generate Bill (₹${grandTotal})`}
+                </Text>
+                <Feather name="arrow-right" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+              </View>
             )}
           </TouchableOpacity>
         </View>
@@ -457,24 +473,24 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   amountBanner: {
-    backgroundColor: '#ECFDF5',
-    borderRadius: 16,
+    backgroundColor: colors.primaryLight,
+    borderRadius: 14,
     padding: 16,
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: colors.primaryBorder,
   },
   amountBannerLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#065F46',
+    color: colors.primary,
     letterSpacing: 0.5,
   },
   amountBannerVal: {
     fontSize: 32,
     fontWeight: '900',
-    color: '#047857',
+    color: colors.primaryDark,
     marginTop: 2,
   },
   modeTabs: {
@@ -487,17 +503,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    paddingVertical: 12,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    paddingVertical: 11,
+    borderWidth: 1,
+    borderColor: colors.border,
     gap: 6,
   },
   tabActive: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#10B981',
-    shadowColor: '#10B981',
+    backgroundColor: colors.primaryLight,
+    borderColor: colors.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -508,39 +524,40 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#64748B',
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
   tabTextActive: {
-    color: '#0F172A',
+    color: colors.primary,
+    fontWeight: '700',
   },
   bodyScroll: {
     maxHeight: 280,
   },
   sectionCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 16,
+    backgroundColor: colors.background,
+    borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   sectionLabel: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '700',
+    color: colors.textSecondary,
     letterSpacing: 0.5,
     marginBottom: 8,
   },
   cashInput: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 26,
-    fontWeight: '900',
-    color: '#0F172A',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    fontWeight: '800',
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
     textAlign: 'center',
   },
   quickCashRow: {
@@ -554,36 +571,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: colors.border,
   },
   quickCashText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#334155',
+    fontWeight: '600',
+    color: colors.text,
   },
   changeCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   changeLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   changeVal: {
     fontSize: 22,
-    fontWeight: '900',
-    color: '#64748B',
+    fontWeight: '800',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   changeValActive: {
-    color: '#EF4444',
+    color: colors.danger,
   },
   khataToggleRow: {
     flexDirection: 'row',
@@ -594,7 +611,7 @@ const styles = StyleSheet.create({
   khataToggleText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#2563EB',
+    color: colors.primary,
   },
   newCustForm: {
     gap: 8,
@@ -603,15 +620,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
-    color: '#0F172A',
+    color: colors.text,
   },
   noCustomers: {
     fontSize: 13,
-    color: '#94A3B8',
+    color: colors.textMuted,
     textAlign: 'center',
     paddingVertical: 16,
   },
@@ -621,26 +638,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     marginBottom: 8,
   },
   customerRowSelected: {
-    borderColor: '#10B981',
-    backgroundColor: '#ECFDF5',
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryLight,
   },
   custName: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.text,
   },
   custPhone: {
     fontSize: 12,
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   balanceBadge: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(234, 84, 85, 0.1)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -648,19 +665,19 @@ const styles = StyleSheet.create({
   balanceText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#DC2626',
+    color: colors.danger,
   },
   finishBtn: {
-    backgroundColor: '#10B981',
-    paddingVertical: 16,
-    borderRadius: 16,
+    backgroundColor: colors.primary, // MasterX Royal Purple
+    paddingVertical: 15,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 16,
-    shadowColor: '#10B981',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   finishBtnDisabled: {
     opacity: 0.6,

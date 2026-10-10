@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useProductStore } from '../../store/productStore';
 import { useCartStore } from '../../store/cartStore';
 import { useHardwareStore } from '../../store/hardwareStore';
@@ -85,14 +86,21 @@ export const TarajuScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.screenTitle}>Taraju Smart Scale ⚖️</Text>
-          <Text style={styles.screenSubtitle}>
-            Instant price-to-weight & weight-to-price calculator
-          </Text>
+          <View style={styles.headerTitleRow}>
+            <View style={styles.iconCircle}>
+              <MaterialCommunityIcons name="scale-balance" size={20} color={colors.primary} />
+            </View>
+            <View>
+              <Text style={styles.screenTitle}>Taraju Smart Scale</Text>
+              <Text style={styles.screenSubtitle}>
+                Instant price-to-weight & weight-to-price calculator
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Live Digital Scale Banner */}
@@ -100,8 +108,8 @@ export const TarajuScreen: React.FC = () => {
           <View style={styles.liveScaleBanner}>
             <View style={styles.liveScaleInfo}>
               <View style={styles.liveScaleStatusRow}>
-                <Text style={styles.liveScaleDot}>🟢</Text>
-                <Text style={styles.liveScaleTitle}>DIGITAL SCALE (लाइव तराजू)</Text>
+                <View style={[styles.statusDot, { backgroundColor: isScaleStable ? colors.systemGreen : colors.systemOrange }]} />
+                <Text style={styles.liveScaleTitle}>DIGITAL SCALE (LIVE TARAJU)</Text>
                 <View
                   style={[
                     styles.scalePill,
@@ -131,7 +139,8 @@ export const TarajuScreen: React.FC = () => {
                 setInputValue(String(grams));
               }}
             >
-              <Text style={styles.applyScaleBtnText}>Apply Weight ➔</Text>
+              <Text style={styles.applyScaleBtnText}>Apply Weight</Text>
+              <Feather name="arrow-right" size={14} color="#FFFFFF" style={{ marginLeft: 4 }} />
             </TouchableOpacity>
           </View>
         )}
@@ -152,7 +161,11 @@ export const TarajuScreen: React.FC = () => {
                 onPress={() => handleSelectProduct(p)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.pillEmoji}>🌾</Text>
+                <Feather
+                  name="package"
+                  size={16}
+                  color={isSelected ? colors.primary : colors.textSecondary}
+                />
                 <View>
                   <Text
                     style={[
@@ -180,7 +193,11 @@ export const TarajuScreen: React.FC = () => {
             onPress={() => setSelectedProduct(null)}
             activeOpacity={0.8}
           >
-            <Text style={styles.pillEmoji}>✏️</Text>
+            <Feather
+              name="edit-2"
+              size={15}
+              color={!selectedProduct ? colors.primary : colors.textSecondary}
+            />
             <View>
               <Text
                 style={[
@@ -212,7 +229,7 @@ export const TarajuScreen: React.FC = () => {
               onChangeText={setCustomRate}
               keyboardType="numeric"
               placeholder="e.g. 50"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={colors.textMuted}
             />
           </View>
         )}
@@ -273,7 +290,7 @@ export const TarajuScreen: React.FC = () => {
             onChangeText={setInputValue}
             keyboardType="numeric"
             placeholder="0"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textMuted}
             autoFocus
           />
         </View>
@@ -338,20 +355,21 @@ export const TarajuScreen: React.FC = () => {
             useCartStore.getState().addItem(targetProduct, qtyInKg, activeRate);
 
             Alert.alert(
-              'Added to Bill! 🛒',
+              'Added to Bill',
               `${resultDisplay} of ${targetProduct.name} added to cart.`,
               [
                 { text: 'Keep Weighing', style: 'cancel' },
                 {
-                  text: 'Go to Cart ➔',
+                  text: 'Go to Cart',
                   onPress: () => (navigation as any)?.navigate?.('BillsTab'),
                 },
               ]
             );
           }}
         >
+          <Feather name="shopping-cart" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
           <Text style={styles.addBillText}>
-            🛒 Add to Active Bill ({resultDisplay})
+            Add to Active Bill ({resultDisplay})
           </Text>
         </TouchableOpacity>
 
@@ -382,29 +400,42 @@ export const TarajuScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   scroll: {
-    padding: 18,
+    padding: 16,
     paddingBottom: 40,
   },
   header: {
     marginBottom: 16,
   },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   screenTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 22,
+    fontWeight: '700',
+    color: colors.text,
   },
   screenSubtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   sectionHeader: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: colors.textSecondary,
     letterSpacing: 0.5,
     marginBottom: 8,
   },
@@ -419,121 +450,120 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
     gap: 8,
   },
   productPillSelected: {
-    borderColor: '#10B981',
-    backgroundColor: '#ECFDF5',
-  },
-  pillEmoji: {
-    fontSize: 20,
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryLight,
   },
   productPillName: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#334155',
+    color: colors.text,
   },
   productPillNameSelected: {
-    color: '#065F46',
+    color: colors.primary,
   },
   productPillRate: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   productPillRateSelected: {
-    color: '#047857',
+    color: colors.primary,
     fontWeight: '600',
   },
   customRateCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     marginBottom: 14,
   },
   rateInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: colors.background,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.text,
   },
   modeToggleContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 14,
-    padding: 4,
+    backgroundColor: '#EEEEF2',
+    borderRadius: 10,
+    padding: 3,
     marginBottom: 14,
   },
   modeTab: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 9,
+    borderRadius: 8,
     alignItems: 'center',
   },
   modeTabActive: {
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
     elevation: 1,
   },
   modeTabText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   modeTabTextActive: {
-    color: '#10B981',
-    fontWeight: '800',
+    color: colors.primary,
+    fontWeight: '700',
   },
   inputCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderWidth: 1,
+    borderColor: colors.border,
     marginBottom: 10,
   },
   fieldLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: colors.textSecondary,
     marginBottom: 6,
     letterSpacing: 0.5,
   },
   mainInput: {
     fontSize: 36,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontWeight: '800',
+    color: colors.text,
     textAlign: 'center',
     paddingVertical: 4,
   },
   addBillBtn: {
-    backgroundColor: '#10B981',
-    paddingVertical: 15,
-    borderRadius: 14,
+    flexDirection: 'row',
+    backgroundColor: colors.primary, // MasterX Royal Purple
+    paddingVertical: 14,
+    borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#10B981',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
     marginTop: 4,
   },
   addBillText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '700',
   },
   historySection: {
     marginTop: 24,
@@ -543,30 +573,30 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     marginBottom: 8,
   },
   historyProduct: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: colors.text,
   },
   historyDetails: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   historyResult: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#10B981',
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.primary,
   },
   liveScaleBanner: {
-    backgroundColor: '#0F172A',
-    borderRadius: 16,
+    backgroundColor: '#2F2B3D',
+    borderRadius: 14,
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -574,7 +604,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
@@ -587,35 +617,37 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 4,
   },
-  liveScaleDot: {
-    fontSize: 10,
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
   },
   liveScaleTitle: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    fontWeight: '700',
+    color: colors.textMuted,
     letterSpacing: 0.5,
   },
   scalePill: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 4,
   },
   scalePillStable: {
-    backgroundColor: '#166534',
+    backgroundColor: colors.systemGreen,
   },
   scalePillUnstable: {
-    backgroundColor: '#854D0E',
+    backgroundColor: colors.systemOrange,
   },
   scalePillText: {
     color: '#FFFFFF',
     fontSize: 9,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   liveScaleWeight: {
     fontSize: 24,
-    fontWeight: '900',
-    color: '#38BDF8',
+    fontWeight: '800',
+    color: colors.systemBlue,
   },
   liveScaleKg: {
     fontSize: 14,
@@ -625,17 +657,19 @@ const styles = StyleSheet.create({
   liveScaleGrams: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#64748B',
+    color: colors.textMuted,
   },
   applyScaleBtn: {
-    backgroundColor: '#10B981',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   applyScaleBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
   },
 });

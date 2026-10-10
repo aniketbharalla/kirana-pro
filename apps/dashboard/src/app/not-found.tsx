@@ -13,14 +13,20 @@ export default function NotFound() {
       <Link
         href="/"
         style={{
-          backgroundColor: '#10B981',
+          backgroundColor: '#7367F0',
           color: '#FFFFFF',
-          fontWeight: 700,
-          padding: '10px 18px',
-          borderRadius: '10px',
+          fontWeight: 600,
+          padding: '10px 20px',
+          borderRadius: '8px',
+          textDecoration: 'none',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+          fontFamily: 'var(--font-body)',
         }}
       >
-        ← Back to Dashboard
+        Back to Dashboard
       </Link>
     </div>
   );

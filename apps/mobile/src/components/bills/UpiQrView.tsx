@@ -123,6 +123,6 @@ const styles = StyleSheet.create({
   infoAmount: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#10B981',
+    color: '#28C76F',
   },
 });

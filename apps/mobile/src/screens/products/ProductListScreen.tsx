@@ -21,6 +21,8 @@ import { CategoryFilter } from '../../components/products/CategoryFilter';
 import { ProductCard } from '../../components/products/ProductCard';
 import { colors } from '../../theme';
 import { Product } from '@kirana-pro/shared';
+import { Feather } from '@expo/vector-icons';
+import { ToastBanner } from '../../components/common/ToastBanner';
 
 export const ProductListScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -141,7 +143,7 @@ export const ProductListScreen: React.FC = () => {
         }).catch(() => {});
       }
 
-      setToastMessage(`✅ Restocked +${addQuantity} ${restockProduct.unit || 'units'} of ${restockProduct.name}`);
+      setToastMessage(`Restocked +${addQuantity} ${restockProduct.unit || 'units'} of ${restockProduct.name}`);
       setTimeout(() => setToastMessage(null), 3000);
       setRestockProduct(null);
     } catch (err: any) {
@@ -153,7 +155,7 @@ export const ProductListScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F7FA" />
 
       {/* Header Bar */}
       <View style={styles.header}>
@@ -170,7 +172,7 @@ export const ProductListScreen: React.FC = () => {
             onPress={() => navigation.navigate('BarcodeScanner')}
             activeOpacity={0.85}
           >
-            <Text style={styles.scanIcon}>📷</Text>
+            <Feather name="maximize" size={14} color="#7367F0" style={{ marginRight: 4 }} />
             <Text style={styles.scanText}>Scan</Text>
           </TouchableOpacity>
 
@@ -179,7 +181,7 @@ export const ProductListScreen: React.FC = () => {
             onPress={() => navigation.navigate('AddProduct')}
             activeOpacity={0.85}
           >
-            <Text style={styles.addBtnIcon}>➕</Text>
+            <Feather name="plus" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
             <Text style={styles.addBtnText}>Add</Text>
           </TouchableOpacity>
         </View>
@@ -192,9 +194,16 @@ export const ProductListScreen: React.FC = () => {
           onPress={() => setActiveTab('catalog')}
           activeOpacity={0.85}
         >
-          <Text style={[styles.segmentText, activeTab === 'catalog' && styles.segmentTextActive]}>
-            📦 Products Catalog ({products.length})
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather
+              name="grid"
+              size={13}
+              color={activeTab === 'catalog' ? '#7367F0' : '#6F6B7D'}
+            />
+            <Text style={[styles.segmentText, activeTab === 'catalog' && styles.segmentTextActive]}>
+              Products ({products.length})
+            </Text>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -202,33 +211,45 @@ export const ProductListScreen: React.FC = () => {
           onPress={() => setActiveTab('stock')}
           activeOpacity={0.85}
         >
-          <Text style={[styles.segmentText, activeTab === 'stock' && styles.segmentTextActive]}>
-            📊 Stock Register ({products.length})
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Feather
+              name="bar-chart-2"
+              size={13}
+              color={activeTab === 'stock' ? '#7367F0' : '#6F6B7D'}
+            />
+            <Text style={[styles.segmentText, activeTab === 'stock' && styles.segmentTextActive]}>
+              Stock Register ({products.length})
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
 
       {/* Toast Notification */}
       {toastMessage && (
-        <View style={styles.toastBanner}>
-          <Text style={styles.toastText}>{toastMessage}</Text>
+        <View style={{ marginHorizontal: 16, marginBottom: 12 }}>
+          <ToastBanner
+            type="success"
+            title="Stock Updated"
+            message={toastMessage}
+            onClose={() => setToastMessage(null)}
+          />
         </View>
       )}
 
       {/* Search Input */}
       <View style={styles.searchContainer}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Feather name="search" size={16} color="#A8AAAE" style={{ marginRight: 8 }} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search by product name, barcode, or Hindi..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor="#A8AAAE"
           value={searchQuery}
           onChangeText={setSearchQuery}
           clearButtonMode="while-editing"
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Text style={styles.clearText}>✕</Text>
+            <Feather name="x" size={16} color="#A8AAAE" />
           </TouchableOpacity>
         )}
       </View>
@@ -244,11 +265,11 @@ export const ProductListScreen: React.FC = () => {
 
           {isLoading && products.length === 0 ? (
             <View style={styles.center}>
-              <ActivityIndicator size="large" color={colors.primary} />
+              <ActivityIndicator size="large" color="#7367F0" />
             </View>
           ) : filteredCatalog.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyEmoji}>📦</Text>
+              <Feather name="package" size={48} color="#7367F0" style={{ marginBottom: 12 }} />
               <Text style={styles.emptyTitle}>No Products Found</Text>
               <Text style={styles.emptySub}>
                 {searchQuery
@@ -340,14 +361,21 @@ export const ProductListScreen: React.FC = () => {
               ]}
               onPress={() => setStockStatusFilter('low')}
             >
-              <Text
-                style={[
-                  styles.stockFilterPillText,
-                  stockStatusFilter === 'low' && styles.stockFilterPillAlertText,
-                ]}
-              >
-                ⚠️ Low Stock ({lowStockItems.length})
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather
+                  name="alert-triangle"
+                  size={12}
+                  color={stockStatusFilter === 'low' ? '#B45309' : '#FF9F43'}
+                />
+                <Text
+                  style={[
+                    styles.stockFilterPillText,
+                    stockStatusFilter === 'low' && styles.stockFilterPillAlertText,
+                  ]}
+                >
+                  Low Stock ({lowStockItems.length})
+                </Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -357,14 +385,21 @@ export const ProductListScreen: React.FC = () => {
               ]}
               onPress={() => setStockStatusFilter('out')}
             >
-              <Text
-                style={[
-                  styles.stockFilterPillText,
-                  stockStatusFilter === 'out' && styles.stockFilterPillDangerText,
-                ]}
-              >
-                ❌ Out of Stock ({outOfStockItems.length})
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather
+                  name="alert-circle"
+                  size={12}
+                  color={stockStatusFilter === 'out' ? '#B91C1C' : '#EA5455'}
+                />
+                <Text
+                  style={[
+                    styles.stockFilterPillText,
+                    stockStatusFilter === 'out' && styles.stockFilterPillDangerText,
+                  ]}
+                >
+                  Out of Stock ({outOfStockItems.length})
+                </Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -374,14 +409,21 @@ export const ProductListScreen: React.FC = () => {
               ]}
               onPress={() => setStockStatusFilter('in')}
             >
-              <Text
-                style={[
-                  styles.stockFilterPillText,
-                  stockStatusFilter === 'in' && styles.stockFilterPillSuccessText,
-                ]}
-              >
-                🟢 In Stock ({inStockItems.length})
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather
+                  name="check-circle"
+                  size={12}
+                  color={stockStatusFilter === 'in' ? '#15803D' : '#28C76F'}
+                />
+                <Text
+                  style={[
+                    styles.stockFilterPillText,
+                    stockStatusFilter === 'in' && styles.stockFilterPillSuccessText,
+                  ]}
+                >
+                  In Stock ({inStockItems.length})
+                </Text>
+              </View>
             </TouchableOpacity>
           </ScrollView>
 
@@ -408,7 +450,7 @@ export const ProductListScreen: React.FC = () => {
                         <Text style={styles.stockItemHindi}>{item.nameHindi}</Text>
                       ) : null}
                       <Text style={styles.stockItemCategory}>
-                        🏷️ {item.category} • Barcode: {item.barcode || 'Loose Item'}
+                        {item.category} • Barcode: {item.barcode || 'Loose Item'}
                       </Text>
                     </View>
 
@@ -458,7 +500,7 @@ export const ProductListScreen: React.FC = () => {
 
                     <View style={styles.financialCol}>
                       <Text style={styles.finLabel}>Unit Profit</Text>
-                      <Text style={[styles.finValue, { color: '#059669' }]}>
+                      <Text style={[styles.finValue, { color: '#28C76F' }]}>
                         +₹{profitPerUnit.toFixed(1)} ({marginPercent}%)
                       </Text>
                     </View>
@@ -477,7 +519,10 @@ export const ProductListScreen: React.FC = () => {
                       style={styles.detailLinkBtn}
                       onPress={() => handleProductPress(item)}
                     >
-                      <Text style={styles.detailLinkText}>View History ➔</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Text style={styles.detailLinkText}>View History</Text>
+                        <Feather name="arrow-right" size={13} color="#7367F0" />
+                      </View>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -485,7 +530,10 @@ export const ProductListScreen: React.FC = () => {
                       onPress={() => handleOpenRestockModal(item)}
                       activeOpacity={0.85}
                     >
-                      <Text style={styles.restockActionText}>➕ Quick Restock</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Feather name="plus" size={13} color="#FFFFFF" />
+                        <Text style={styles.restockActionText}>Quick Restock</Text>
+                      </View>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -512,7 +560,7 @@ export const ProductListScreen: React.FC = () => {
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setRestockProduct(null)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Feather name="x" size={20} color="#6F6B7D" />
               </TouchableOpacity>
             </View>
 
@@ -604,29 +652,30 @@ const styles = StyleSheet.create({
   scanBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#EDEBFD',
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 18,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  scanIcon: {
-    fontSize: 15,
-    marginRight: 4,
+    borderColor: 'rgba(115, 103, 240, 0.25)',
   },
   scanText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#065F46',
+    fontWeight: '600',
+    color: '#7367F0',
   },
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 18,
+    borderRadius: 8,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   addBtnIcon: {
     fontSize: 12,
@@ -743,11 +792,16 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   emptyAddBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     marginTop: 18,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 8,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   emptyAddBtnText: {
     color: '#FFFFFF',
@@ -936,10 +990,15 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   restockActionBtn: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 14,
+    backgroundColor: '#7367F0',
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 6,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 2,
   },
   restockActionText: {
     color: '#FFFFFF',
@@ -950,13 +1009,13 @@ const styles = StyleSheet.create({
   /* Modal Styles */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    backgroundColor: 'rgba(47, 43, 61, 0.6)',
     justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 22,
     paddingBottom: 36,
   },
@@ -967,39 +1026,41 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   modalSubtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   modalClose: {
     fontSize: 18,
-    color: '#94A3B8',
+    color: '#6F6B7D',
     padding: 4,
   },
   modalStockBanner: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     padding: 12,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
   },
   modalStockBannerText: {
     fontSize: 14,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   modalStockBannerCost: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 4,
   },
   presetLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#334155',
+    color: '#6F6B7D',
     marginBottom: 8,
   },
   presetChipsRow: {
@@ -1009,16 +1070,16 @@ const styles = StyleSheet.create({
   },
   presetChip: {
     flex: 1,
-    backgroundColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
+    backgroundColor: '#EDEBFD',
+    borderColor: 'rgba(115, 103, 240, 0.25)',
     borderWidth: 1,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
   },
   presetChipText: {
-    color: '#065F46',
-    fontWeight: '800',
+    color: '#7367F0',
+    fontWeight: '700',
     fontSize: 15,
   },
   customQtyRow: {
@@ -1027,26 +1088,31 @@ const styles = StyleSheet.create({
   },
   customQtyInput: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     paddingHorizontal: 14,
     fontSize: 15,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   customSubmitBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
   },
   customSubmitBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 14,
   },
 });

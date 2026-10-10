@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { StockMovement } from '@kirana-pro/shared';
+import { ArrowDownLeft, ArrowUpRight, Edit3 } from 'lucide-react';
 
 export interface StockLogProps {
   movements: StockMovement[];
@@ -28,10 +29,10 @@ export const StockLog: React.FC<StockLogProps> = ({
       <div style={styles.filterBar}>
         <div style={styles.tabGroup}>
           {[
-            { id: 'all', label: 'All Movements' },
-            { id: 'in', label: '🟢 Inward (Restock)' },
-            { id: 'out', label: '🔴 Outward (Sales)' },
-            { id: 'adjustment', label: '✏️ Adjustments' },
+            { id: 'all', label: 'All Movements', icon: null },
+            { id: 'in', label: 'Inward (Restock)', icon: <ArrowDownLeft size={13} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} /> },
+            { id: 'out', label: 'Outward (Sales)', icon: <ArrowUpRight size={13} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} /> },
+            { id: 'adjustment', label: 'Adjustments', icon: <Edit3 size={13} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -41,6 +42,7 @@ export const StockLog: React.FC<StockLogProps> = ({
                 ...(filterType === tab.id ? styles.tabBtnActive : {}),
               }}
             >
+              {tab.icon}
               {tab.label}
             </button>
           ))}

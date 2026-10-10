@@ -41,12 +41,12 @@ export const formatKhataUPIReminder = (
   const upiLink = generateUPILink(upiId, storeName, amountDue, `Khata payment – ${storeName}`);
   const overdueText = daysOverdue && daysOverdue > 0 ? ` (${daysOverdue} din se pending)` : '';
   return (
-    `🙏 Namaste *${customerName}* ji,\n\n` +
+    `Namaste *${customerName}* ji,\n\n` +
     `Aapke *${storeName}* pe ₹*${amountDue.toLocaleString('en-IN')}* ka udhar baaki hai${overdueText}.\n\n` +
     `Ek tap mein pay karein:\n` +
-    `💳 *UPI Pay Link:*\n${upiLink}\n\n` +
-    `Ya seedha UPI ID pe bhejein:\n📱 *${upiId}*\n\n` +
-    `Dhanyawad 🙏\n– ${storeName}`
+    `*UPI Pay Link:*\n${upiLink}\n\n` +
+    `Ya seedha UPI ID pe bhejein:\n*${upiId}*\n\n` +
+    `Dhanyawad\n– ${storeName}`
   );
 };
 
@@ -80,12 +80,12 @@ export const formatFestivalOfferMessage = (
     .join('\n');
 
   return (
-    `🎉 *${offerTitle}*\n` +
-    `📍 *${storeName}*\n\n` +
+    `*${offerTitle}*\n` +
+    `*${storeName}*\n\n` +
     `${description}\n\n` +
-    `🛒 *Offer Items:*\n${itemLines}\n\n` +
-    `📞 Order karein: *${phone}*\n` +
-    `⏰ Limited time only!\n\n` +
+    `*Offer Items:*\n${itemLines}\n\n` +
+    `Order karein: *${phone}*\n` +
+    `Limited time only!\n\n` +
     `#KiranaDeal #GroceryOffer #${storeName.replace(/\s+/g, '')}`
   );
 };
@@ -117,11 +117,11 @@ export const formatDigitalCatalogBroadcast = (
     .join('\n');
 
   return (
-    `🏪 *${storeName} – Digital Dukaan Menu*\n\n` +
+    `*${storeName} – Digital Dukaan Menu*\n\n` +
     `Ab ghar baithe order karein! Hum home delivery bhi karte hain.\n\n` +
-    `📦 *Available Products (${availableProducts.length}):*\n${productLines}\n\n` +
-    `📞 Order bhejein: *${phone}*\n` +
-    `💬 WhatsApp ya call karein – fast delivery guaranteed! 🚴‍♂️`
+    `*Available Products (${availableProducts.length}):*\n${productLines}\n\n` +
+    `Order bhejein: *${phone}*\n` +
+    `WhatsApp ya call karein – fast delivery!`
   );
 };
 
@@ -148,11 +148,11 @@ export const formatRationPackageMessage = (
   const savings = originalTotal - totalPrice;
 
   return (
-    `🛒 *${packageName}*\n` +
-    `📍 ${storeName}\n\n` +
+    `*${packageName}*\n` +
+    `${storeName}\n\n` +
     `Mahine bhar ka saara rashan ek hi order mein!\n\n` +
-    `📋 *Package Contents:*\n${itemLines}\n\n` +
-    `💰 *Package Price: ₹${totalPrice}* (Save ₹${savings}!)\n\n` +
-    `📞 Abhi order karein: *${phone}*`
+    `*Package Contents:*\n${itemLines}\n\n` +
+    `*Package Price: ₹${totalPrice}* (Save ₹${savings}!)\n\n` +
+    `Abhi order karein: *${phone}*`
   );
 };

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { DailyGallaSession } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreGalla } from '../../lib/storeService';
+import { Wallet, CheckCircle2 } from 'lucide-react';
 
 export default function GallaPage() {
   const { storeId } = useAuth();
@@ -51,7 +52,7 @@ export default function GallaPage() {
           <div style={styles.statsRow}>
             <div style={styles.statCard}>
               <div style={styles.statLabel}>LATEST EXPECTED DRAWER CASH</div>
-              <div style={{ ...styles.statValue, color: '#10B981' }}>
+              <div style={{ ...styles.statValue, color: '#28C76F' }}>
                 ₹{latestSession ? latestSession.expectedClosingCash.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
               </div>
             </div>
@@ -75,7 +76,9 @@ export default function GallaPage() {
           {/* Sessions Table or Empty State */}
           {sessions.length === 0 ? (
             <div style={styles.emptyCard}>
-              <div style={styles.emptyIcon}>💰</div>
+              <div style={styles.emptyIcon}>
+                <Wallet size={48} color="#A8AAAE" />
+              </div>
               <h3 style={styles.emptyTitle}>No Daily Galla Closings Yet</h3>
               <p style={styles.emptySubtitle}>
                 When your cashier or store manager finishes a shift and logs closing cash in the POS drawer, daily tallies will appear here.
@@ -105,11 +108,11 @@ export default function GallaPage() {
                         {s.date}
                       </td>
                       <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>₹{s.openingCash.toFixed(2)}</td>
-                      <td style={{ ...styles.td, color: '#10B981', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                      <td style={{ ...styles.td, color: '#28C76F', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                         +₹{s.systemSalesCash.toFixed(2)}
                       </td>
                       <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>₹{s.systemSalesUPI.toFixed(2)}</td>
-                      <td style={{ ...styles.td, color: '#10B981', fontVariantNumeric: 'tabular-nums' }}>
+                      <td style={{ ...styles.td, color: '#28C76F', fontVariantNumeric: 'tabular-nums' }}>
                         +₹{s.systemUdharRepaid.toFixed(2)}
                       </td>
                       <td style={{ ...styles.td, color: '#FF3B30', fontVariantNumeric: 'tabular-nums' }}>
@@ -140,7 +143,7 @@ export default function GallaPage() {
                           }}
                         >
                           {(s.cashDifference ?? 0) === 0
-                            ? '✓ Exact Match'
+                            ? 'Exact Match'
                             : (s.cashDifference ?? 0) > 0
                             ? `+₹${(s.cashDifference ?? 0).toFixed(2)}`
                             : `-₹${Math.abs(s.cashDifference ?? 0).toFixed(2)}`}
@@ -187,8 +190,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '11px',
     fontWeight: 700,
     letterSpacing: '0.04em',
-    color: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    color: '#28C76F',
+    backgroundColor: 'rgba(40, 199, 111, 0.12)',
     padding: '4px 10px',
     borderRadius: '9999px',
   },
@@ -229,8 +232,8 @@ const styles: Record<string, React.CSSProperties> = {
     height: '32px',
     borderWidth: 3,
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderTopColor: '#10B981',
+    borderColor: 'rgba(115, 103, 240, 0.15)',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 14px',
     animation: 'spin 0.8s linear infinite',

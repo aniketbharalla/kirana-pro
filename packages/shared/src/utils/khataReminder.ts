@@ -14,3 +14,5 @@ export function formatWhatsAppUdharReminder(
     `धन्यवाद!\n*${storeName}*`
   );
 }
+
+export const formatWhatsAppKhataReminder = formatWhatsAppUdharReminder;

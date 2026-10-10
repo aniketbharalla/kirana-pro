@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import {
   subscribeStoreProducts,
   subscribeStoreCustomers,
@@ -11,9 +12,35 @@ import {
   seedStarterProducts,
 } from '../../lib/storeService';
 import { Product, CustomerKhata, Invoice, InvoiceItem, PaymentMode, PRODUCT_CATEGORIES } from '@kirana-pro/shared';
+import {
+  Barcode,
+  Search,
+  Scale,
+  Package,
+  RefreshCw,
+  Sparkles,
+  User,
+  Users,
+  X,
+  ShoppingCart,
+  Minus,
+  Plus,
+  Trash2,
+  Zap,
+  Banknote,
+  QrCode,
+  BookOpen,
+  AlertCircle,
+  Check,
+  CheckCircle2,
+  Printer,
+  Receipt,
+  ArrowRight,
+} from 'lucide-react';
 
 export default function PosBillingPage() {
   const { store, profile, storeId, activeStaff, activeShift } = useAuth();
+  const toast = useToast();
 
   // Products & Customers
   const [products, setProducts] = useState<Product[]>([]);
@@ -134,7 +161,7 @@ export default function PosBillingPage() {
       addItemToCart(match, 1);
       setBarcodeInput('');
     } else {
-      alert(`No product found with barcode: ${code}. You can add it from catalog or type name to search.`);
+      toast.error('Product Not Found', `No item matches "${code}". Add it from catalog or search by name.`);
     }
   };
 
@@ -292,17 +319,18 @@ export default function PosBillingPage() {
     const g = parseFloat(tarajuWeightGrams) || 0;
     const kg = parseFloat((g / 1000).toFixed(3));
     if (kg <= 0) {
-      alert('Please enter a valid weight');
+      toast.error('Invalid Weight', 'Please place the item on scale or enter a valid weight in kg.');
       return;
     }
     addItemToCart(selectedLooseProduct, kg);
+    toast.success('Added to Bill', `${selectedLooseProduct.name} (${kg} kg) added to cart.`);
     setShowTarajuModal(false);
   };
 
   // 10. Open Checkout Modal
   const handleOpenCheckout = () => {
     if (cartItems.length === 0) {
-      alert('Cart is empty. Add products before checkout.');
+      toast.error('Cart is Empty', 'Please add products to the bill before proceeding to checkout.');
       return;
     }
     setCashTendered(grandTotal.toString());
@@ -312,7 +340,7 @@ export default function PosBillingPage() {
   // 11. Complete Sale Execution
   const handleExecuteCheckout = async () => {
     if (!storeId) {
-      alert('Store not found. Please log in.');
+      toast.error('Store Not Found', 'Active store session missing. Please log in.');
       return;
     }
     setProcessingSale(true);
@@ -351,13 +379,18 @@ export default function PosBillingPage() {
       setShowCheckoutModal(false);
       setShowReceiptModal(true);
 
+      toast.success(
+        'Bill Generated Successfully',
+        `Invoice #${invoice.invoiceNumber} recorded for ₹${invoice.grandTotal.toFixed(2)}.`
+      );
+
       // Reset cart for next customer
       setCartItems([]);
       setBillDiscount('0');
       setSelectedCustomer({ name: 'Walk-in Customer (नकद)' });
     } catch (err: any) {
       console.error('Checkout error:', err);
-      alert(`Sale failed: ${err.message}`);
+      toast.error('Sale Failed', err.message || 'Could not complete transaction.');
     } finally {
       setProcessingSale(false);
     }
@@ -369,11 +402,13 @@ export default function PosBillingPage() {
   const upiQrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiIntentUri)}`;
 
   return (
-    <div style={styles.container}>
+    <div className="pos-container" style={styles.container}>
       {/* Top POS Header Toolbar */}
       <div style={styles.topToolbar}>
         <div style={styles.brandGroup}>
-          <span style={styles.posBadge}>⚡ POS QUICK BILLING</span>
+          <span style={styles.posBadge}>
+            <Zap size={13} style={{ marginRight: 4 }} /> POS QUICK BILLING
+          </span>
           <h1 style={styles.storeName}>{store?.name || 'Kirana Pro Counter'}</h1>
           <span style={styles.counterBadge}>
             Counter {activeShift?.counterNumber || 1} • {activeStaff ? `Cashier: ${activeStaff.name}` : (profile?.displayName || 'Owner')}
@@ -386,13 +421,13 @@ export default function PosBillingPage() {
           <span style={styles.shortcutPill}><strong>F4</strong> Pay Bill</span>
           <span style={styles.shortcutPill}><strong>ESC</strong> Close</span>
           <Link href="/bills" style={styles.historyLink}>
-            🧾 Sales History
+            <Receipt size={14} style={{ marginRight: 6 }} /> Sales History
           </Link>
         </div>
       </div>
 
       {/* Main POS Split Layout */}
-      <div style={styles.mainGrid}>
+      <div className="pos-main-grid" style={styles.mainGrid}>
         {/* ============================================================== */}
         {/* LEFT PANEL: PRODUCT CATALOG & BARCODE SCANNER */}
         {/* ============================================================== */}
@@ -400,7 +435,7 @@ export default function PosBillingPage() {
           {/* Barcode & Search Bar */}
           <div style={styles.searchHeader}>
             <form onSubmit={handleBarcodeSubmit} style={styles.barcodeForm}>
-              <span style={styles.barcodeIcon}>📷</span>
+              <Barcode size={18} color="#7367F0" />
               <input
                 ref={barcodeInputRef}
                 style={styles.barcodeInput}
@@ -410,13 +445,13 @@ export default function PosBillingPage() {
                 onChange={(e) => setBarcodeInput(e.target.value)}
               />
               <button type="submit" style={styles.scanSubmitBtn}>
-                Add ➔
+                Add <ArrowRight size={14} style={{ marginLeft: 4 }} />
               </button>
             </form>
 
             <div style={styles.searchRow}>
               <div style={styles.textSearchWrapper}>
-                <span style={styles.searchIcon}>🔍</span>
+                <Search size={16} color="#6F6B7D" />
                 <input
                   style={styles.textSearchInput}
                   type="text"
@@ -432,7 +467,7 @@ export default function PosBillingPage() {
                 onClick={() => handleOpenTaraju()}
                 title="Open Smart Taraju Scale for Loose Dal, Rice, Sugar, Spices"
               >
-                ⚖️ Loose / तराजू
+                <Scale size={14} style={{ marginRight: 6 }} /> Loose / तराजू
               </button>
             </div>
           </div>
@@ -471,7 +506,9 @@ export default function PosBillingPage() {
               </div>
             ) : filteredProducts.length === 0 ? (
               <div style={styles.emptyCatalogCard}>
-                <div style={styles.emptyIcon}>📦</div>
+                <div style={styles.emptyIcon}>
+                  <Package size={44} color="#A8AAAE" />
+                </div>
                 <h3>No Products Found</h3>
                 <p>Add products to your catalog or click below to populate the standard Indian Kirana staples.</p>
                 <div style={styles.catalogRecoveryButtons}>
@@ -484,7 +521,7 @@ export default function PosBillingPage() {
                       });
                     }}
                   >
-                    🔄 Discover Existing Products
+                    <RefreshCw size={14} style={{ marginRight: 6 }} /> Discover Existing Products
                   </button>
                   <button
                     style={styles.seedBtn}
@@ -495,7 +532,7 @@ export default function PosBillingPage() {
                       });
                     }}
                   >
-                    ✨ Load 12 Indian Kirana Staples
+                    <Sparkles size={14} style={{ marginRight: 6 }} /> Load 12 Indian Kirana Staples
                   </button>
                 </div>
               </div>
@@ -522,7 +559,11 @@ export default function PosBillingPage() {
                     >
                       <div style={styles.cardTopRow}>
                         <span style={styles.cardCategory}>{p.category}</span>
-                        {p.isLoose && <span style={styles.cardLoosePill}>⚖️ Loose</span>}
+                        {p.isLoose && (
+                          <span style={styles.cardLoosePill}>
+                            <Scale size={11} style={{ marginRight: 3 }} /> Loose
+                          </span>
+                        )}
                         {p.barcode && <span style={styles.cardBarcode}>#{p.barcode.slice(-4)}</span>}
                       </div>
 
@@ -564,7 +605,9 @@ export default function PosBillingPage() {
           {/* Customer Selection Banner */}
           <div style={styles.customerBar}>
             <div style={styles.customerSelector}>
-              <span style={styles.customerIcon}>👤</span>
+              <div style={styles.customerIconWrapper}>
+                <User size={16} color="#7367F0" />
+              </div>
               <div style={styles.customerInfo}>
                 <span style={styles.customerTitle}>{selectedCustomer.name}</span>
                 {selectedCustomer.phoneNumber && <span style={styles.customerPhone}>+91 {selectedCustomer.phoneNumber}</span>}
@@ -577,7 +620,15 @@ export default function PosBillingPage() {
                 style={styles.changeCustBtn}
                 onClick={() => setShowCustomerDropdown(!showCustomerDropdown)}
               >
-                {showCustomerDropdown ? '✕ Close' : '📒 Select Customer'}
+                {showCustomerDropdown ? (
+                  <>
+                    <X size={14} style={{ marginRight: 4 }} /> Close
+                  </>
+                ) : (
+                  <>
+                    <Users size={14} style={{ marginRight: 6 }} /> Select Customer
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -626,7 +677,7 @@ export default function PosBillingPage() {
                       <span
                         style={{
                           fontWeight: 700,
-                          color: (c.currentBalance || 0) > 0 ? '#DC2626' : '#059669',
+                          color: (c.currentBalance || 0) > 0 ? '#EA5455' : '#28C76F',
                         }}
                       >
                         ₹{c.currentBalance || 0} Udhar
@@ -650,7 +701,9 @@ export default function PosBillingPage() {
           <div style={styles.cartItemsScroll}>
             {cartItems.length === 0 ? (
               <div style={styles.emptyCartBox}>
-                <span style={styles.emptyCartIcon}>🛒</span>
+                <div style={styles.emptyCartIcon}>
+                  <ShoppingCart size={40} color="#A8AAAE" />
+                </div>
                 <h4 style={styles.emptyCartHeading}>Cart is Empty</h4>
                 <p style={styles.emptyCartSub}>
                   Scan barcodes with a reader gun, press <strong>F2</strong>, or click items on the left to add to bill.
@@ -680,7 +733,7 @@ export default function PosBillingPage() {
                       style={styles.qtyBtn}
                       onClick={() => updateItemQty(idx, item.isLoose ? parseFloat((item.quantity - 0.25).toFixed(3)) : item.quantity - 1)}
                     >
-                      −
+                      <Minus size={11} strokeWidth={2.5} />
                     </button>
                     <input
                       style={styles.qtyInput}
@@ -694,12 +747,12 @@ export default function PosBillingPage() {
                       style={styles.qtyBtn}
                       onClick={() => updateItemQty(idx, item.isLoose ? parseFloat((item.quantity + 0.25).toFixed(3)) : item.quantity + 1)}
                     >
-                      +
+                      <Plus size={11} strokeWidth={2.5} />
                     </button>
                   </div>
 
                   {/* Line Total */}
-                  <div style={{ flex: 1.5, textAlign: 'right', fontWeight: 700, color: '#0F172A' }}>
+                  <div style={{ flex: 1.5, textAlign: 'right', fontWeight: 700, color: '#2F2B3D' }}>
                     ₹{item.totalAmount.toFixed(2)}
                   </div>
 
@@ -711,7 +764,7 @@ export default function PosBillingPage() {
                       onClick={() => removeCartItem(idx)}
                       title="Remove item"
                     >
-                      ✕
+                      <Trash2 size={15} color="#EA5455" />
                     </button>
                   </div>
                 </div>
@@ -766,7 +819,7 @@ export default function PosBillingPage() {
                 onClick={handleClearCart}
                 disabled={cartItems.length === 0}
               >
-                🗑️ Clear
+                <Trash2 size={14} style={{ marginRight: 4 }} /> Clear
               </button>
               <button
                 type="button"
@@ -777,7 +830,7 @@ export default function PosBillingPage() {
                 disabled={cartItems.length === 0}
                 onClick={handleOpenCheckout}
               >
-                ⚡ PAY & BILL (F4) ➔
+                <Zap size={16} style={{ marginRight: 6 }} /> PAY & BILL (F4)
               </button>
             </div>
           </div>
@@ -796,7 +849,7 @@ export default function PosBillingPage() {
                 <h2 style={styles.modalTitle}>Complete POS Sale</h2>
               </div>
               <button style={styles.closeBtn} onClick={() => setShowCheckoutModal(false)}>
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -817,7 +870,7 @@ export default function PosBillingPage() {
                 }}
                 onClick={() => setPaymentMode('cash')}
               >
-                💵 Cash (नकद)
+                <Banknote size={15} style={{ marginRight: 6 }} /> Cash (नकद)
               </button>
               <button
                 type="button"
@@ -827,7 +880,7 @@ export default function PosBillingPage() {
                 }}
                 onClick={() => setPaymentMode('upi')}
               >
-                📱 UPI QR (PhonePe/GPay)
+                <QrCode size={15} style={{ marginRight: 6 }} /> UPI QR
               </button>
               <button
                 type="button"
@@ -837,7 +890,7 @@ export default function PosBillingPage() {
                 }}
                 onClick={() => setPaymentMode('credit')}
               >
-                📒 Khata Udhar (उधार)
+                <BookOpen size={15} style={{ marginRight: 6 }} /> Khata Udhar
               </button>
             </div>
 
@@ -907,7 +960,7 @@ export default function PosBillingPage() {
             {paymentMode === 'credit' && (
               <div style={styles.payBody}>
                 <div style={styles.khataWarningBox}>
-                  <span style={styles.khataWarningIcon}>📒</span>
+                  <AlertCircle size={22} color="#EA5455" style={{ flexShrink: 0 }} />
                   <div>
                     <h4 style={styles.khataHeading}>Record Udhar in Customer Khata</h4>
                     <p style={styles.khataText}>
@@ -925,7 +978,11 @@ export default function PosBillingPage() {
               onClick={handleExecuteCheckout}
               disabled={processingSale}
             >
-              {processingSale ? 'Processing Sale...' : `✓ Complete Sale & Print Bill (₹${grandTotal})`}
+              {processingSale ? 'Processing Sale...' : (
+                <>
+                  <Check size={18} style={{ marginRight: 6 }} /> Complete Sale & Print Bill (₹{grandTotal})
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -939,11 +996,13 @@ export default function PosBillingPage() {
           <div style={styles.receiptModalCard}>
             <div style={styles.modalHeader}>
               <div>
-                <span style={styles.modalSub}>SALE COMPLETED ✓</span>
+                <span style={styles.modalSub}>
+                  <CheckCircle2 size={13} style={{ marginRight: 4 }} /> SALE COMPLETED
+                </span>
                 <h3 style={styles.modalTitle}>Invoice #{completedInvoice.invoiceNumber}</h3>
               </div>
               <button style={styles.closeBtn} onClick={() => setShowReceiptModal(false)}>
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -1028,7 +1087,7 @@ export default function PosBillingPage() {
                 style={styles.printThermalBtn}
                 onClick={() => window.print()}
               >
-                🖨️ Print 58mm Thermal Receipt
+                <Printer size={16} style={{ marginRight: 6 }} /> Print 58mm Thermal Receipt
               </button>
               <button
                 type="button"
@@ -1038,7 +1097,7 @@ export default function PosBillingPage() {
                   barcodeInputRef.current?.focus();
                 }}
               >
-                ➕ New Bill (F2)
+                <Plus size={16} style={{ marginRight: 6 }} /> New Bill (F2)
               </button>
             </div>
           </div>
@@ -1054,10 +1113,13 @@ export default function PosBillingPage() {
             <div style={styles.modalHeader}>
               <div>
                 <span style={styles.modalSub}>SMART SCALE CALCULATOR</span>
-                <h3 style={styles.modalTitle}>⚖️ Taraju Loose Item Calculator</h3>
+                <h3 style={styles.modalTitle}>
+                  <Scale size={20} color="#7367F0" style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                  Taraju Loose Item Calculator
+                </h3>
               </div>
               <button style={styles.closeBtn} onClick={() => setShowTarajuModal(false)}>
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -1128,7 +1190,7 @@ export default function PosBillingPage() {
               <span>Calculated Quantity:</span>
               <strong>{(parseFloat(tarajuWeightGrams) / 1000).toFixed(3)} kg</strong>
               <span>Total Price:</span>
-              <strong style={{ color: '#059669', fontSize: 18 }}>₹{tarajuRupees}</strong>
+              <strong style={{ color: '#28C76F', fontSize: 18 }}>₹{tarajuRupees}</strong>
             </div>
 
             <button
@@ -1136,7 +1198,7 @@ export default function PosBillingPage() {
               style={styles.finalizeBtn}
               onClick={handleAddTarajuToCart}
             >
-              ➕ Add to Bill ({(parseFloat(tarajuWeightGrams) / 1000).toFixed(3)} kg = ₹{tarajuRupees})
+              <Plus size={16} style={{ marginRight: 6 }} /> Add to Bill ({(parseFloat(tarajuWeightGrams) / 1000).toFixed(3)} kg = ₹{tarajuRupees})
             </button>
           </div>
         </div>
@@ -1145,12 +1207,14 @@ export default function PosBillingPage() {
   );
 }
 
+
 const styles: Record<string, React.CSSProperties> = {
   container: {
     display: 'flex',
     flexDirection: 'column',
     height: 'calc(100vh - 84px)',
     gap: '12px',
+    fontFamily: 'var(--font-body)',
   },
   topToolbar: {
     display: 'flex',
@@ -1159,35 +1223,41 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: '#FFFFFF',
     padding: '10px 18px',
     borderRadius: '16px',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.02)',
+    border: '1px solid #DBDADE',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.06)',
+    flexWrap: 'wrap',
+    gap: '10px',
   },
   brandGroup: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    flexWrap: 'wrap',
   },
   posBadge: {
-    backgroundColor: '#ECFDF5',
-    color: '#065F46',
-    border: '1px solid #A7F3D0',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
+    border: '1px solid rgba(115, 103, 240, 0.3)',
     fontSize: '11px',
     fontWeight: 800,
     padding: '3px 10px',
     borderRadius: '999px',
     letterSpacing: '0.04em',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   storeName: {
     fontSize: '18px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#2F2B3D',
     margin: 0,
     letterSpacing: '-0.02em',
   },
   counterBadge: {
     fontSize: '12px',
-    color: '#64748B',
-    backgroundColor: '#F1F5F9',
+    color: '#6F6B7D',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
     padding: '3px 10px',
     borderRadius: '8px',
     fontWeight: 600,
@@ -1196,23 +1266,26 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
+    flexWrap: 'wrap',
   },
   shortcutPill: {
     fontSize: '11px',
-    color: '#475569',
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #E2E8F0',
-    padding: '3px 8px',
+    color: '#6F6B7D',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    padding: '4px 8px',
     borderRadius: '6px',
   },
   historyLink: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#4F46E5',
+    color: '#7367F0',
     textDecoration: 'none',
-    backgroundColor: '#EEF2FF',
-    padding: '4px 10px',
+    backgroundColor: '#EDEBFD',
+    padding: '5px 12px',
     borderRadius: '8px',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   mainGrid: {
     display: 'grid',
@@ -1226,15 +1299,15 @@ const styles: Record<string, React.CSSProperties> = {
   catalogPanel: {
     backgroundColor: '#FFFFFF',
     borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid #DBDADE',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.06)',
   },
   searchHeader: {
     padding: '14px 16px 10px',
-    borderBottom: '1px solid #F1F5F9',
+    borderBottom: '1px solid #DBDADE',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
@@ -1243,25 +1316,22 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    backgroundColor: '#F8FAFC',
-    border: '2px solid #4F46E5',
+    backgroundColor: '#F8F7FA',
+    border: '2px solid #7367F0',
     borderRadius: '12px',
     padding: '4px 12px',
-  },
-  barcodeIcon: {
-    fontSize: '18px',
   },
   barcodeInput: {
     flex: 1,
     border: 'none',
     backgroundColor: 'transparent',
-    fontSize: '15px',
+    fontSize: '14px',
     fontWeight: 600,
-    color: '#0F172A',
+    color: '#2F2B3D',
     outline: 'none',
   },
   scanSubmitBtn: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
     padding: '6px 14px',
@@ -1269,6 +1339,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    boxShadow: '0 2px 8px rgba(115, 103, 240, 0.3)',
   },
   searchRow: {
     display: 'flex',
@@ -1278,14 +1351,11 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
     borderRadius: '10px',
     padding: '6px 12px',
     gap: '8px',
-  },
-  searchIcon: {
-    fontSize: '14px',
-    color: '#94A3B8',
   },
   textSearchInput: {
     border: 'none',
@@ -1293,18 +1363,20 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     width: '100%',
     outline: 'none',
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   tarajuQuickBtn: {
-    backgroundColor: '#FEF3C7',
-    border: '1px solid #F59E0B',
-    color: '#B45309',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid #7367F0',
+    color: '#7367F0',
     fontWeight: 700,
     fontSize: '12px',
     padding: '6px 12px',
     borderRadius: '10px',
     cursor: 'pointer',
     whiteSpace: 'nowrap',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
 
   categoryTabs: {
@@ -1312,12 +1384,14 @@ const styles: Record<string, React.CSSProperties> = {
     overflowX: 'auto',
     padding: '8px 16px',
     gap: '6px',
-    borderBottom: '1px solid #F1F5F9',
+    borderBottom: '1px solid #DBDADE',
   },
   catTab: {
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #E2E8F0',
-    color: '#64748B',
+    backgroundColor: '#F8F7FA',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#DBDADE',
+    color: '#6F6B7D',
     fontSize: '12px',
     fontWeight: 600,
     padding: '5px 12px',
@@ -1326,9 +1400,10 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'nowrap',
   },
   catTabActive: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
-    borderColor: '#0F172A',
+    borderColor: '#7367F0',
+    boxShadow: '0 2px 8px rgba(115, 103, 240, 0.25)',
   },
 
   productsScrollArea: {
@@ -1343,18 +1418,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
   productCard: {
     backgroundColor: '#FFFFFF',
-    border: '1.5px solid #E2E8F0',
+    border: '1px solid #DBDADE',
     borderRadius: '14px',
     padding: '12px',
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     transition: 'all 0.15s ease',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)',
+    boxShadow: '0 2px 4px rgba(47, 43, 61, 0.04)',
   },
   productCardOut: {
     opacity: 0.6,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   cardTopRow: {
     display: 'flex',
@@ -1365,32 +1440,34 @@ const styles: Record<string, React.CSSProperties> = {
   cardCategory: {
     fontSize: '10px',
     fontWeight: 700,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     textTransform: 'uppercase',
   },
   cardLoosePill: {
     fontSize: '10px',
-    backgroundColor: '#FEF3C7',
-    color: '#B45309',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
     padding: '2px 6px',
     borderRadius: '4px',
     fontWeight: 700,
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   cardBarcode: {
     fontSize: '10px',
-    color: '#94A3B8',
+    color: '#A8AAAE',
     fontFamily: 'monospace',
   },
   cardName: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#2F2B3D',
     margin: '0 0 2px 0',
     lineHeight: 1.3,
   },
   cardHindi: {
     fontSize: '11px',
-    color: '#64748B',
+    color: '#6F6B7D',
     marginBottom: '8px',
   },
   cardBottomRow: {
@@ -1399,7 +1476,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'flex-end',
     marginTop: 'auto',
     paddingTop: '8px',
-    borderTop: '1px dashed #F1F5F9',
+    borderTop: '1px dashed #DBDADE',
   },
   priceContainer: {
     display: 'flex',
@@ -1408,17 +1485,17 @@ const styles: Record<string, React.CSSProperties> = {
   priceSymbol: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   priceValue: {
     fontSize: '17px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#2F2B3D',
     letterSpacing: '-0.5px',
   },
   priceUnit: {
     fontSize: '11px',
-    color: '#64748B',
+    color: '#6F6B7D',
     marginLeft: '2px',
   },
   stockPill: {
@@ -1428,43 +1505,50 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '6px',
   },
   stockOk: {
-    backgroundColor: '#ECFDF5',
-    color: '#065F46',
+    backgroundColor: '#DDF6E8',
+    color: '#28C76F',
   },
   stockLow: {
-    backgroundColor: '#FFFBEB',
-    color: '#B45309',
+    backgroundColor: '#FFF1E3',
+    color: '#FF9F43',
   },
   stockOut: {
-    backgroundColor: '#FEF2F2',
-    color: '#DC2626',
+    backgroundColor: '#FCE4E4',
+    color: '#EA5455',
   },
 
   // Right Cart Panel
   cartPanel: {
     backgroundColor: '#FFFFFF',
     borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid #DBDADE',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.06)',
   },
   customerBar: {
     padding: '12px 16px',
-    borderBottom: '1px solid #F1F5F9',
+    borderBottom: '1px solid #DBDADE',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   customerSelector: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
   },
-  customerIcon: {
-    fontSize: '18px',
+  customerIconWrapper: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
+    backgroundColor: '#EDEBFD',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   customerInfo: {
     display: 'flex',
@@ -1473,38 +1557,42 @@ const styles: Record<string, React.CSSProperties> = {
   customerTitle: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   customerPhone: {
     fontSize: '11px',
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   customerActions: {},
   changeCustBtn: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
-    color: '#334155',
+    border: '1px solid #DBDADE',
+    color: '#2F2B3D',
     fontSize: '11px',
     fontWeight: 700,
-    padding: '4px 10px',
+    padding: '5px 10px',
     borderRadius: '8px',
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   customerDropdownCard: {
     padding: '12px',
     backgroundColor: '#FFFFFF',
-    borderBottom: '2px solid #4F46E5',
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
+    borderBottom: '2px solid #7367F0',
+    boxShadow: '0 8px 16px rgba(47, 43, 61, 0.08)',
   },
   custSearchInput: {
     width: '100%',
     padding: '8px 12px',
-    border: '1px solid #CBD5E1',
+    border: '1px solid #DBDADE',
     borderRadius: '8px',
     fontSize: '13px',
     outline: 'none',
     boxSizing: 'border-box',
     marginBottom: '8px',
+    backgroundColor: '#F8F7FA',
+    color: '#2F2B3D',
   },
   custList: {
     maxHeight: '160px',
@@ -1521,25 +1609,26 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
     fontSize: '12px',
-    border: '1px solid #F1F5F9',
+    border: '1px solid #DBDADE',
+    backgroundColor: '#FFFFFF',
   },
   custRowName: {
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   custRowPhone: {
     fontSize: '11px',
-    color: '#64748B',
+    color: '#6F6B7D',
   },
 
   cartTableHeader: {
     display: 'flex',
     padding: '8px 16px',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
     fontSize: '11px',
     fontWeight: 700,
-    color: '#64748B',
-    borderBottom: '1px solid #E2E8F0',
+    color: '#6F6B7D',
+    borderBottom: '1px solid #DBDADE',
     letterSpacing: '0.04em',
   },
   cartItemsScroll: {
@@ -1551,30 +1640,30 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     padding: '8px 6px',
-    borderBottom: '1px solid #F1F5F9',
+    borderBottom: '1px solid #DBDADE',
     gap: '6px',
     fontSize: '13px',
   },
   itemNameText: {
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#2F2B3D',
     fontSize: '13px',
   },
   itemHindiText: {
     fontSize: '11px',
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   itemTaxMeta: {
     fontSize: '10px',
-    color: '#94A3B8',
+    color: '#A8AAAE',
   },
   qtyBtn: {
     width: '24px',
     height: '24px',
     borderRadius: '6px',
-    border: '1px solid #CBD5E1',
-    backgroundColor: '#F8FAFC',
-    fontWeight: 700,
+    border: '1px solid #DBDADE',
+    backgroundColor: '#F8F7FA',
+    color: '#2F2B3D',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -1583,33 +1672,37 @@ const styles: Record<string, React.CSSProperties> = {
   qtyInput: {
     width: '38px',
     textAlign: 'center',
-    border: '1px solid #E2E8F0',
+    border: '1px solid #DBDADE',
     borderRadius: '6px',
     padding: '2px 0',
     fontSize: '13px',
     fontWeight: 700,
+    color: '#2F2B3D',
+    backgroundColor: '#FFFFFF',
   },
   delItemBtn: {
     backgroundColor: 'transparent',
     border: 'none',
-    color: '#94A3B8',
     cursor: 'pointer',
-    fontSize: '14px',
     padding: '2px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyCartBox: {
     padding: '48px 24px',
     textAlign: 'center',
-    color: '#94A3B8',
+    color: '#A8AAAE',
   },
   emptyCartIcon: {
-    fontSize: '44px',
     marginBottom: '8px',
+    display: 'flex',
+    justifyContent: 'center',
   },
   emptyCartHeading: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#334155',
+    color: '#2F2B3D',
     margin: '0 0 6px',
   },
   emptyCartSub: {
@@ -1617,11 +1710,12 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '280px',
     margin: '0 auto',
     lineHeight: 1.5,
+    color: '#6F6B7D',
   },
 
   cartSummary: {
-    backgroundColor: '#F8FAFC',
-    borderTop: '1px solid #E2E8F0',
+    backgroundColor: '#F8F7FA',
+    borderTop: '1px solid #DBDADE',
     padding: '14px 16px',
     display: 'flex',
     flexDirection: 'column',
@@ -1631,7 +1725,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     fontSize: '12px',
-    color: '#64748B',
+    color: '#6F6B7D',
     fontWeight: 600,
   },
   discountInput: {
@@ -1639,12 +1733,14 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'right',
     padding: '2px 6px',
     borderRadius: '4px',
-    border: '1px solid #CBD5E1',
+    border: '1px solid #DBDADE',
     fontSize: '12px',
     fontWeight: 700,
+    color: '#2F2B3D',
+    backgroundColor: '#FFFFFF',
   },
   grandTotalHero: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#2F2B3D',
     color: '#FFFFFF',
     borderRadius: '14px',
     padding: '12px 16px',
@@ -1657,16 +1753,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '11px',
     fontWeight: 800,
     letterSpacing: '0.05em',
-    color: '#94A3B8',
+    color: '#A8AAAE',
   },
   grandTotalHindi: {
     fontSize: '12px',
-    color: '#CBD5E1',
+    color: '#DBDADE',
   },
   grandTotalAmount: {
     fontSize: '28px',
     fontWeight: 900,
-    color: '#10B981',
+    color: '#28C76F',
     letterSpacing: '-1px',
   },
   cartActionButtons: {
@@ -1676,17 +1772,19 @@ const styles: Record<string, React.CSSProperties> = {
   },
   clearCartBtn: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
-    color: '#64748B',
+    border: '1px solid #DBDADE',
+    color: '#6F6B7D',
     fontWeight: 700,
     fontSize: '13px',
     padding: '12px 16px',
     borderRadius: '12px',
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   checkoutBtn: {
     flex: 1,
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
     fontWeight: 800,
@@ -1694,14 +1792,17 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '12px 20px',
     borderRadius: '12px',
     cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Modals
   modalOverlay: {
     position: 'fixed',
     inset: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    backgroundColor: 'rgba(47, 43, 61, 0.55)',
     backdropFilter: 'blur(6px)',
     display: 'flex',
     alignItems: 'center',
@@ -1711,27 +1812,30 @@ const styles: Record<string, React.CSSProperties> = {
   },
   checkoutModalCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '24px',
+    borderRadius: '20px',
     width: '100%',
     maxWidth: '520px',
-    padding: '26px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    padding: '24px',
+    boxShadow: '0 16px 36px rgba(47, 43, 61, 0.16)',
+    border: '1px solid #DBDADE',
   },
   receiptModalCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '24px',
+    borderRadius: '20px',
     width: '100%',
     maxWidth: '440px',
     padding: '24px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    boxShadow: '0 16px 36px rgba(47, 43, 61, 0.16)',
+    border: '1px solid #DBDADE',
   },
   tarajuModalCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '24px',
+    borderRadius: '20px',
     width: '100%',
     maxWidth: '480px',
     padding: '24px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    boxShadow: '0 16px 36px rgba(47, 43, 61, 0.16)',
+    border: '1px solid #DBDADE',
   },
   modalHeader: {
     display: 'flex',
@@ -1740,52 +1844,55 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '16px',
   },
   modalSub: {
-    fontSize: '10px',
+    fontSize: '11px',
     fontWeight: 800,
-    color: '#4F46E5',
+    color: '#7367F0',
     letterSpacing: '0.05em',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: '20px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#2F2B3D',
     margin: '2px 0 0',
   },
   closeBtn: {
-    backgroundColor: '#F1F5F9',
-    border: 'none',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
     width: '32px',
     height: '32px',
     borderRadius: '50%',
-    fontSize: '14px',
-    fontWeight: 700,
     cursor: 'pointer',
-    color: '#64748B',
+    color: '#6F6B7D',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   checkoutAmountBox: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
     borderRadius: '16px',
     padding: '16px',
     textAlign: 'center',
-    border: '1.5px solid #E2E8F0',
+    border: '1px solid #DBDADE',
     marginBottom: '16px',
   },
   checkoutAmountLabel: {
     fontSize: '11px',
     fontWeight: 800,
-    color: '#64748B',
+    color: '#6F6B7D',
     letterSpacing: '0.04em',
   },
   checkoutAmountBig: {
     fontSize: '34px',
     fontWeight: 900,
-    color: '#0F172A',
+    color: '#2F2B3D',
     margin: '4px 0',
   },
   checkoutCustomerName: {
     fontSize: '12px',
-    color: '#4F46E5',
+    color: '#7367F0',
     fontWeight: 700,
   },
 
@@ -1796,20 +1903,25 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '16px',
   },
   payTab: {
-    backgroundColor: '#F1F5F9',
-    border: '1.5px solid transparent',
+    backgroundColor: '#F8F7FA',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#DBDADE',
     padding: '10px 8px',
     borderRadius: '12px',
     fontSize: '12px',
     fontWeight: 700,
-    color: '#475569',
+    color: '#6F6B7D',
     cursor: 'pointer',
     textAlign: 'center',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   payTabActive: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
-    color: '#065F46',
+    backgroundColor: '#EDEBFD',
+    borderColor: '#7367F0',
+    color: '#7367F0',
   },
 
   payBody: {
@@ -1825,20 +1937,20 @@ const styles: Record<string, React.CSSProperties> = {
   inputLabel: {
     fontSize: '11px',
     fontWeight: 800,
-    color: '#475569',
+    color: '#6F6B7D',
   },
   currencyInputRow: {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    border: '2px solid #CBD5E1',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
     borderRadius: '12px',
     padding: '6px 14px',
   },
   currencySym: {
     fontSize: '20px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#2F2B3D',
     marginRight: '6px',
   },
   cashInput: {
@@ -1846,7 +1958,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: 'transparent',
     fontSize: '22px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#2F2B3D',
     width: '100%',
     outline: 'none',
   },
@@ -1856,9 +1968,9 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   qcBtn: {
-    backgroundColor: '#F1F5F9',
-    border: '1px solid #CBD5E1',
-    color: '#334155',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    color: '#2F2B3D',
     fontWeight: 700,
     fontSize: '12px',
     padding: '6px 10px',
@@ -1866,8 +1978,8 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   changeDueBox: {
-    backgroundColor: '#EFF6FF',
-    border: '1px solid #BFDBFE',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.3)',
     borderRadius: '12px',
     padding: '12px 16px',
     display: 'flex',
@@ -1877,21 +1989,21 @@ const styles: Record<string, React.CSSProperties> = {
   changeDueLabel: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#1E40AF',
+    color: '#7367F0',
   },
   changeDueValue: {
     fontSize: '20px',
     fontWeight: 900,
-    color: '#1D4ED8',
+    color: '#5E50EE',
   },
   upiQrBox: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     padding: '12px',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
     borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid #DBDADE',
   },
   qrImage: {
     width: '180px',
@@ -1899,7 +2011,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '12px',
     backgroundColor: '#FFFFFF',
     padding: '6px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+    boxShadow: '0 4px 12px rgba(47, 43, 61, 0.05)',
   },
   upiInstructions: {
     marginTop: '10px',
@@ -1907,46 +2019,43 @@ const styles: Record<string, React.CSSProperties> = {
   upiStoreText: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#475569',
+    color: '#6F6B7D',
   },
   upiAmountBadge: {
     fontSize: '18px',
     fontWeight: 900,
-    color: '#059669',
+    color: '#28C76F',
     margin: '2px 0',
   },
   upiVpaText: {
     fontSize: '11px',
-    color: '#94A3B8',
+    color: '#A8AAAE',
     fontFamily: 'monospace',
   },
   khataWarningBox: {
     display: 'flex',
     gap: '12px',
-    backgroundColor: '#FEF2F2',
-    border: '1px solid #FECACA',
+    backgroundColor: '#FCE4E4',
+    border: '1px solid rgba(234, 84, 85, 0.25)',
     borderRadius: '14px',
     padding: '14px',
-  },
-  khataWarningIcon: {
-    fontSize: '24px',
   },
   khataHeading: {
     margin: '0 0 4px',
     fontSize: '14px',
     fontWeight: 700,
-    color: '#991B1B',
+    color: '#EA5455',
   },
   khataText: {
     margin: 0,
     fontSize: '12px',
-    color: '#B91C1C',
+    color: '#EA5455',
     lineHeight: 1.4,
   },
 
   finalizeBtn: {
     width: '100%',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
     padding: '14px',
@@ -1954,18 +2063,21 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 800,
     fontSize: '16px',
     cursor: 'pointer',
-    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Thermal Receipt
   thermalReceipt: {
     backgroundColor: '#FFFDF9',
-    border: '1px solid #E5E7EB',
+    border: '1px solid #DBDADE',
     borderRadius: '12px',
     padding: '14px',
     fontFamily: 'monospace',
     fontSize: '11px',
-    color: '#1F2937',
+    color: '#2F2B3D',
     maxHeight: '360px',
     overflowY: 'auto',
   },
@@ -1977,12 +2089,12 @@ const styles: Record<string, React.CSSProperties> = {
   receiptSub: {
     textAlign: 'center',
     fontSize: '10px',
-    color: '#6B7280',
+    color: '#6F6B7D',
     marginTop: '2px',
   },
   receiptDivider: {
     textAlign: 'center',
-    color: '#9CA3AF',
+    color: '#DBDADE',
     margin: '4px 0',
   },
   receiptMeta: {
@@ -1993,7 +2105,7 @@ const styles: Record<string, React.CSSProperties> = {
   receiptCust: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#374151',
+    color: '#2F2B3D',
   },
   receiptItemsList: {
     margin: '6px 0',
@@ -2013,14 +2125,14 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     fontWeight: 900,
     fontSize: '14px',
-    color: '#059669',
+    color: '#28C76F',
     margin: '4px 0',
   },
   receiptFooter: {
     textAlign: 'center',
     marginTop: '8px',
     fontWeight: 700,
-    color: '#4B5563',
+    color: '#6F6B7D',
   },
   receiptActions: {
     display: 'flex',
@@ -2029,7 +2141,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   printThermalBtn: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#2F2B3D',
     color: '#FFFFFF',
     border: 'none',
     padding: '12px',
@@ -2037,10 +2149,13 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 700,
     fontSize: '13px',
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   nextBillBtn: {
     flex: 1,
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
     padding: '12px',
@@ -2048,6 +2163,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 800,
     fontSize: '13px',
     cursor: 'pointer',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Taraju Modal
@@ -2055,25 +2174,25 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
     padding: '12px',
     borderRadius: '12px',
     marginBottom: '16px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid #DBDADE',
   },
   tarajuProdName: {
     margin: 0,
     fontSize: '14px',
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   tarajuProdHindi: {
     fontSize: '12px',
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   tarajuRateBadge: {
-    backgroundColor: '#ECFDF5',
-    color: '#065F46',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
     fontWeight: 800,
     fontSize: '12px',
     padding: '4px 8px',
@@ -2093,7 +2212,7 @@ const styles: Record<string, React.CSSProperties> = {
   tarajuUnitLabel: {
     fontSize: '16px',
     fontWeight: 700,
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   quickGramsRow: {
     display: 'flex',
@@ -2101,9 +2220,9 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   gramPill: {
-    backgroundColor: '#F1F5F9',
-    border: '1px solid #CBD5E1',
-    color: '#475569',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    color: '#2F2B3D',
     fontSize: '10px',
     fontWeight: 700,
     padding: '3px 6px',
@@ -2111,8 +2230,8 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   tarajuResultCard: {
-    backgroundColor: '#EFF6FF',
-    border: '1px solid #BFDBFE',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.3)',
     borderRadius: '12px',
     padding: '12px 16px',
     display: 'flex',
@@ -2126,11 +2245,12 @@ const styles: Record<string, React.CSSProperties> = {
   emptyCatalogCard: {
     textAlign: 'center',
     padding: '40px 20px',
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   emptyIcon: {
-    fontSize: '44px',
     marginBottom: '10px',
+    display: 'flex',
+    justifyContent: 'center',
   },
   catalogRecoveryButtons: {
     display: 'flex',
@@ -2140,7 +2260,7 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   recoverBtn: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
     padding: '10px 16px',
@@ -2148,29 +2268,35 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
     fontWeight: 700,
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
   seedBtn: {
-    backgroundColor: '#ECFDF5',
-    color: '#065F46',
-    border: '1px solid #10B981',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
+    border: '1px solid #7367F0',
     padding: '10px 16px',
     borderRadius: '10px',
     fontSize: '12px',
     fontWeight: 700,
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   centerLoading: {
     textAlign: 'center',
     padding: '60px',
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid rgba(0, 0, 0, 0.1)',
-    borderTopColor: '#4F46E5',
+    border: '3px solid #DBDADE',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 10px',
     animation: 'spin 0.8s linear infinite',
   },
 };
+

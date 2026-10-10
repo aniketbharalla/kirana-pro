@@ -12,16 +12,46 @@ import {
 import { ConfirmationResult, RecaptchaVerifier } from 'firebase/auth';
 import { useAuth } from '../../context/AuthContext';
 import { StaffMember, Store } from '@kirana-pro/shared';
+import { Toast } from '../../components/common/Toast';
+import { useToast } from '../../context/ToastContext';
+import {
+  ShieldCheck,
+  UserCheck,
+  Phone,
+  Lock,
+  Smartphone,
+  KeyRound,
+  LogIn,
+  Store as StoreIcon,
+  CheckCircle2,
+  AlertCircle,
+  Zap,
+  Scale,
+  Landmark,
+  ArrowRight,
+  LogOut,
+  Sparkles,
+} from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { staffSignIn, startStaffShift } = useAuth();
+  const {
+    user,
+    profile,
+    store,
+    activeStaff,
+    activeShift,
+    signOut,
+    staffSignOut,
+    staffSignIn,
+    startStaffShift,
+  } = useAuth();
 
   // Persona: Store Owner vs Staff / Cashier
   const [persona, setPersona] = useState<'owner' | 'staff'>('owner');
 
   // Owner Auth state
-  const [authMethod, setAuthMethod] = useState<'phone' | 'google'>('phone');
+  const [authMethod, setAuthMethod] = useState<'google' | 'phone'>('google');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
@@ -51,20 +81,48 @@ export default function LoginPage() {
   }, []);
 
   // Handle Staff Verification
-  const handleStaffVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleStaffVerify = async (e?: React.FormEvent, customPhone?: string, customPin?: string) => {
+    if (e) e.preventDefault();
+    setErrorMsg('');
+    setInfoMsg('');
+    setLoading(true);
+
+    const phoneToUse = customPhone || staffPhone;
+    const pinToUse = customPin || staffPin;
+
+    try {
+      const res = await staffSignIn(phoneToUse, pinToUse);
+      setVerifiedStaff(res.staff);
+      setVerifiedStore(res.store);
+      setInfoMsg(`Verified: ${res.staff.name} (${res.staff.role}) at ${res.store.name}`);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Staff verification failed. Check phone and PIN.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Quick fill and auto-verify cashier
+  const handleQuickFillStaff = (phone: string, pin: string) => {
+    setStaffPhone(phone);
+    setStaffPin(pin);
+    handleStaffVerify(undefined, phone, pin);
+  };
+
+  // Quick 1-click Demo Owner Sign-in
+  const handleQuickDemoOwner = async () => {
     setErrorMsg('');
     setInfoMsg('');
     setLoading(true);
 
     try {
-      const res = await staffSignIn(staffPhone, staffPin);
+      const res = await staffSignIn('9876543210', '1234');
       setVerifiedStaff(res.staff);
       setVerifiedStore(res.store);
-      setInfoMsg(`✓ Verified: ${res.staff.name} (${res.staff.role}) at ${res.store.name}`);
+      await startStaffShift(1, 1000);
+      router.replace('/pos');
     } catch (err: any) {
-      setErrorMsg(err.message || 'Staff verification failed. Check phone and PIN.');
-    } finally {
+      setErrorMsg(err.message || 'Demo owner sign-in failed.');
       setLoading(false);
     }
   };
@@ -92,12 +150,15 @@ export default function LoginPage() {
     setInfoMsg('');
     try {
       await signInWithGoogle();
+      router.replace('/');
     } catch (err: any) {
       console.error('Google Sign In Error:', err);
       if (err.code === 'auth/unauthorized-domain') {
-        setErrorMsg('Domain not authorized in Firebase Console. Please access via http://localhost:3000 and refresh.');
+        setErrorMsg('Domain not authorized in Firebase Console. Please access via http://localhost:3000 and refresh, or use 1-Click Demo Owner Sign-In.');
       } else if (err.code === 'auth/popup-closed-by-user') {
-        setErrorMsg('Sign-in cancelled. Please try again.');
+        setErrorMsg('Sign-in popup closed. Please try again or use 1-Click Demo Login.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setErrorMsg('Popup was blocked by your browser. Please allow popups for localhost:3000 or use 1-Click Demo Owner Sign-In.');
       } else {
         setErrorMsg(err.message || 'Google sign-in failed. Please try again.');
       }
@@ -132,7 +193,7 @@ export default function LoginPage() {
 
       if (err.code === 'auth/internal-error') {
         setErrorMsg(
-          'Firebase returned auth/internal-error. Ensure "Phone" provider is active in Firebase Console, or use Google Sign-In!'
+          'Firebase returned auth/internal-error. Ensure "Phone" provider is active in Firebase Console, or use Google / 1-Click Demo Sign-In!'
         );
       } else if (err.code === 'auth/invalid-phone-number') {
         setErrorMsg('Invalid phone number format.');
@@ -167,6 +228,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await verifyPhoneOtp(confirmationResultRef.current, cleanOtp);
+      router.replace('/');
     } catch (err: any) {
       console.error('Phone OTP Verification Error:', err);
       if (err.code === 'auth/invalid-verification-code') {
@@ -180,6 +242,24 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // Handle manual sign out from existing session
+  const handleCurrentSessionSignOut = async () => {
+    setLoading(true);
+    if (activeStaff) {
+      staffSignOut();
+    } else {
+      await signOut();
+    }
+    setVerifiedStaff(null);
+    setVerifiedStore(null);
+    setLoading(false);
+    setInfoMsg('Signed out of previous session. You can now log in freshly.');
+  };
+
+  const hasActiveSession = Boolean(user || activeStaff);
+  const activeSessionName = activeStaff?.name || profile?.displayName || user?.email || 'Store Owner';
+  const activeSessionRole = activeStaff ? activeStaff.role.toUpperCase() : 'STORE OWNER';
 
   return (
     <div style={styles.pageWrapper}>
@@ -209,15 +289,10 @@ export default function LoginPage() {
         </svg>
       </div>
 
-      {/* 4. Top-Left Brand Emblem (Matching Ebolt reference) */}
+      {/* 4. Top-Left Brand Emblem */}
       <div style={styles.brandPill}>
         <div style={styles.brandIconBox}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5">
-            <rect x="3" y="3" width="7" height="7" rx="2" />
-            <rect x="14" y="3" width="7" height="7" rx="2" />
-            <rect x="14" y="14" width="7" height="7" rx="2" />
-            <rect x="3" y="14" width="7" height="7" rx="2" />
-          </svg>
+          <StoreIcon size={16} color="#FFFFFF" strokeWidth={2.2} />
         </div>
         <span style={styles.brandText}>Kirana Pro</span>
       </div>
@@ -228,25 +303,56 @@ export default function LoginPage() {
           {/* Card Top Icon Chip */}
           <div style={styles.chipWrapper}>
             <div style={styles.iconChip}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                <polyline points="10 17 15 12 10 7" />
-                <line x1="15" y1="12" x2="3" y2="12" />
-              </svg>
+              <LogIn size={22} color="#7367F0" strokeWidth={2.2} />
             </div>
           </div>
 
           {/* Heading & Subtitle */}
           <h1 style={styles.cardTitle}>
-            {persona === 'owner' ? 'Sign in with mobile' : 'Staff & Cashier Sign In'}
+            {persona === 'owner' ? 'Store Owner Access' : 'Staff & Cashier Sign In'}
           </h1>
           <p style={styles.cardSubtitle}>
             Fastest billing, live stock sync, and desktop store OS. 100% Free.
           </p>
 
+          {/* Existing Active Session Banner (if already logged in) */}
+          {hasActiveSession && (
+            <div style={styles.activeSessionBanner}>
+              <div style={styles.activeSessionMeta}>
+                <div style={styles.activeBadge}>
+                  <span style={styles.activeDot} />
+                  <span>SESSION ACTIVE</span>
+                </div>
+                <div style={styles.activeSessionText}>
+                  Signed in as <strong>{activeSessionName}</strong> ({activeSessionRole})
+                </div>
+              </div>
+              <div style={styles.activeSessionActions}>
+                <button
+                  type="button"
+                  style={styles.activeEnterBtn}
+                  onClick={() => router.replace(activeStaff && !user ? '/bills' : '/pos')}
+                >
+                  <span>Enter Store OS</span>
+                  <ArrowRight size={14} color="#FFFFFF" />
+                </button>
+                <button
+                  type="button"
+                  style={styles.activeSwitchBtn}
+                  onClick={handleCurrentSessionSignOut}
+                  disabled={loading}
+                >
+                  <LogOut size={13} color="#EA5455" />
+                  <span>Switch Account</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Persona Segmented Bar */}
           <div style={styles.personaBar}>
             <button
+              id="tab-store-owner"
               type="button"
               style={{
                 ...styles.personaPill,
@@ -258,9 +364,11 @@ export default function LoginPage() {
                 setInfoMsg('');
               }}
             >
-              👑 Store Owner (मालिक)
+              <ShieldCheck size={15} color={persona === 'owner' ? '#7367F0' : '#6F6B7D'} />
+              <span>Store Owner (मालिक)</span>
             </button>
             <button
+              id="tab-staff-cashier"
               type="button"
               style={{
                 ...styles.personaPill,
@@ -272,183 +380,150 @@ export default function LoginPage() {
                 setInfoMsg('');
               }}
             >
-              🧑‍💼 Staff & Cashier (कैशियर)
+              <UserCheck size={15} color={persona === 'staff' ? '#7367F0' : '#6F6B7D'} />
+              <span>Staff & Cashier (कैशियर)</span>
             </button>
           </div>
 
-          {/* Status / Alert Messages */}
-          {errorMsg && <div style={styles.errorBox}>⚠️ {errorMsg}</div>}
-          {infoMsg && <div style={styles.infoBox}>✓ {infoMsg}</div>}
+          {/* Status / Alert Toasters */}
+          {errorMsg && (
+            <div id="login-error-toast-wrapper" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <Toast
+                type="error"
+                title="Action Required"
+                message={errorMsg}
+                onClose={() => setErrorMsg('')}
+              />
+            </div>
+          )}
+          {infoMsg && (
+            <div id="login-success-toast-wrapper" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <Toast
+                type="success"
+                title="Success"
+                message={infoMsg}
+                onClose={() => setInfoMsg('')}
+              />
+            </div>
+          )}
 
           {/* ========================================================= */}
           {/* A. STORE OWNER AUTH FLOW */}
           {/* ========================================================= */}
           {persona === 'owner' && (
             <div style={styles.formContent}>
-              {authMethod === 'phone' ? (
-                <>
-                  {!isOtpSent ? (
-                    <div style={styles.inputStack}>
-                      {/* Mobile Number Pill Input */}
-                      <div style={styles.pillInputRow}>
-                        <div style={styles.inputPrefix}>
-                          <span>🇮🇳</span>
-                          <span style={styles.prefixCode}>+91</span>
-                        </div>
-                        <input
-                          style={styles.pillInput}
-                          type="tel"
-                          placeholder="Enter 10-digit mobile"
-                          maxLength={10}
-                          value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          autoFocus
-                        />
-                      </div>
+              {/* 1. Direct Google Sign-In Button (Prominent & Primary) */}
+              <button
+                id="btn-google-login"
+                type="button"
+                style={styles.googlePrimaryBtn}
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>{loading ? 'Connecting with Google...' : 'Continue with Google'}</span>
+              </button>
 
-                      {/* Primary Dark Charcoal CTA Button */}
-                      <button
-                        style={styles.charcoalBtn}
-                        onClick={handleSendPhoneOtp}
-                        disabled={loading}
-                      >
-                        {loading ? 'Sending OTP SMS...' : 'Get Started'}
-                      </button>
-                    </div>
-                  ) : (
-                    <div style={styles.inputStack}>
-                      {/* 6-Digit OTP Pill Input */}
-                      <div style={styles.otpInputWrapper}>
-                        <input
-                          style={styles.otpPillInput}
-                          type="text"
-                          placeholder="• • • • • •"
-                          maxLength={6}
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value)}
-                          autoFocus
-                        />
-                      </div>
-
-                      <div style={styles.resendRow}>
-                        <button
-                          type="button"
-                          style={styles.linkBtn}
-                          onClick={() => {
-                            setIsOtpSent(false);
-                            setOtpCode('');
-                          }}
-                        >
-                          ← Change number or resend
-                        </button>
-                      </div>
-
-                      <button
-                        style={styles.charcoalBtn}
-                        onClick={handleVerifyPhoneOtp}
-                        disabled={loading}
-                      >
-                        {loading ? 'Verifying OTP...' : 'Verify & Enter Dukaan'}
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                /* Google Flow Card */
-                <div style={styles.inputStack}>
-                  <div style={styles.googleFeatureBox}>
-                    <div style={styles.featureLine}>
-                      <span>⚡</span> <span>Real-time inventory sync & barcode catalog</span>
-                    </div>
-                    <div style={styles.featureLine}>
-                      <span>⚖️</span> <span>Taraju smart scale weight calculations</span>
-                    </div>
-                    <div style={styles.featureLine}>
-                      <span>🏛️</span> <span>Automatic GST & Customer Khata ledger</span>
-                    </div>
-                  </div>
-
-                  <button
-                    style={styles.charcoalBtn}
-                    onClick={handleGoogleSignIn}
-                    disabled={loading}
-                  >
-                    {loading ? 'Connecting with Google...' : 'Continue with Google'}
-                  </button>
-                </div>
-              )}
+              {/* 2. One-Click Demo Owner Sign-In */}
+              <button
+                id="btn-demo-owner"
+                type="button"
+                style={styles.demoOwnerBtn}
+                onClick={handleQuickDemoOwner}
+                disabled={loading}
+              >
+                <Sparkles size={16} color="#7367F0" />
+                <span>1-Click Demo Owner Sign In (Dukaan Malik)</span>
+              </button>
 
               {/* Dotted Divider */}
               <div style={styles.dividerRow}>
                 <div style={styles.dottedLine} />
-                <span style={styles.dividerLabel}>Or sign in with</span>
+                <span style={styles.dividerLabel}>Or sign in with Phone SMS OTP</span>
                 <div style={styles.dottedLine} />
               </div>
 
-              {/* Social Authentication Cards */}
-              <div style={styles.socialRow}>
-                {/* 1. Google Button */}
-                <button
-                  type="button"
-                  style={{
-                    ...styles.socialBtn,
-                    ...(authMethod === 'google' ? styles.socialBtnActive : {}),
-                  }}
-                  onClick={() => {
-                    setAuthMethod('google');
-                    setErrorMsg('');
-                  }}
-                  title="Sign in with Google"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              {/* 3. Phone SMS OTP Input Flow */}
+              {!isOtpSent ? (
+                <div style={styles.inputStack}>
+                  <div style={styles.pillInputRow}>
+                    <div style={styles.inputPrefix}>
+                      <Phone size={15} color="#7367F0" />
+                      <span style={styles.prefixCode}>+91</span>
+                    </div>
+                    <input
+                      style={styles.pillInput}
+                      type="tel"
+                      placeholder="Enter 10-digit mobile"
+                      maxLength={10}
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
                     />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                    />
-                  </svg>
-                </button>
+                  </div>
 
-                {/* 2. Mobile OTP Button */}
-                <button
-                  type="button"
-                  style={{
-                    ...styles.socialBtn,
-                    ...(authMethod === 'phone' ? styles.socialBtnActive : {}),
-                  }}
-                  onClick={() => {
-                    setAuthMethod('phone');
-                    setErrorMsg('');
-                  }}
-                  title="Sign in with Mobile Phone"
-                >
-                  <span style={{ fontSize: '18px' }}>📱</span>
-                </button>
+                  <button
+                    type="button"
+                    style={styles.purpleCtaBtn}
+                    onClick={handleSendPhoneOtp}
+                    disabled={loading}
+                  >
+                    {loading ? 'Sending OTP SMS...' : 'Send OTP via SMS'}
+                  </button>
+                </div>
+              ) : (
+                <div style={styles.inputStack}>
+                  <div style={styles.otpInputWrapper}>
+                    <input
+                      style={styles.otpPillInput}
+                      type="text"
+                      placeholder="• • • • • •"
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
 
-                {/* 3. Fast Staff Switch */}
-                <button
-                  type="button"
-                  style={styles.socialBtn}
-                  onClick={() => {
-                    setPersona('staff');
-                    setErrorMsg('');
-                  }}
-                  title="Switch to Staff Cashier PIN"
-                >
-                  <span style={{ fontSize: '18px' }}>🧑‍💼</span>
-                </button>
-              </div>
+                  <div style={styles.resendRow}>
+                    <button
+                      type="button"
+                      style={styles.linkBtn}
+                      onClick={() => {
+                        setIsOtpSent(false);
+                        setOtpCode('');
+                      }}
+                    >
+                      Change number or resend
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    style={styles.purpleCtaBtn}
+                    onClick={handleVerifyPhoneOtp}
+                    disabled={loading}
+                  >
+                    {loading ? 'Verifying OTP...' : 'Verify & Enter Dukaan'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -458,50 +533,88 @@ export default function LoginPage() {
           {persona === 'staff' && (
             <div style={styles.formContent}>
               {!verifiedStaff ? (
-                <form onSubmit={handleStaffVerify} style={styles.inputStack}>
-                  {/* Staff Mobile Input */}
-                  <div style={styles.pillInputRow}>
-                    <div style={styles.inputPrefix}>
-                      <span>🇮🇳</span>
-                      <span style={styles.prefixCode}>+91</span>
+                <>
+                  {/* Quick Fill / Demo Cashier Pills */}
+                  <div style={styles.quickFillSection}>
+                    <div style={styles.quickFillLabel}>
+                      <Zap size={12} color="#7367F0" />
+                      <span>One-Tap Demo Cashiers:</span>
                     </div>
-                    <input
-                      style={styles.pillInput}
-                      type="tel"
-                      placeholder="Staff Mobile Number"
-                      maxLength={10}
-                      value={staffPhone}
-                      onChange={(e) => setStaffPhone(e.target.value)}
-                      required
-                      autoFocus
-                    />
+                    <div style={styles.quickFillChips}>
+                      <button
+                        id="chip-cashier-1"
+                        type="button"
+                        style={styles.quickFillChip}
+                        onClick={() => handleQuickFillStaff('9811122233', '0000')}
+                      >
+                        <strong>Cashier 1:</strong> Rohan (PIN: 0000)
+                      </button>
+                      <button
+                        id="chip-cashier-2"
+                        type="button"
+                        style={styles.quickFillChip}
+                        onClick={() => handleQuickFillStaff('9822233344', '1111')}
+                      >
+                        <strong>Cashier 2:</strong> Amit (PIN: 1111)
+                      </button>
+                      <button
+                        id="chip-owner-pin"
+                        type="button"
+                        style={styles.quickFillChip}
+                        onClick={() => handleQuickFillStaff('9876543210', '1234')}
+                      >
+                        <strong>Owner PIN:</strong> Malik (PIN: 1234)
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Staff 4-digit PIN */}
-                  <div style={styles.pillInputRow}>
-                    <div style={styles.inputPrefix}>
-                      <span>🔒</span>
+                  <form onSubmit={handleStaffVerify} style={styles.inputStack}>
+                    {/* Staff Mobile Input */}
+                    <div style={styles.pillInputRow}>
+                      <div style={styles.inputPrefix}>
+                        <Phone size={15} color="#7367F0" />
+                        <span style={styles.prefixCode}>+91</span>
+                      </div>
+                      <input
+                        id="input-staff-phone"
+                        style={styles.pillInput}
+                        type="tel"
+                        placeholder="Staff Mobile Number"
+                        maxLength={10}
+                        value={staffPhone}
+                        onChange={(e) => setStaffPhone(e.target.value)}
+                        required
+                      />
                     </div>
-                    <input
-                      style={styles.pillInput}
-                      type="password"
-                      inputMode="numeric"
-                      placeholder="4-digit Security PIN"
-                      maxLength={4}
-                      value={staffPin}
-                      onChange={(e) => setStaffPin(e.target.value.replace(/\D/g, ''))}
-                      required
-                    />
-                  </div>
 
-                  <button
-                    style={styles.charcoalBtn}
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? 'Verifying PIN...' : 'Verify Credentials ➔'}
-                  </button>
-                </form>
+                    {/* Staff 4-digit PIN */}
+                    <div style={styles.pillInputRow}>
+                      <div style={styles.inputPrefix}>
+                        <Lock size={15} color="#7367F0" />
+                      </div>
+                      <input
+                        id="input-staff-pin"
+                        style={styles.pillInput}
+                        type="password"
+                        inputMode="numeric"
+                        placeholder="4-digit Security PIN"
+                        maxLength={4}
+                        value={staffPin}
+                        onChange={(e) => setStaffPin(e.target.value.replace(/\D/g, ''))}
+                        required
+                      />
+                    </div>
+
+                    <button
+                      id="btn-staff-verify"
+                      style={styles.purpleCtaBtn}
+                      type="submit"
+                      disabled={loading}
+                    >
+                      {loading ? 'Verifying PIN...' : 'Verify Credentials'}
+                    </button>
+                  </form>
+                </>
               ) : (
                 /* Step 2: Open Shift Register & Select Counter */
                 <div style={styles.shiftCard}>
@@ -545,11 +658,12 @@ export default function LoginPage() {
                   </div>
 
                   <button
-                    style={styles.charcoalBtn}
+                    type="button"
+                    style={styles.purpleCtaBtn}
                     onClick={handleOpenShiftAndLaunch}
                     disabled={loading}
                   >
-                    {loading ? 'Opening Shift...' : '🚀 Start Shift & Launch Billing'}
+                    {loading ? 'Opening Shift...' : 'Start Shift & Launch Billing'}
                   </button>
 
                   <button
@@ -565,27 +679,76 @@ export default function LoginPage() {
                   </button>
                 </div>
               )}
-
-              {/* Dotted Divider & Switch to Owner */}
-              <div style={styles.dividerRow}>
-                <div style={styles.dottedLine} />
-                <span style={styles.dividerLabel}>Store Owner Access</span>
-                <div style={styles.dottedLine} />
-              </div>
-
-              <div style={styles.socialRow}>
-                <button
-                  type="button"
-                  style={{ ...styles.socialBtn, width: '100%' }}
-                  onClick={() => setPersona('owner')}
-                >
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
-                    👑 Switch to Store Owner Login
-                  </span>
-                </button>
-              </div>
             </div>
           )}
+
+          {/* Bottom Switcher Row */}
+          <div style={styles.dividerRow}>
+            <div style={styles.dottedLine} />
+            <span style={styles.dividerLabel}>Quick Switch</span>
+            <div style={styles.dottedLine} />
+          </div>
+
+          <div style={styles.socialRow}>
+            {/* 1. Direct Google Sign-In */}
+            <button
+              type="button"
+              style={styles.socialBtn}
+              onClick={handleGoogleSignIn}
+              title="Sign in with Google"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
+            </button>
+
+            {/* 2. Switch to Owner */}
+            <button
+              type="button"
+              style={{
+                ...styles.socialBtn,
+                ...(persona === 'owner' ? styles.socialBtnActive : {}),
+              }}
+              onClick={() => {
+                setPersona('owner');
+                setErrorMsg('');
+              }}
+              title="Switch to Store Owner View"
+            >
+              <Smartphone size={18} color="#7367F0" />
+            </button>
+
+            {/* 3. Switch to Staff */}
+            <button
+              type="button"
+              style={{
+                ...styles.socialBtn,
+                ...(persona === 'staff' ? styles.socialBtnActive : {}),
+              }}
+              onClick={() => {
+                setPersona('staff');
+                setErrorMsg('');
+              }}
+              title="Switch to Staff & Cashier PIN"
+            >
+              <KeyRound size={18} color="#7367F0" />
+            </button>
+          </div>
 
           {/* reCAPTCHA Container */}
           <div id="recaptcha-container" />
@@ -654,25 +817,22 @@ const styles: Record<string, React.CSSProperties> = {
   },
   brandPill: {
     position: 'absolute',
-    top: '32px',
-    left: '36px',
+    top: '28px',
+    left: '32px',
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '7px 16px 7px 10px',
-    backgroundColor: 'rgba(24, 24, 27, 0.88)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    borderRadius: '12px',
-    border: '1px solid rgba(255, 255, 255, 0.18)',
-    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)',
+    gap: '8px',
+    padding: '6px 14px 6px 8px',
+    backgroundColor: '#2F2B3D',
+    borderRadius: '10px',
+    boxShadow: '0 4px 14px rgba(47, 43, 61, 0.15)',
     zIndex: 10,
   },
   brandIconBox: {
-    width: '28px',
-    height: '28px',
-    borderRadius: '8px',
-    backgroundColor: '#3F3F46',
+    width: '26px',
+    height: '26px',
+    borderRadius: '6px',
+    backgroundColor: '#7367F0',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -680,7 +840,7 @@ const styles: Record<string, React.CSSProperties> = {
   brandText: {
     color: '#FFFFFF',
     fontWeight: 700,
-    fontSize: '14px',
+    fontSize: '13px',
     letterSpacing: '-0.01em',
     fontFamily: 'var(--font-display)',
   },
@@ -688,260 +848,353 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'relative',
     zIndex: 10,
     width: '100%',
-    maxWidth: '460px',
+    maxWidth: '470px',
     display: 'flex',
     justifyContent: 'center',
   },
   frostedCard: {
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.78)',
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
     backdropFilter: 'blur(36px) saturate(190%)',
     WebkitBackdropFilter: 'blur(36px) saturate(190%)',
-    border: '1px solid rgba(255, 255, 255, 0.92)',
-    borderRadius: '32px',
-    padding: '38px 36px 32px',
-    boxShadow: '0 24px 64px -12px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.8), 0 16px 36px rgba(99, 102, 241, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.95)',
+    borderRadius: '24px',
+    padding: '32px 28px 24px',
+    boxShadow: '0 20px 50px rgba(47, 43, 61, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
   },
   chipWrapper: {
     display: 'flex',
     justifyContent: 'center',
-    marginBottom: '16px',
+    marginBottom: '12px',
   },
   iconChip: {
-    width: '52px',
-    height: '52px',
-    borderRadius: '16px',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid rgba(226, 232, 240, 0.85)',
-    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.05)',
+    width: '46px',
+    height: '46px',
+    borderRadius: '12px',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.25)',
+    boxShadow: '0 4px 12px rgba(115, 103, 240, 0.15)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardTitle: {
     fontFamily: 'var(--font-display)',
-    fontSize: '24px',
-    fontWeight: 800,
-    color: '#0F172A',
-    letterSpacing: '-0.025em',
-    margin: '0 0 6px 0',
+    fontSize: '22px',
+    fontWeight: 700,
+    color: '#2F2B3D',
+    letterSpacing: '-0.02em',
+    margin: '0 0 4px 0',
   },
   cardSubtitle: {
     fontSize: '13px',
-    color: '#64748B',
+    color: '#6F6B7D',
     lineHeight: 1.45,
-    margin: '0 0 20px 0',
+    margin: '0 0 16px 0',
+  },
+  activeSessionBanner: {
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.3)',
+    borderRadius: '12px',
+    padding: '12px 14px',
+    marginBottom: '16px',
+    textAlign: 'left',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+  },
+  activeSessionMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '8px',
+    flexWrap: 'wrap',
+  },
+  activeBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '5px',
+    backgroundColor: '#FFFFFF',
+    padding: '2px 8px',
+    borderRadius: '999px',
+    fontSize: '10px',
+    fontWeight: 700,
+    color: '#7367F0',
+    letterSpacing: '0.04em',
+  },
+  activeDot: {
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    backgroundColor: '#28C76F',
+  },
+  activeSessionText: {
+    fontSize: '12px',
+    color: '#2F2B3D',
+  },
+  activeSessionActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  activeEnterBtn: {
+    flex: 1,
+    backgroundColor: '#7367F0',
+    color: '#FFFFFF',
+    border: 'none',
+    borderRadius: '8px',
+    padding: '8px 12px',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    boxShadow: '0 2px 8px rgba(115, 103, 240, 0.3)',
+  },
+  activeSwitchBtn: {
+    backgroundColor: '#FFFFFF',
+    color: '#EA5455',
+    border: '1px solid #FECACA',
+    borderRadius: '8px',
+    padding: '8px 12px',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
   },
   personaBar: {
     display: 'flex',
-    backgroundColor: 'rgba(241, 245, 249, 0.85)',
-    borderRadius: '12px',
+    backgroundColor: '#F8F7FA',
+    borderRadius: '10px',
     padding: '4px',
     gap: '4px',
-    marginBottom: '20px',
-    border: '1px solid rgba(226, 232, 240, 0.6)',
+    marginBottom: '16px',
+    border: '1px solid #DBDADE',
   },
   personaPill: {
     flex: 1,
     border: 'none',
     backgroundColor: 'transparent',
     padding: '8px 10px',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '12px',
-    fontWeight: 700,
-    color: '#64748B',
+    fontWeight: 600,
+    color: '#6F6B7D',
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
     transition: 'all 0.15s ease',
   },
   personaPillActive: {
     backgroundColor: '#FFFFFF',
-    color: '#0F172A',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)',
+    color: '#7367F0',
+    boxShadow: '0 2px 4px rgba(47, 43, 61, 0.08)',
   },
   formContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '12px',
+  },
+  googlePrimaryBtn: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DBDADE',
+    borderRadius: '10px',
+    padding: '12px 16px',
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#2F2B3D',
+    cursor: 'pointer',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.06)',
+    transition: 'all 0.15s ease',
+  },
+  demoOwnerBtn: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.25)',
+    borderRadius: '10px',
+    padding: '10px 14px',
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#7367F0',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  quickFillSection: {
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    textAlign: 'left',
+  },
+  quickFillLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    fontSize: '11px',
+    fontWeight: 700,
+    color: '#7367F0',
+    marginBottom: '8px',
+    letterSpacing: '0.02em',
+  },
+  quickFillChips: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  quickFillChip: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DBDADE',
+    borderRadius: '6px',
+    padding: '6px 10px',
+    fontSize: '11px',
+    color: '#4B465C',
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'all 0.15s ease',
   },
   inputStack: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '14px',
+    gap: '10px',
   },
   pillInputRow: {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: 'rgba(241, 245, 249, 0.85)',
-    border: '1px solid rgba(203, 213, 225, 0.6)',
-    borderRadius: '14px',
-    padding: '4px 14px',
-    height: '48px',
-    transition: 'border-color 0.15s ease, background-color 0.15s ease',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    borderRadius: '10px',
+    padding: '4px 12px',
+    height: '46px',
+    transition: 'border-color 0.15s ease',
   },
   inputPrefix: {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
     paddingRight: '10px',
-    borderRight: '1px solid rgba(203, 213, 225, 0.6)',
+    borderRight: '1px solid #DBDADE',
     marginRight: '10px',
-    fontSize: '14px',
-    fontWeight: 700,
-    color: '#334155',
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#4B465C',
   },
   prefixCode: {
     fontSize: '13px',
-    fontWeight: 700,
-    color: '#475569',
+    fontWeight: 600,
+    color: '#6F6B7D',
   },
   pillInput: {
     flex: 1,
     border: 'none',
     outline: 'none',
     backgroundColor: 'transparent',
-    fontSize: '15px',
-    fontWeight: 600,
-    color: '#0F172A',
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#2F2B3D',
   },
-  charcoalBtn: {
+  purpleCtaBtn: {
     width: '100%',
-    backgroundColor: '#18181B',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '14px',
-    padding: '14px',
+    borderRadius: '10px',
+    padding: '12px',
     fontSize: '14px',
-    fontWeight: 700,
+    fontWeight: 600,
     cursor: 'pointer',
-    boxShadow: '0 4px 14px rgba(24, 24, 27, 0.25)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
     transition: 'all 0.15s ease',
   },
   otpInputWrapper: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
-    border: '2px solid #10B981',
+    borderRadius: '10px',
+    border: '2px solid #7367F0',
     padding: '6px 12px',
-    boxShadow: '0 2px 10px rgba(16, 185, 129, 0.12)',
+    boxShadow: '0 2px 8px rgba(115, 103, 240, 0.15)',
   },
   otpPillInput: {
     width: '100%',
     border: 'none',
     outline: 'none',
-    fontSize: '24px',
-    fontWeight: 800,
-    letterSpacing: '12px',
     textAlign: 'center',
-    color: '#0F172A',
+    fontSize: '20px',
+    letterSpacing: '10px',
+    fontWeight: 700,
+    color: '#2F2B3D',
+    backgroundColor: 'transparent',
   },
   resendRow: {
-    textAlign: 'center',
+    display: 'flex',
+    justifyContent: 'center',
   },
   linkBtn: {
-    backgroundColor: 'transparent',
+    background: 'none',
     border: 'none',
-    color: '#4F46E5',
+    color: '#7367F0',
     fontSize: '12px',
-    fontWeight: 700,
+    fontWeight: 600,
     cursor: 'pointer',
     padding: '4px',
-  },
-  googleFeatureBox: {
-    backgroundColor: 'rgba(241, 245, 249, 0.75)',
-    borderRadius: '14px',
-    padding: '14px 16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    textAlign: 'left',
-    border: '1px solid rgba(226, 232, 240, 0.6)',
-  },
-  featureLine: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '12px',
-    fontWeight: 600,
-    color: '#475569',
-  },
-  dividerRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    margin: '6px 0',
-  },
-  dottedLine: {
-    flex: 1,
-    borderBottom: '1.5px dotted #CBD5E1',
-  },
-  dividerLabel: {
-    fontSize: '11px',
-    fontWeight: 600,
-    color: '#94A3B8',
-    letterSpacing: '0.02em',
-  },
-  socialRow: {
-    display: 'flex',
-    gap: '12px',
-  },
-  socialBtn: {
-    flex: 1,
-    height: '46px',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid rgba(226, 232, 240, 0.9)',
-    borderRadius: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
-    transition: 'all 0.15s ease',
-  },
-  socialBtnActive: {
-    border: '1.5px solid #4F46E5',
-    boxShadow: '0 2px 10px rgba(79, 70, 229, 0.15)',
+    textDecoration: 'underline',
   },
   shiftCard: {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    backgroundColor: 'rgba(241, 245, 249, 0.8)',
-    borderRadius: '16px',
-    padding: '16px',
-    border: '1px solid rgba(226, 232, 240, 0.8)',
     textAlign: 'left',
   },
   shiftHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '12px',
+    backgroundColor: '#F8F7FA',
+    padding: '12px',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
   },
   shiftAvatar: {
-    width: '38px',
-    height: '38px',
-    borderRadius: '12px',
-    backgroundColor: '#ECFDF5',
-    color: '#059669',
+    width: '42px',
+    height: '42px',
+    borderRadius: '50%',
+    backgroundColor: '#7367F0',
+    color: '#FFFFFF',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    fontWeight: 700,
     fontSize: '16px',
-    fontWeight: 800,
-    border: '1px solid #A7F3D0',
   },
   shiftStaffName: {
-    margin: 0,
     fontSize: '15px',
-    fontWeight: 800,
-    color: '#0F172A',
+    fontWeight: 700,
+    color: '#2F2B3D',
+    margin: 0,
   },
   shiftRoleBadge: {
+    display: 'inline-block',
     fontSize: '10px',
     fontWeight: 700,
-    color: '#059669',
-    backgroundColor: '#D1FAE5',
+    color: '#28C76F',
+    backgroundColor: '#E8FADF',
     padding: '2px 8px',
     borderRadius: '999px',
+    marginTop: '4px',
   },
   counterRow: {
     display: 'flex',
@@ -949,48 +1202,99 @@ const styles: Record<string, React.CSSProperties> = {
   },
   counterBtn: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
-    borderRadius: '10px',
+    backgroundColor: '#F8F7FA',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#DBDADE',
+    borderRadius: '8px',
     padding: '8px',
     fontSize: '12px',
-    fontWeight: 700,
-    color: '#64748B',
+    fontWeight: 600,
+    color: '#6F6B7D',
     cursor: 'pointer',
-    textAlign: 'center',
+    transition: 'all 0.15s ease',
   },
   counterBtnActive: {
-    backgroundColor: '#18181B',
-    borderColor: '#18181B',
-    color: '#FFFFFF',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+    backgroundColor: '#EDEBFD',
+    borderColor: '#7367F0',
+    color: '#7367F0',
+  },
+  dividerRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    margin: '14px 0 10px 0',
+  },
+  dottedLine: {
+    flex: 1,
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'dashed',
+    borderBottomColor: '#DBDADE',
+  },
+  dividerLabel: {
+    fontSize: '11px',
+    color: '#A8AAAE',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
+  },
+  socialRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '12px',
+  },
+  socialBtn: {
+    width: '44px',
+    height: '44px',
+    borderRadius: '10px',
+    backgroundColor: '#F8F7FA',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: '#DBDADE',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+  },
+  socialBtnActive: {
+    backgroundColor: '#EDEBFD',
+    borderColor: '#7367F0',
   },
   errorBox: {
-    backgroundColor: '#FEF2F2',
-    color: '#DC2626',
-    padding: '10px 14px',
-    borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: 600,
-    marginBottom: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    backgroundColor: '#FCE4E4',
     border: '1px solid #FECACA',
+    borderRadius: '8px',
+    padding: '10px 12px',
+    fontSize: '12px',
+    color: '#EA5455',
+    fontWeight: 500,
     textAlign: 'left',
+    marginBottom: '10px',
   },
   infoBox: {
-    backgroundColor: '#ECFDF5',
-    color: '#065F46',
-    padding: '10px 14px',
-    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    backgroundColor: '#E8FADF',
+    border: '1px solid #B7F2CB',
+    borderRadius: '8px',
+    padding: '10px 12px',
     fontSize: '12px',
-    fontWeight: 600,
-    marginBottom: '12px',
-    border: '1px solid #A7F3D0',
+    color: '#28C76F',
+    fontWeight: 500,
     textAlign: 'left',
+    marginBottom: '10px',
   },
   footerText: {
     fontSize: '11px',
-    color: '#94A3B8',
-    marginTop: '18px',
-    margin: 0,
+    color: '#A8AAAE',
+    marginTop: '16px',
+    marginBottom: 0,
+    lineHeight: 1.4,
   },
 };

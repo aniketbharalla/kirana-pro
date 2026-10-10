@@ -70,7 +70,7 @@ export const ProductsNavigator: React.FC = () => {
           title: 'Scan Barcode',
           headerBackTitle: 'Back',
           headerStyle: { backgroundColor: '#0F172A' },
-          headerTintColor: '#10B981',
+          headerTintColor: '#7367F0',
           headerTitleStyle: { color: '#FFFFFF', fontWeight: '700' },
         }}
       />

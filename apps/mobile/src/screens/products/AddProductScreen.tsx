@@ -9,10 +9,10 @@ import {
   ScrollView,
   Switch,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   PRODUCT_CATEGORIES,
@@ -22,7 +22,6 @@ import {
 } from '@kirana-pro/shared';
 import { addProduct } from '../../services/product';
 import { useAuthStore } from '../../store/authStore';
-import { colors } from '../../theme';
 
 export const AddProductScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -123,7 +122,8 @@ export const AddProductScreen: React.FC = () => {
         <ScrollView contentContainerStyle={styles.scroll}>
           {errorMsg ? (
             <View style={styles.errorBox}>
-              <Text style={styles.errorText}>⚠️ {errorMsg}</Text>
+              <Feather name="alert-circle" size={15} color="#EA5455" style={{ marginRight: 6 }} />
+              <Text style={styles.errorText}>{errorMsg}</Text>
             </View>
           ) : null}
 
@@ -135,7 +135,7 @@ export const AddProductScreen: React.FC = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="Scan or type barcode"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#82808B"
                   keyboardType="numeric"
                   value={barcode}
                   onChangeText={setBarcode}
@@ -144,8 +144,9 @@ export const AddProductScreen: React.FC = () => {
               <TouchableOpacity
                 style={styles.scanBtn}
                 onPress={() => navigation.navigate('BarcodeScanner')}
+                activeOpacity={0.85}
               >
-                <Text style={styles.scanBtnIcon}>📷</Text>
+                <Feather name="camera" size={16} color="#7367F0" style={{ marginRight: 6 }} />
                 <Text style={styles.scanBtnText}>Scan</Text>
               </TouchableOpacity>
             </View>
@@ -158,7 +159,7 @@ export const AddProductScreen: React.FC = () => {
             <TextInput
               style={styles.input}
               placeholder="e.g. Maggi Masala Noodles 70g"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#82808B"
               value={name}
               onChangeText={setName}
             />
@@ -167,7 +168,7 @@ export const AddProductScreen: React.FC = () => {
             <TextInput
               style={styles.input}
               placeholder="e.g. मैगी मसाला"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#82808B"
               value={nameHindi}
               onChangeText={setNameHindi}
             />
@@ -179,6 +180,7 @@ export const AddProductScreen: React.FC = () => {
                   key={cat.id}
                   style={[styles.smallPill, category === cat.id && styles.smallPillActive]}
                   onPress={() => setCategory(cat.id)}
+                  activeOpacity={0.8}
                 >
                   <Text
                     style={[styles.smallPillText, category === cat.id && styles.smallPillTextActive]}
@@ -196,7 +198,7 @@ export const AddProductScreen: React.FC = () => {
 
             <View style={styles.looseToggleRow}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.toggleTitle}>⚖️ Loose / By Weight (Taraju)</Text>
+                <Text style={styles.toggleTitle}>Loose / By Weight (Taraju)</Text>
                 <Text style={styles.toggleSub}>
                   Sold loose (chawal, dal, cheeni). Enables 1-tap price-to-weight calculation.
                 </Text>
@@ -204,7 +206,8 @@ export const AddProductScreen: React.FC = () => {
               <Switch
                 value={isLoose}
                 onValueChange={handleToggleLoose}
-                trackColor={{ false: '#E2E8F0', true: '#10B981' }}
+                trackColor={{ false: '#DBDADE', true: '#7367F0' }}
+                thumbColor="#FFFFFF"
               />
             </View>
 
@@ -214,7 +217,7 @@ export const AddProductScreen: React.FC = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g. 50"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#82808B"
                   keyboardType="numeric"
                   value={sellingPrice}
                   onChangeText={setSellingPrice}
@@ -226,7 +229,7 @@ export const AddProductScreen: React.FC = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g. 42"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#82808B"
                   keyboardType="numeric"
                   value={purchasePrice}
                   onChangeText={setPurchasePrice}
@@ -238,14 +241,17 @@ export const AddProductScreen: React.FC = () => {
               <View style={styles.profitBannerBox}>
                 {parseFloat(sellingPrice) >= parseFloat(purchasePrice) ? (
                   <Text style={styles.profitBannerGain}>
-                    📊 Expected Profit: ₹{(parseFloat(sellingPrice) - parseFloat(purchasePrice)).toFixed(2)} / unit (
+                    Expected Profit: ₹{(parseFloat(sellingPrice) - parseFloat(purchasePrice)).toFixed(2)} / unit (
                     {(((parseFloat(sellingPrice) - parseFloat(purchasePrice)) / parseFloat(sellingPrice)) * 100).toFixed(1)}% margin)
                   </Text>
                 ) : (
-                  <Text style={styles.profitBannerLoss}>
-                    ⚠️ Selling price is less than buying price (Loss: ₹
-                    {(parseFloat(purchasePrice) - parseFloat(sellingPrice)).toFixed(2)}/unit)
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Feather name="alert-triangle" size={13} color="#EA5455" style={{ marginRight: 4 }} />
+                    <Text style={styles.profitBannerLoss}>
+                      Selling price is less than buying price (Loss: ₹
+                      {(parseFloat(purchasePrice) - parseFloat(sellingPrice)).toFixed(2)}/unit)
+                    </Text>
+                  </View>
                 )}
               </View>
             ) : null}
@@ -257,6 +263,7 @@ export const AddProductScreen: React.FC = () => {
                   key={u.value}
                   style={[styles.smallPill, unit === u.value && styles.smallPillActive]}
                   onPress={() => setUnit(u.value as ProductUnit)}
+                  activeOpacity={0.8}
                 >
                   <Text
                     style={[styles.smallPillText, unit === u.value && styles.smallPillTextActive]}
@@ -274,6 +281,7 @@ export const AddProductScreen: React.FC = () => {
                   key={rate}
                   style={[styles.gstPill, gstRate === rate && styles.gstPillActive]}
                   onPress={() => setGstRate(rate)}
+                  activeOpacity={0.8}
                 >
                   <Text style={[styles.gstText, gstRate === rate && styles.gstTextActive]}>
                     {rate}%
@@ -292,7 +300,7 @@ export const AddProductScreen: React.FC = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="10"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#82808B"
                   keyboardType="numeric"
                   value={currentStock}
                   onChangeText={setCurrentStock}
@@ -304,7 +312,7 @@ export const AddProductScreen: React.FC = () => {
                 <TextInput
                   style={styles.input}
                   placeholder="5"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#82808B"
                   keyboardType="numeric"
                   value={minStockAlert}
                   onChangeText={setMinStockAlert}
@@ -323,7 +331,10 @@ export const AddProductScreen: React.FC = () => {
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.saveBtnText}>✓ Save to Catalog</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Feather name="check" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
+                <Text style={styles.saveBtnText}>Save to Catalog</Text>
+              </View>
             )}
           </TouchableOpacity>
         </ScrollView>
@@ -335,59 +346,61 @@ export const AddProductScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   container: {
     flex: 1,
   },
   scroll: {
-    padding: 18,
+    padding: 16,
     paddingBottom: 40,
   },
   errorBox: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#FCE4E4',
     borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 12,
+    borderColor: '#EA5455',
+    borderRadius: 8,
     padding: 12,
     marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   errorText: {
-    color: '#DC2626',
+    color: '#EA5455',
     fontSize: 13,
     fontWeight: '600',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     marginBottom: 14,
   },
   cardHeader: {
     fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
     marginBottom: 12,
   },
   fieldLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#82808B',
     marginBottom: 6,
     letterSpacing: 0.5,
   },
   input: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#0F172A',
+    color: '#4B465C',
   },
   barcodeRow: {
     flexDirection: 'row',
@@ -397,21 +410,17 @@ const styles = StyleSheet.create({
   scanBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#EDEBFD',
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: '#7367F0',
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 12,
-  },
-  scanBtnIcon: {
-    fontSize: 16,
-    marginRight: 4,
+    paddingVertical: 11,
+    borderRadius: 8,
   },
   scanBtnText: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#065F46',
+    fontWeight: '600',
+    color: '#7367F0',
   },
   pillRow: {
     flexDirection: 'row',
@@ -419,42 +428,45 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   smallPill: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F8F7FA',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 14,
+    borderRadius: 6,
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
   },
   smallPillActive: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
+    borderColor: '#7367F0',
   },
   smallPillText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#475569',
+    color: '#5D596C',
   },
   smallPillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
   },
   looseToggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#EDEBFD',
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#BBF7D0',
+    borderColor: 'rgba(115, 103, 240, 0.2)',
     marginBottom: 14,
   },
   toggleTitle: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#166534',
+    fontWeight: '600',
+    color: '#7367F0',
   },
   toggleSub: {
     fontSize: 11,
-    color: '#15803D',
+    color: '#5D596C',
     marginTop: 2,
     paddingRight: 10,
   },
@@ -471,35 +483,36 @@ const styles = StyleSheet.create({
   },
   gstPill: {
     flex: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F8F7FA',
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 6,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
   },
   gstPillActive: {
-    backgroundColor: '#10B981',
-    borderColor: '#059669',
+    backgroundColor: '#7367F0',
+    borderColor: '#7367F0',
   },
   gstText: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#475569',
+    fontWeight: '600',
+    color: '#5D596C',
   },
   gstTextActive: {
     color: '#FFFFFF',
   },
   saveBtn: {
-    backgroundColor: '#10B981',
-    paddingVertical: 15,
-    borderRadius: 14,
+    backgroundColor: '#7367F0',
+    paddingVertical: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    shadowColor: '#10B981',
+    justifyContent: 'center',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
     marginTop: 8,
   },
   saveBtnDisabled: {
@@ -507,25 +520,26 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '600',
   },
   profitBannerBox: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#E8FADF',
     borderWidth: 1,
-    borderColor: '#BBF7D0',
-    borderRadius: 10,
+    borderColor: '#28C76F',
+    borderRadius: 6,
     padding: 10,
     marginTop: 8,
   },
   profitBannerGain: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#166534',
+    fontWeight: '600',
+    color: '#28C76F',
   },
   profitBannerLoss: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#DC2626',
+    fontWeight: '600',
+    color: '#EA5455',
   },
 });
+

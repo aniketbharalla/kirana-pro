@@ -10,6 +10,7 @@ import {
   Share,
   Platform,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import {
   Invoice,
   GSTTaxSummary,
@@ -186,7 +187,7 @@ export const GSTReportScreen: React.FC = () => {
         a.download = `GSTR1_${periodStr}_07AABCK9999F1Z1.json`;
         a.click();
         URL.revokeObjectURL(url);
-        Alert.alert('GSTR-1 Exported! 📥', 'Downloaded official GSTR-1 JSON file.');
+        Alert.alert('GSTR-1 Exported', 'Downloaded official GSTR-1 JSON file.');
       } catch {
         Alert.alert('GSTR-1 JSON Ready', `JSON Generated (${invoices.length} invoices).`);
       }
@@ -210,7 +211,7 @@ export const GSTReportScreen: React.FC = () => {
         a.download = `KiranaPro_GST_Report_Oct2026.csv`;
         a.click();
         URL.revokeObjectURL(url);
-        Alert.alert('Tax Report CSV Downloaded! 📊', 'Downloaded CSV for CA / Accountant.');
+        Alert.alert('Tax Report CSV Downloaded', 'Downloaded CSV for CA / Accountant.');
       } catch {
         Alert.alert('CSV Ready', 'Tax report CSV generated successfully.');
       }
@@ -223,7 +224,7 @@ export const GSTReportScreen: React.FC = () => {
   };
 
   const handleShareToCA = () => {
-    const msg = `🏪 *Kirana Pro - GST Tax Report*\nPeriod: ${summary.periodLabel}\n• Total Turnover: ₹${summary.totalGrossSales}\n• Taxable Turnover: ₹${summary.totalTaxable}\n• Total GST: ₹${summary.totalTax} (CGST: ₹${summary.totalCgst}, SGST: ₹${summary.totalSgst})\n• B2B Bills: ${summary.b2bCount} (Taxable: ₹${summary.b2bTaxable})\n• B2C Bills: ${summary.b2cCount} (Taxable: ₹${summary.b2cTaxable})\nGenerated via Kirana Pro SaaS`;
+    const msg = `*Kirana Pro - GST Tax Report*\nPeriod: ${summary.periodLabel}\n• Total Turnover: ₹${summary.totalGrossSales}\n• Taxable Turnover: ₹${summary.totalTaxable}\n• Total GST: ₹${summary.totalTax} (CGST: ₹${summary.totalCgst}, SGST: ₹${summary.totalSgst})\n• B2B Bills: ${summary.b2bCount} (Taxable: ₹${summary.b2bTaxable})\n• B2C Bills: ${summary.b2cCount} (Taxable: ₹${summary.b2cTaxable})\nGenerated via Kirana Pro SaaS`;
     Share.share({ message: msg });
   };
 
@@ -351,14 +352,16 @@ export const GSTReportScreen: React.FC = () => {
             activeOpacity={0.85}
             onPress={handleExportGSTR1JSON}
           >
-            <Text style={styles.btnEmoji}>🏛️</Text>
-            <View style={{ flex: 1, marginLeft: 10 }}>
+            <View style={styles.btnIconContainer}>
+              <Feather name="file-text" size={20} color="#7367F0" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.btnTitle}>Export GSTR-1 JSON (Govt Portal)</Text>
               <Text style={styles.btnSub}>
                 Upload directly to gst.gov.in portal for offline return filing
               </Text>
             </View>
-            <Text style={styles.arrow}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#82808B" />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -366,14 +369,16 @@ export const GSTReportScreen: React.FC = () => {
             activeOpacity={0.85}
             onPress={handleExportCSV}
           >
-            <Text style={styles.btnEmoji}>📊</Text>
-            <View style={{ flex: 1, marginLeft: 10 }}>
+            <View style={styles.btnIconContainer}>
+              <Feather name="bar-chart-2" size={20} color="#7367F0" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.btnTitle}>Download CA Report (CSV / Excel)</Text>
               <Text style={styles.btnSub}>
                 Invoice-level ledger for Chartered Accountant reconciliation
               </Text>
             </View>
-            <Text style={styles.arrow}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#82808B" />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -381,14 +386,16 @@ export const GSTReportScreen: React.FC = () => {
             activeOpacity={0.85}
             onPress={handleShareToCA}
           >
-            <Text style={styles.btnEmoji}>📲</Text>
-            <View style={{ flex: 1, marginLeft: 10 }}>
+            <View style={[styles.btnIconContainer, { backgroundColor: '#E8FADF' }]}>
+              <Feather name="share-2" size={20} color="#28C76F" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.btnTitle}>Share Tax Summary on WhatsApp</Text>
               <Text style={styles.btnSub}>
                 Send monthly turnover and tax snapshot to your CA
               </Text>
             </View>
-            <Text style={styles.arrow}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#82808B" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -399,7 +406,7 @@ export const GSTReportScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   container: {
     padding: 16,
@@ -410,12 +417,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
   },
   sub: {
-    fontSize: 12,
-    color: '#64748B',
+    fontSize: 13,
+    color: '#82808B',
     marginTop: 2,
   },
   periodTabs: {
@@ -425,30 +432,35 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingVertical: 10,
+    borderRadius: 8,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     alignItems: 'center',
   },
   tabActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: '#7367F0',
+    borderColor: '#7367F0',
   },
   tabText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#5D596C',
   },
   tabTextActive: {
     color: '#FFFFFF',
   },
   bannerCard: {
-    backgroundColor: '#0F172A',
-    borderRadius: 18,
+    backgroundColor: '#2F2B3D',
+    borderRadius: 12,
     padding: 18,
     marginBottom: 16,
+    shadowColor: '#2F2B3D',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 4,
   },
   bannerRow: {
     flexDirection: 'row',
@@ -457,26 +469,26 @@ const styles = StyleSheet.create({
   },
   bannerLabel: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#94A3B8',
+    fontWeight: '700',
+    color: '#A8AAAE',
     letterSpacing: 0.5,
   },
   bannerVal: {
     fontSize: 26,
-    fontWeight: '800',
-    color: '#38BDF8',
+    fontWeight: '700',
+    color: '#7367F0',
     marginTop: 4,
   },
   turnoverVal: {
     fontSize: 20,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
     marginTop: 4,
   },
   taxSplitRow: {
     flexDirection: 'row',
-    backgroundColor: '#1E293B',
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 8,
     padding: 10,
     gap: 8,
   },
@@ -485,8 +497,8 @@ const styles = StyleSheet.create({
   },
   splitLabel: {
     fontSize: 9,
-    fontWeight: '700',
-    color: '#94A3B8',
+    fontWeight: '600',
+    color: '#A8AAAE',
   },
   splitVal: {
     fontSize: 14,
@@ -496,16 +508,16 @@ const styles = StyleSheet.create({
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     marginBottom: 16,
   },
   sectionHeader: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: '#4B465C',
     marginBottom: 12,
   },
   b2bRow: {
@@ -515,111 +527,112 @@ const styles = StyleSheet.create({
   typeCard: {
     flex: 1,
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
   },
   b2bCard: {
-    backgroundColor: '#F0FDF4',
-    borderColor: '#BBF7D0',
+    backgroundColor: '#E8FADF',
+    borderColor: '#28C76F',
   },
   b2cCard: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
+    backgroundColor: '#EDEBFD',
+    borderColor: '#7367F0',
   },
   typeTag: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '700',
+    color: '#5D596C',
   },
   typeCount: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
     marginVertical: 4,
   },
   typeDetail: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#82808B',
   },
   typeTax: {
     fontSize: 12,
     fontWeight: '700',
-    color: colors.primary,
+    color: '#7367F0',
     marginTop: 2,
   },
   tableHeader: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
-    paddingBottom: 6,
-    marginBottom: 6,
+    borderBottomColor: '#DBDADE',
+    paddingBottom: 8,
+    marginBottom: 8,
   },
   th: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '700',
+    color: '#82808B',
   },
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F8FAFC',
+    borderBottomColor: '#F1F0F2',
   },
   td: {
     fontSize: 12,
-    color: '#334155',
+    color: '#5D596C',
   },
   hsnCode: {
     width: 55,
     fontWeight: '700',
-    color: colors.primary,
+    color: '#7367F0',
   },
   actionsCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     marginBottom: 20,
   },
   exportBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     marginBottom: 10,
   },
   jsonBtn: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#FDE68A',
+    backgroundColor: '#F8F7FA',
+    borderColor: '#DBDADE',
   },
   csvBtn: {
-    backgroundColor: '#F1F5F9',
-    borderColor: '#E2E8F0',
+    backgroundColor: '#F8F7FA',
+    borderColor: '#DBDADE',
   },
   waBtn: {
-    backgroundColor: '#DCFCE7',
-    borderColor: '#BBF7D0',
+    backgroundColor: '#F8F7FA',
+    borderColor: '#DBDADE',
     marginBottom: 0,
   },
-  btnEmoji: {
-    fontSize: 22,
+  btnIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#EDEBFD',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   btnTitle: {
     fontSize: 13,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: '#4B465C',
   },
   btnSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#82808B',
     marginTop: 2,
   },
-  arrow: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '800',
-  },
 });
+

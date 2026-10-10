@@ -11,10 +11,12 @@ import {
   StatusBar,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { Invoice, formatWhatsAppReceipt } from '@kirana-pro/shared';
 import { useStoreStore } from '../../store/storeStore';
 import { useHardwareStore } from '../../store/hardwareStore';
 import { printInvoiceReceipt } from '../../services/printerService';
+import { colors } from '../../theme';
 
 export const BillReceiptScreen: React.FC = () => {
   const route = useRoute<any>();
@@ -80,18 +82,18 @@ export const BillReceiptScreen: React.FC = () => {
       settings
     );
     Alert.alert(
-      result.success ? 'Receipt Printed 🖨️' : 'Print Notice',
+      result.success ? 'Receipt Printed' : 'Print Notice',
       result.message
     );
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Success Banner */}
         <View style={styles.successBadge}>
-          <Text style={styles.successIcon}>✓</Text>
+          <Feather name="check-circle" size={16} color={colors.systemGreen} />
           <Text style={styles.successTitle}>Bill Generated Successfully!</Text>
         </View>
 
@@ -191,7 +193,7 @@ export const BillReceiptScreen: React.FC = () => {
           </View>
 
           <Text style={styles.divider}>--------------------------------</Text>
-          <Text style={styles.footerGreeting}>धन्यवाद! फिर पधारें 🙏</Text>
+          <Text style={styles.footerGreeting}>Thank you for visiting!</Text>
           <Text style={styles.footerBrand}>Powered by Kirana Pro</Text>
         </View>
 
@@ -202,7 +204,7 @@ export const BillReceiptScreen: React.FC = () => {
             activeOpacity={0.88}
             onPress={handleShareWhatsApp}
           >
-            <Text style={styles.btnIcon}>💬</Text>
+            <Feather name="share-2" size={16} color="#FFFFFF" />
             <Text style={styles.whatsAppBtnText}>Share Bill on WhatsApp</Text>
           </TouchableOpacity>
 
@@ -212,7 +214,7 @@ export const BillReceiptScreen: React.FC = () => {
               activeOpacity={0.85}
               onPress={handlePrint}
             >
-              <Text style={styles.btnIcon}>🖨️</Text>
+              <Feather name="printer" size={16} color={colors.text} />
               <Text style={styles.printBtnText}>Thermal Print</Text>
             </TouchableOpacity>
 
@@ -221,7 +223,7 @@ export const BillReceiptScreen: React.FC = () => {
               activeOpacity={0.85}
               onPress={() => navigation.navigate('BillingScreen')}
             >
-              <Text style={styles.btnIcon}>⚡</Text>
+              <Feather name="plus" size={16} color="#FFFFFF" />
               <Text style={styles.newBillBtnText}>New Bill</Text>
             </TouchableOpacity>
           </View>
@@ -234,45 +236,40 @@ export const BillReceiptScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   scroll: {
-    padding: 18,
+    padding: 16,
     paddingBottom: 40,
   },
   successBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(40, 199, 111, 0.12)',
     paddingVertical: 10,
-    borderRadius: 14,
+    borderRadius: 12,
     marginBottom: 16,
     gap: 8,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  successIcon: {
-    fontSize: 16,
-    color: '#059669',
-    fontWeight: '900',
+    borderColor: 'rgba(40, 199, 111, 0.25)',
   },
   successTitle: {
     fontSize: 14,
-    fontWeight: '800',
-    color: '#065F46',
+    fontWeight: '700',
+    color: colors.systemGreen,
   },
   paperContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 18,
+    borderRadius: 14,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
     marginBottom: 20,
   },
   receiptTop: {
@@ -281,18 +278,18 @@ const styles = StyleSheet.create({
   },
   storeTitle: {
     fontSize: 18,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontWeight: '800',
+    color: colors.text,
     textAlign: 'center',
   },
   receiptSub: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
     textAlign: 'center',
   },
   divider: {
-    color: '#CBD5E1',
+    color: colors.border,
     letterSpacing: -1,
     marginVertical: 4,
     textAlign: 'center',
@@ -305,11 +302,11 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#334155',
+    color: colors.text,
   },
   customerLine: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   itemsTable: {
@@ -319,19 +316,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingBottom: 4,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: colors.border,
   },
   headerText: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '700',
+    color: colors.textSecondary,
   },
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 6,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#F8FAFC',
+    borderBottomColor: colors.background,
   },
   colItem: {
     flex: 3,
@@ -339,30 +336,30 @@ const styles = StyleSheet.create({
   colQty: {
     flex: 1.5,
     fontSize: 11,
-    color: '#334155',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   colRate: {
     flex: 1.5,
     fontSize: 11,
-    color: '#334155',
+    color: colors.textSecondary,
     textAlign: 'right',
   },
   colTotal: {
     flex: 1.8,
     fontSize: 12,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.text,
     textAlign: 'right',
   },
   itemText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.text,
   },
   itemHindiText: {
     fontSize: 10,
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   totalsSection: {
     marginVertical: 4,
@@ -374,23 +371,23 @@ const styles = StyleSheet.create({
   },
   receiptText: {
     fontSize: 12,
-    color: '#475569',
+    color: colors.textSecondary,
   },
   grandTotalLine: {
     marginTop: 6,
     paddingTop: 6,
     borderTopWidth: 1,
-    borderTopColor: '#0F172A',
+    borderTopColor: colors.border,
   },
   grandTotalLabel: {
     fontSize: 14,
-    fontWeight: '900',
-    color: '#0F172A',
+    fontWeight: '800',
+    color: colors.text,
   },
   grandTotalVal: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#10B981',
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.primary,
   },
   paymentBadgeRow: {
     flexDirection: 'row',
@@ -399,32 +396,32 @@ const styles = StyleSheet.create({
   },
   paymentBadge: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#065F46',
-    backgroundColor: '#ECFDF5',
+    fontWeight: '700',
+    color: colors.systemGreen,
+    backgroundColor: 'rgba(40, 199, 111, 0.12)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
   changeBadge: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#B45309',
-    backgroundColor: '#FFFBEB',
+    fontWeight: '700',
+    color: colors.systemOrange,
+    backgroundColor: 'rgba(255, 159, 67, 0.12)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
   footerGreeting: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: colors.text,
     textAlign: 'center',
     marginTop: 4,
   },
   footerBrand: {
     fontSize: 10,
-    color: '#94A3B8',
+    color: colors.textMuted,
     textAlign: 'center',
     marginTop: 2,
   },
@@ -437,7 +434,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#25D366',
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 12,
     gap: 8,
     shadowColor: '#25D366',
     shadowOffset: { width: 0, height: 4 },
@@ -448,7 +445,7 @@ const styles = StyleSheet.create({
   whatsAppBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   btnRow: {
     flexDirection: 'row',
@@ -460,14 +457,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    paddingVertical: 13,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
     gap: 6,
   },
   printBtnText: {
-    color: '#0F172A',
+    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -476,18 +473,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#10B981',
-    paddingVertical: 14,
-    borderRadius: 14,
+    backgroundColor: colors.primary, // MasterX Royal Purple
+    paddingVertical: 13,
+    borderRadius: 12,
     gap: 6,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   newBillBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
-  },
-  btnIcon: {
-    fontSize: 16,
   },
   errorBox: {
     flex: 1,
@@ -497,11 +496,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginBottom: 16,
   },
   actionBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 10,

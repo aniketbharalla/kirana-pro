@@ -9,8 +9,8 @@ import {
   Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { Feather } from '@expo/vector-icons';
 import { useStaffStore } from '../../store/staffStore';
-import { colors } from '../../theme';
 
 interface StaffPINLockModalProps {
   visible: boolean;
@@ -87,8 +87,10 @@ export const StaffPINLockModal: React.FC<StaffPINLockModalProps> = ({
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.lockIcon}>🔒</Text>
-          <Text style={styles.title}>Counter Locked / कैशियर स्विच</Text>
+          <View style={styles.lockIconCircle}>
+            <Feather name="lock" size={28} color="#7367F0" />
+          </View>
+          <Text style={styles.title}>Counter Locked / Cashier Switch</Text>
           <Text style={styles.subtitle}>
             Enter 4-digit staff PIN to unlock this register
           </Text>
@@ -117,7 +119,8 @@ export const StaffPINLockModal: React.FC<StaffPINLockModalProps> = ({
         {/* Error message */}
         {errorMsg ? (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>⚠️ {errorMsg}</Text>
+            <Feather name="alert-triangle" size={13} color="#EA5455" style={{ marginRight: 6 }} />
+            <Text style={styles.errorText}>{errorMsg}</Text>
           </View>
         ) : (
           <View style={styles.hintContainer}>
@@ -133,7 +136,7 @@ export const StaffPINLockModal: React.FC<StaffPINLockModalProps> = ({
             ['1', '2', '3'],
             ['4', '5', '6'],
             ['7', '8', '9'],
-            ['C', '0', '⌫'],
+            ['C', '0', 'DEL'],
           ].map((row, rIdx) => (
             <View key={rIdx} style={styles.keypadRow}>
               {row.map((btn) => {
@@ -143,19 +146,21 @@ export const StaffPINLockModal: React.FC<StaffPINLockModalProps> = ({
                       key={btn}
                       style={[styles.keyBtn, styles.specialKey]}
                       onPress={handleClear}
+                      activeOpacity={0.7}
                     >
                       <Text style={styles.specialKeyText}>Clear</Text>
                     </TouchableOpacity>
                   );
                 }
-                if (btn === '⌫') {
+                if (btn === 'DEL') {
                   return (
                     <TouchableOpacity
                       key={btn}
                       style={[styles.keyBtn, styles.specialKey]}
                       onPress={handleDelete}
+                      activeOpacity={0.7}
                     >
-                      <Text style={styles.specialKeyText}>⌫</Text>
+                      <Feather name="delete" size={20} color="#A8AAAE" />
                     </TouchableOpacity>
                   );
                 }
@@ -176,7 +181,7 @@ export const StaffPINLockModal: React.FC<StaffPINLockModalProps> = ({
 
         {/* Cancel button if modal was opened intentionally */}
         {onClose && (
-          <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+          <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.7}>
             <Text style={styles.cancelBtnText}>Dismiss</Text>
           </TouchableOpacity>
         )}
@@ -188,7 +193,7 @@ export const StaffPINLockModal: React.FC<StaffPINLockModalProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#2F2B3D',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -197,31 +202,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 28,
   },
-  lockIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  lockIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    backgroundColor: 'rgba(115, 103, 240, 0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
   },
   title: {
     fontSize: 22,
-    fontWeight: '800',
+    fontWeight: '700',
     color: '#FFFFFF',
     marginBottom: 6,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#94A3B8',
+    color: '#A8AAAE',
     textAlign: 'center',
   },
   currentStaffBadge: {
     marginTop: 10,
-    backgroundColor: '#1E293B',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 12,
+    borderRadius: 6,
     fontSize: 12,
-    color: '#38BDF8',
-    fontWeight: '700',
+    color: '#7367F0',
+    fontWeight: '600',
   },
   pinDotsRow: {
     flexDirection: 'row',
@@ -234,37 +244,39 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 9,
     borderWidth: 2,
-    borderColor: '#475569',
+    borderColor: '#4B465C',
     backgroundColor: 'transparent',
   },
   dotFilled: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+    backgroundColor: '#7367F0',
+    borderColor: '#7367F0',
     transform: [{ scale: 1.15 }],
   },
   dotError: {
-    borderColor: '#EF4444',
-    backgroundColor: '#EF4444',
+    borderColor: '#EA5455',
+    backgroundColor: '#EA5455',
   },
   errorContainer: {
-    backgroundColor: '#450A0A',
+    backgroundColor: 'rgba(234, 84, 85, 0.16)',
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderRadius: 8,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#991B1B',
+    borderColor: '#EA5455',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   errorText: {
-    color: '#FCA5A5',
+    color: '#EA5455',
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   hintContainer: {
     marginBottom: 20,
   },
   hintText: {
-    color: '#64748B',
+    color: '#A8AAAE',
     fontSize: 11,
     textAlign: 'center',
   },
@@ -281,12 +293,12 @@ const styles = StyleSheet.create({
   keyBtn: {
     flex: 1,
     height: 64,
-    backgroundColor: '#1E293B',
-    borderRadius: 16,
+    backgroundColor: '#3C364C',
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   keyText: {
     fontSize: 26,
@@ -294,13 +306,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   specialKey: {
-    backgroundColor: '#0F172A',
-    borderColor: '#1E293B',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderColor: 'rgba(255, 255, 255, 0.04)',
   },
   specialKeyText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#94A3B8',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#A8AAAE',
   },
   cancelBtn: {
     marginTop: 20,
@@ -308,8 +320,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   cancelBtnText: {
-    color: '#64748B',
+    color: '#A8AAAE',
     fontSize: 14,
     fontWeight: '600',
   },
 });
+

@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { useCartStore } from '../../store/cartStore';
 import { useProductStore } from '../../store/productStore';
 import { useAuthStore } from '../../store/authStore';
@@ -18,11 +19,12 @@ import { CartItemList } from '../../components/bills/CartItemList';
 import { QuickItemPicker } from '../../components/bills/QuickItemPicker';
 import { POSBarcodeScannerModal } from '../../components/bills/POSBarcodeScannerModal';
 import { Product } from '@kirana-pro/shared';
+import { colors } from '../../theme';
 
 export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpenCheckout }) => {
   const navigation = useNavigation<any>();
   const { user } = useAuthStore();
-  const { products, findByBarcode } = useProductStore();
+  const { products } = useProductStore();
   const {
     items,
     totals,
@@ -66,7 +68,7 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F2F2F7" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -88,6 +90,7 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
                 ]);
               }}
             >
+              <Feather name="trash-2" size={13} color={colors.danger} style={{ marginRight: 4 }} />
               <Text style={styles.clearText}>Clear</Text>
             </TouchableOpacity>
           )}
@@ -97,7 +100,7 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
             onPress={handleScanBarcode}
             activeOpacity={0.8}
           >
-            <Text style={styles.scanIcon}>📷</Text>
+            <Feather name="camera" size={14} color={colors.primary} style={{ marginRight: 5 }} />
             <Text style={styles.scanText}>Scan</Text>
           </TouchableOpacity>
         </View>
@@ -105,17 +108,17 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
 
       {/* Search Product Bar */}
       <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Feather name="search" size={16} color={colors.textSecondary} style={{ marginRight: 8 }} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search products, barcodes, Hindi..."
-          placeholderTextColor="#8E8E93"
+          placeholderTextColor={colors.textMuted}
           value={searchQuery}
           onChangeText={handleSearch}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => handleSearch('')}>
-            <Text style={styles.clearIcon}>✕</Text>
+            <Feather name="x" size={16} color={colors.textMuted} />
           </TouchableOpacity>
         )}
       </View>
@@ -182,7 +185,8 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
               }
             }}
           >
-            <Text style={styles.payButtonText}>Proceed to Pay ➔</Text>
+            <Text style={styles.payButtonText}>Proceed to Pay</Text>
+            <Feather name="arrow-right" size={15} color="#FFFFFF" style={{ marginLeft: 6 }} />
           </TouchableOpacity>
         </View>
       )}
@@ -199,7 +203,7 @@ export const BillingScreen: React.FC<{ onOpenCheckout?: () => void }> = ({ onOpe
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -210,16 +214,14 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   headerTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#1C1C1E',
-    letterSpacing: -0.5,
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.text,
   },
   headerSub: {
     fontSize: 13,
-    color: '#8E8E93',
+    color: colors.textSecondary,
     marginTop: 2,
-    letterSpacing: -0.1,
   },
   headerActions: {
     flexDirection: 'row',
@@ -227,32 +229,30 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   clearBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 9999,
-    backgroundColor: 'rgba(255, 59, 48, 0.12)',
+    borderRadius: 8,
+    backgroundColor: 'rgba(234, 84, 85, 0.12)',
   },
   clearText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FF3B30',
+    color: colors.danger,
   },
   scanBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    backgroundColor: colors.primaryLight,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 9999,
-  },
-  scanIcon: {
-    fontSize: 14,
-    marginRight: 4,
+    borderRadius: 8,
   },
   scanText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#059669',
+    color: colors.primary,
   },
   searchBox: {
     flexDirection: 'row',
@@ -260,44 +260,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
     marginTop: 4,
-    borderRadius: 14,
+    borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderWidth: 0.5,
-    borderColor: 'rgba(60, 60, 67, 0.12)',
+    borderWidth: 1,
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 3,
     elevation: 1,
   },
-  searchIcon: {
-    fontSize: 14,
-    marginRight: 8,
-    opacity: 0.6,
-  },
   searchInput: {
     flex: 1,
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#1C1C1E',
-  },
-  clearIcon: {
     fontSize: 14,
-    color: '#8E8E93',
-    padding: 4,
+    fontWeight: '500',
+    color: colors.text,
   },
   searchResultsContainer: {
     backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
     marginTop: 6,
-    borderRadius: 16,
-    borderWidth: 0.5,
-    borderColor: 'rgba(60, 60, 67, 0.12)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 14,
+    shadowRadius: 10,
     elevation: 4,
     maxHeight: 240,
     zIndex: 10,
@@ -309,34 +299,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: 'rgba(60, 60, 67, 0.08)',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   searchResultLeft: {
     flex: 1,
   },
   searchResultName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#1C1C1E',
+    color: colors.text,
   },
   searchResultHindi: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   searchResultRight: {
     alignItems: 'flex-end',
   },
   searchResultPrice: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#10B981',
+    color: colors.primary,
   },
   searchResultAdd: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#007AFF',
+    color: colors.primary,
     marginTop: 2,
   },
   scrollArea: {
@@ -351,8 +341,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 0.5,
-    borderTopColor: 'rgba(60, 60, 67, 0.12)',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
     paddingHorizontal: 20,
     paddingVertical: 14,
     flexDirection: 'row',
@@ -360,7 +350,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.06,
     shadowRadius: 10,
     elevation: 8,
   },
@@ -369,23 +359,24 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 12,
-    color: '#8E8E93',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   totalValue: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#1C1C1E',
-    letterSpacing: -0.3,
+    color: colors.text,
   },
   payButton: {
-    backgroundColor: '#1D1D1F',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 9999,
-    shadowColor: '#000',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary, // MasterX Royal Purple
+    paddingHorizontal: 22,
+    paddingVertical: 13,
+    borderRadius: 10,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 4,
   },
@@ -393,6 +384,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
-    letterSpacing: -0.2,
   },
 });

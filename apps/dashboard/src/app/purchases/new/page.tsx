@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Product, PurchaseInvoice, PurchaseInvoiceDraft, Supplier } from '@kirana-pro/shared';
 import { useAuth } from '../../../context/AuthContext';
+import { ScanLine, CheckCircle2, FileText, Package, Plus, ArrowLeft, Sparkles } from 'lucide-react';
 import {
   subscribeStoreProducts,
   subscribeStoreSuppliers,
@@ -101,33 +102,37 @@ export default function NewPurchasePage() {
       {/* Top Navigation & Breadcrumbs */}
       <div style={styles.topNav}>
         <Link href="/purchases" style={styles.backLink}>
-          ← Back to Purchases Ledger
+          <ArrowLeft size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Back to Purchases Ledger
         </Link>
         <div style={styles.breadcrumb}>
           <span>Wholesale</span>
           <span>/</span>
-          <span style={{ color: '#0F172A', fontWeight: 600 }}>Scan & Inward Bill (OCR)</span>
+          <span style={{ color: '#2F2B3D', fontWeight: 600 }}>Scan & Inward Bill (OCR)</span>
         </div>
       </div>
 
       {/* Header Banner */}
       <div style={styles.heroBanner}>
         <div>
-          <h1 style={styles.pageTitle}>📥 Inward Wholesaler Bill (Free WASM OCR)</h1>
+          <h1 style={styles.pageTitle}>
+            <ScanLine size={22} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> Inward Wholesaler Bill (Free WASM OCR)
+          </h1>
           <p style={styles.pageDesc}>
             Scan distributor invoices like Parle (N R ENTERPRISES). Auto-calculates quantities from Gross/Rate,
             splits CGST & SGST 2.5%, and updates your store stock atomically.
           </p>
         </div>
         <div style={styles.tagBadge}>
-          ⚡ Tesseract WASM • 100% Free Tier
+          <Sparkles size={13} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Tesseract WASM • 100% Free Tier
         </div>
       </div>
 
       {/* Success Banner */}
       {successInfo ? (
         <div style={styles.successCard}>
-          <div style={styles.successIcon}>🎉</div>
+          <div style={styles.successIcon}>
+            <CheckCircle2 size={44} color="#28C76F" />
+          </div>
           <div style={{ flex: 1 }}>
             <h2 style={styles.successTitle}>
               Invoice #{successInfo.invoiceNo} Successfully Inwarded!
@@ -138,10 +143,10 @@ export default function NewPurchasePage() {
             </p>
             <div style={styles.successBtnRow}>
               <Link href="/purchases" style={styles.viewLedgerBtn}>
-                📋 View Purchases Ledger
+                <FileText size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> View Purchases Ledger
               </Link>
               <Link href="/products" style={styles.viewStockBtn}>
-                📦 Check Updated Product Stock
+                <Package size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Check Updated Product Stock
               </Link>
               <button
                 type="button"
@@ -151,7 +156,7 @@ export default function NewPurchasePage() {
                 }}
                 style={styles.scanAnotherBtn}
               >
-                + Scan Another Bill
+                <Plus size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Scan Another Bill
               </button>
             </div>
           </div>
@@ -275,36 +280,39 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   viewLedgerBtn: {
-    backgroundColor: '#059669',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     textDecoration: 'none',
     padding: '10px 18px',
-    borderRadius: '10px',
+    borderRadius: '8px',
     fontSize: '13px',
     fontWeight: 700,
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   viewStockBtn: {
     backgroundColor: '#FFFFFF',
-    color: '#047857',
+    color: '#2F2B3D',
     textDecoration: 'none',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#A7F3D0',
+    border: '1px solid #DBDADE',
     padding: '10px 18px',
-    borderRadius: '10px',
+    borderRadius: '8px',
     fontSize: '13px',
     fontWeight: 600,
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   scanAnotherBtn: {
-    backgroundColor: '#FFFFFF',
-    color: '#334155',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: '#CBD5E1',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
+    border: '1px solid rgba(115, 103, 240, 0.35)',
     padding: '10px 18px',
-    borderRadius: '10px',
+    borderRadius: '8px',
     fontSize: '13px',
     fontWeight: 600,
     cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
 };

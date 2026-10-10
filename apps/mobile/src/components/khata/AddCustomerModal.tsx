@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { createCustomer } from '../../services/khata';
 import { useAuthStore } from '../../store/authStore';
 import { useKhataStore } from '../../store/khataStore';
@@ -72,8 +73,8 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
         <View style={styles.card}>
           <View style={styles.header}>
             <Text style={styles.title}>Add Khata Customer</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeText}>✕</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
+              <Feather name="x" size={18} color="#82808B" />
             </TouchableOpacity>
           </View>
 
@@ -81,8 +82,8 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
             <Text style={styles.label}>CUSTOMER NAME *</Text>
             <TextInput
               style={styles.input}
-              placeholder="e.g. Ramesh Sharma (Pandit Ji)"
-              placeholderTextColor="#94A3B8"
+              placeholder="e.g. Ramesh Sharma"
+              placeholderTextColor="#82808B"
               value={name}
               onChangeText={setName}
             />
@@ -91,7 +92,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
             <TextInput
               style={styles.input}
               placeholder="9876543210"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#82808B"
               keyboardType="phone-pad"
               maxLength={10}
               value={phoneNumber}
@@ -102,7 +103,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
             <TextInput
               style={styles.input}
               placeholder="e.g. Near Shiv Mandir, Ward 4"
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor="#82808B"
               value={address}
               onChangeText={setAddress}
             />
@@ -111,6 +112,7 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
               style={[styles.saveBtn, loading && styles.saveBtnDisabled]}
               onPress={handleSave}
               disabled={loading}
+              activeOpacity={0.85}
             >
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
@@ -128,14 +130,21 @@ export const AddCustomerModal: React.FC<AddCustomerModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    backgroundColor: 'rgba(47, 43, 61, 0.6)',
     justifyContent: 'center',
     padding: 20,
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 20,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
+    shadowColor: '#2F2B3D',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   header: {
     flexDirection: 'row',
@@ -145,16 +154,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
   },
   closeBtn: {
     padding: 4,
-  },
-  closeText: {
-    fontSize: 16,
-    color: '#94A3B8',
-    fontWeight: '700',
   },
   form: {
     gap: 12,
@@ -162,32 +166,37 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#82808B',
     marginBottom: -4,
   },
   input: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 15,
-    color: '#0F172A',
+    fontSize: 14,
+    color: '#4B465C',
   },
   saveBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   saveBtnDisabled: {
     opacity: 0.6,
   },
   saveBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

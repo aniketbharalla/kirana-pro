@@ -2,48 +2,50 @@ import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 import { Platform } from 'react-native';
 
 /**
- * Apple iOS Human Interface Guidelines (HIG) Design Tokens
- * Fluid physical typography, translucent materials, system colors & continuous corners.
+ * MasterX Design System & Human Interface Guidelines Tokens
+ * Fluid physical typography, translucent materials, and MasterX signature Royal Purple CTA.
  */
 export const colors = {
-  // Apple System Tint Colors
-  primary: '#10B981', // Kirana Retail Emerald
-  primaryDark: '#059669',
-  primaryForest: '#047857',
-  primaryLight: 'rgba(16, 185, 129, 0.12)',
-  primaryBorder: 'rgba(16, 185, 129, 0.28)',
+  // MasterX Primary CTA & Brand Accent
+  primary: '#7367F0', // MasterX Royal Purple
+  primaryDark: '#5E50EE',
+  primaryForest: '#4839EB',
+  primaryLight: '#EDEBFD', // MasterX Soft Purple Tint
+  primaryBorder: 'rgba(115, 103, 240, 0.35)',
 
-  systemBlue: '#007AFF', // iOS System Blue
-  systemGreen: '#34C759',
-  systemOrange: '#FF9500',
-  systemRed: '#FF3B30',
-  systemIndigo: '#5856D6',
+  // Semantic Colors (MasterX UI Kit)
+  systemBlue: '#00CFE8', // MasterX Info Cyan
+  systemGreen: '#28C76F', // MasterX Success Green
+  systemOrange: '#FF9F43', // MasterX Warning Orange
+  systemRed: '#EA5455', // MasterX Danger Red
+  systemIndigo: '#7367F0', // MasterX Violet
 
-  secondary: '#007AFF',
-  accent: '#FF9500',
-  danger: '#FF3B30',
+  secondary: '#7367F0',
+  accent: '#FF9F43',
+  danger: '#EA5455',
+  success: '#28C76F',
 
-  // iOS System Background Hierarchy
-  background: '#F2F2F7', // iOS Grouped Table Background
-  surface: '#FFFFFF', // Inset Group Card Surface
+  // MasterX Neutral Canvas Hierarchy
+  background: '#F8F7FA', // MasterX Light Neutral Canvas
+  surface: '#FFFFFF', // Card Surface
   card: '#FFFFFF',
 
-  // iOS Dynamic Label Typography Hierarchy
-  text: '#1C1C1E', // Primary Label
-  textSecondary: '#636366', // Secondary Label
-  textMuted: '#8E8E93', // Tertiary / Placeholder
-  border: 'rgba(60, 60, 67, 0.12)', // iOS Hairline Separator
-  divider: 'rgba(60, 60, 67, 0.08)',
+  // MasterX Typography Hierarchy
+  text: '#2F2B3D', // Primary Charcoal Text
+  textSecondary: '#6F6B7D', // Secondary Muted Slate
+  textMuted: '#A8AAAE', // Tertiary / Placeholder
+  border: '#DBDADE', // MasterX Hairline Separator
+  divider: '#DBDADE',
 
   // Segmented Pill & Sheet Controls
-  pillActiveBg: '#10B981',
+  pillActiveBg: '#7367F0',
   pillActiveText: '#FFFFFF',
-  pillInactiveBg: 'rgba(118, 118, 128, 0.12)',
-  pillInactiveText: '#1C1C1E',
+  pillInactiveBg: '#EDEBFD',
+  pillInactiveText: '#7367F0',
 
   // Translucent Frosted Glass Overlay
-  glassOverlay: 'rgba(255, 255, 255, 0.75)',
-  glassBorder: 'rgba(255, 255, 255, 0.6)',
+  glassOverlay: 'rgba(248, 247, 250, 0.85)',
+  glassBorder: 'rgba(219, 218, 222, 0.6)',
 };
 
 /**

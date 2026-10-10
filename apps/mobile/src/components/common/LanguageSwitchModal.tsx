@@ -7,18 +7,18 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useLanguageStore, Language } from '../../store/languageStore';
-import { colors } from '../../theme';
 
 interface LanguageSwitchModalProps {
   visible: boolean;
   onClose: () => void;
 }
 
-const LANGUAGE_OPTIONS: { code: Language; label: string; sublabel: string; flag: string }[] = [
-  { code: 'en', label: 'English', sublabel: 'Standard English', flag: '🇬🇧' },
-  { code: 'hi', label: 'हिंदी', sublabel: 'शुद्ध हिंदी', flag: '🇮🇳' },
-  { code: 'hinglish', label: 'Hinglish', sublabel: 'दुकान की भाषा', flag: '🏪' },
+const LANGUAGE_OPTIONS: { code: Language; label: string; sublabel: string; badge: string }[] = [
+  { code: 'en', label: 'English', sublabel: 'Standard English', badge: 'EN' },
+  { code: 'hi', label: 'हिंदी', sublabel: 'शुद्ध हिंदी', badge: 'HI' },
+  { code: 'hinglish', label: 'Hinglish', sublabel: 'दुकान की भाषा', badge: 'HGL' },
 ];
 
 export const LanguageSwitchModal: React.FC<LanguageSwitchModalProps> = ({ visible, onClose }) => {
@@ -39,7 +39,10 @@ export const LanguageSwitchModal: React.FC<LanguageSwitchModalProps> = ({ visibl
       <Pressable style={styles.backdrop} onPress={onClose}>
         <View style={styles.sheet}>
           <View style={styles.handle} />
-          <Text style={styles.title}>🌐 Choose Language / भाषा चुनें</Text>
+          <View style={styles.titleRow}>
+            <Feather name="globe" size={20} color="#7367F0" style={{ marginRight: 8 }} />
+            <Text style={styles.title}>Choose Language / भाषा चुनें</Text>
+          </View>
           <Text style={styles.subtitle}>All text updates instantly across the app</Text>
 
           {LANGUAGE_OPTIONS.map((opt) => {
@@ -51,19 +54,23 @@ export const LanguageSwitchModal: React.FC<LanguageSwitchModalProps> = ({ visibl
                 onPress={() => handleSelect(opt.code)}
                 activeOpacity={0.75}
               >
-                <Text style={styles.flag}>{opt.flag}</Text>
+                <View style={[styles.langBadge, isSelected && styles.langBadgeSelected]}>
+                  <Text style={[styles.langBadgeText, isSelected && styles.langBadgeTextSelected]}>
+                    {opt.badge}
+                  </Text>
+                </View>
                 <View style={styles.optionText}>
                   <Text style={[styles.optionLabel, isSelected && styles.optionLabelSelected]}>
                     {opt.label}
                   </Text>
                   <Text style={styles.optionSublabel}>{opt.sublabel}</Text>
                 </View>
-                {isSelected && <Text style={styles.check}>✓</Text>}
+                {isSelected && <Feather name="check" size={18} color="#7367F0" />}
               </TouchableOpacity>
             );
           })}
 
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.85}>
             <Text style={styles.closeBtnText}>Close / बंद करें</Text>
           </TouchableOpacity>
         </View>
@@ -77,7 +84,7 @@ export const LanguageTogglePill: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const { language } = useLanguageStore();
 
-  const label = language === 'en' ? '🌐 EN' : language === 'hi' ? '🌐 हिंदी' : '🌐 HGL';
+  const label = language === 'en' ? 'EN' : language === 'hi' ? 'हिंदी' : 'HGL';
 
   return (
     <>
@@ -86,6 +93,7 @@ export const LanguageTogglePill: React.FC = () => {
         onPress={() => setModalVisible(true)}
         activeOpacity={0.8}
       >
+        <Feather name="globe" size={12} color="#7367F0" style={{ marginRight: 4 }} />
         <Text style={styles.pillText}>{label}</Text>
       </TouchableOpacity>
       <LanguageSwitchModal visible={modalVisible} onClose={() => setModalVisible(false)} />
@@ -96,100 +104,121 @@ export const LanguageTogglePill: React.FC = () => {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(47, 43, 61, 0.6)',
     justifyContent: 'flex-end',
   },
   sheet: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     padding: 24,
     paddingBottom: 40,
   },
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: '#CBD5E0',
+    backgroundColor: '#DBDADE',
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1A202C',
-    textAlign: 'center',
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 6,
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#4B465C',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#82808B',
     textAlign: 'center',
     marginBottom: 20,
   },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
+    padding: 14,
+    borderRadius: 8,
     marginBottom: 10,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    backgroundColor: '#F8F7FA',
+    borderWidth: 1,
+    borderColor: '#DBDADE',
   },
   optionSelected: {
-    borderColor: colors.primary,
-    backgroundColor: `${colors.primary}12`,
+    borderColor: '#7367F0',
+    backgroundColor: '#EDEBFD',
   },
-  flag: {
-    fontSize: 28,
-    marginRight: 14,
+  langBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#DBDADE',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  langBadgeSelected: {
+    backgroundColor: '#7367F0',
+  },
+  langBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#4B465C',
+  },
+  langBadgeTextSelected: {
+    color: '#FFFFFF',
   },
   optionText: {
     flex: 1,
   },
   optionLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#2D3748',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#4B465C',
   },
   optionLabelSelected: {
-    color: colors.primary,
+    color: '#7367F0',
   },
   optionSublabel: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: '#82808B',
     marginTop: 2,
-  },
-  check: {
-    fontSize: 20,
-    color: colors.primary,
-    fontWeight: '900',
   },
   closeBtn: {
     marginTop: 12,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#F8F7FA',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DBDADE',
   },
   closeBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#475569',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#5D596C',
   },
   // Pill
   pill: {
-    backgroundColor: `${colors.primary}15`,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    backgroundColor: '#EDEBFD',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: `${colors.primary}40`,
+    borderColor: 'rgba(115, 103, 240, 0.2)',
   },
   pillText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primary,
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#7367F0',
   },
 });
+

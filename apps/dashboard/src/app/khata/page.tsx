@@ -5,6 +5,7 @@ import { KhataTable } from '../../components/KhataTable';
 import { CustomerKhata } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreCustomers, saveStoreCustomer } from '../../lib/storeService';
+import { BookOpen, Plus, X, Save } from 'lucide-react';
 
 export default function KhataPage() {
   const { storeId } = useAuth();
@@ -67,7 +68,9 @@ export default function KhataPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.badge}>📒 UDHAR LEDGER</span>
+            <span style={styles.badge}>
+              <BookOpen size={12} style={{ marginRight: 4 }} /> UDHAR LEDGER
+            </span>
             <span style={styles.countBadge}>{customers.length} Accounts</span>
           </div>
           <h1 style={styles.title}>Customer Khata (उधार बहीखाता)</h1>
@@ -77,7 +80,7 @@ export default function KhataPage() {
         </div>
 
         <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
-          ➕ Add Khata Customer
+          <Plus size={15} style={{ marginRight: 6 }} /> Add Khata Customer
         </button>
       </div>
 
@@ -88,13 +91,15 @@ export default function KhataPage() {
         </div>
       ) : customers.length === 0 ? (
         <div style={styles.emptyCard}>
-          <div style={styles.emptyIcon}>📒</div>
+          <div style={styles.emptyIcon}>
+            <BookOpen size={48} color="#A8AAAE" />
+          </div>
           <h3 style={styles.emptyTitle}>No Khata Customers Yet</h3>
           <p style={styles.emptySubtitle}>
             Add regular customers to keep track of store credits (उधार), partial payments, and WhatsApp reminders.
           </p>
           <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
-            ➕ Add First Khata Account
+            <Plus size={15} style={{ marginRight: 6 }} /> Add First Khata Account
           </button>
         </div>
       ) : (
@@ -106,9 +111,11 @@ export default function KhataPage() {
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>➕ Add Customer to Khata</h2>
+              <h2 style={styles.modalTitle}>
+                <Plus size={18} style={{ marginRight: 6 }} /> Add Customer to Khata
+              </h2>
               <button style={styles.closeBtn} onClick={() => setShowAddModal(false)}>
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -166,7 +173,8 @@ export default function KhataPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} style={styles.btnPrimary}>
-                  {saving ? 'Saving...' : '💾 Save Khata Account'}
+                  <Save size={15} style={{ marginRight: 6 }} />
+                  {saving ? 'Saving...' : 'Save Khata Account'}
                 </button>
               </div>
             </form>
@@ -199,53 +207,60 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '6px',
   },
   badge: {
-    fontSize: '10px',
-    fontWeight: 800,
+    fontSize: '11px',
+    fontWeight: 700,
     letterSpacing: '0.04em',
-    color: '#D97706',
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
-    padding: '3px 9px',
+    color: '#7367F0',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.28)',
+    padding: '4px 10px',
     borderRadius: '999px',
     textTransform: 'uppercase',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   countBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#86868B',
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    padding: '3px 9px',
+    color: '#6F6B7D',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    padding: '4px 10px',
     borderRadius: '999px',
   },
   title: {
     fontSize: '26px',
     fontWeight: 800,
-    color: '#1D1D1F',
-    letterSpacing: '-0.03em',
+    color: '#2F2B3D',
+    letterSpacing: '-0.02em',
     margin: 0,
     lineHeight: 1.15,
   },
   subtitle: {
     fontSize: '13px',
-    color: '#86868B',
+    color: '#6F6B7D',
     marginTop: '4px',
     margin: 0,
   },
   btnPrimary: {
-    backgroundColor: '#D97706',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '11px',
+    borderRadius: '8px',
     padding: '10px 18px',
     fontSize: '13px',
-    fontWeight: 700,
+    fontWeight: 600,
     cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(217, 119, 6, 0.25)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
   },
   btnSecondary: {
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    color: '#555558',
-    border: 'none',
-    borderRadius: '11px',
+    backgroundColor: 'rgba(115, 103, 240, 0.08)',
+    color: '#7367F0',
+    border: '1px solid rgba(115, 103, 240, 0.2)',
+    borderRadius: '8px',
     padding: '10px 16px',
     fontSize: '13px',
     fontWeight: 600,
@@ -255,17 +270,17 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
-    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.08)',
   },
   spinner: {
     width: '32px',
     height: '32px',
     borderWidth: '3px',
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderTopColor: '#D97706',
+    borderColor: 'rgba(115, 103, 240, 0.15)',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
@@ -320,12 +335,12 @@ const styles: Record<string, React.CSSProperties> = {
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '24px',
-    padding: '28px',
+    borderRadius: '12px',
+    padding: '24px',
     width: '92%',
     maxWidth: '480px',
-    boxShadow: '0 20px 48px -8px rgba(0, 0, 0, 0.2)',
-    border: '1px solid rgba(0, 0, 0, 0.08)',
+    boxShadow: '0 16px 36px rgba(47, 43, 61, 0.16)',
+    border: '1px solid #DBDADE',
   },
   modalHeader: {
     display: 'flex',

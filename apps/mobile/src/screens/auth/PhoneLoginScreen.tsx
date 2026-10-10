@@ -11,6 +11,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import { UserProfile } from '@kirana-pro/shared';
 import { sendPhoneOTP, verifyOTP, setupRecaptchaVerifier } from '../../services/auth';
@@ -115,20 +116,20 @@ export const PhoneLoginScreen: React.FC = () => {
 
           {errorMsg ? (
             <View style={styles.errorBox}>
-              <Text style={styles.errorText}>⚠️ {errorMsg}</Text>
+              <Feather name="alert-circle" size={14} color="#EA5455" style={{ marginRight: 6 }} />
+              <Text style={styles.errorText}>{errorMsg}</Text>
             </View>
           ) : null}
 
           {!isOtpSent ? (
             <View style={styles.inputContainer}>
               <View style={styles.prefixBox}>
-                <Text style={styles.flagEmoji}>🇮🇳</Text>
                 <Text style={styles.prefixText}>+91</Text>
               </View>
               <TextInput
                 style={styles.input}
                 placeholder="98765 43210"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor="#A8AAAE"
                 keyboardType="phone-pad"
                 maxLength={10}
                 value={phoneNumber}
@@ -141,7 +142,7 @@ export const PhoneLoginScreen: React.FC = () => {
               <TextInput
                 style={styles.otpInput}
                 placeholder="• • • • • •"
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor="#A8AAAE"
                 keyboardType="number-pad"
                 maxLength={6}
                 value={otpCode}
@@ -184,7 +185,7 @@ export const PhoneLoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   container: {
     flex: 1,
@@ -195,27 +196,27 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   subtitle: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 6,
     marginBottom: 24,
     lineHeight: 20,
   },
   errorBox: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#FCE4E4',
     borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 10,
+    borderColor: '#EA5455',
+    borderRadius: 8,
     padding: 10,
     marginBottom: 16,
   },
   errorText: {
-    color: '#DC2626',
+    color: '#EA5455',
     fontSize: 13,
     fontWeight: '500',
   },
@@ -223,35 +224,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
     overflow: 'hidden',
     marginBottom: 20,
   },
   prefixBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 14,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#EDEBFD',
     borderRightWidth: 1,
-    borderRightColor: '#E2E8F0',
-  },
-  flagEmoji: {
-    fontSize: 18,
-    marginRight: 6,
+    borderRightColor: '#DBDADE',
   },
   prefixText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#7367F0',
   },
   input: {
     flex: 1,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#0F172A',
+    color: '#2F2B3D',
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
@@ -261,33 +258,33 @@ const styles = StyleSheet.create({
   otpInput: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#10B981',
-    borderRadius: 14,
-    fontSize: 28,
+    borderColor: '#7367F0',
+    borderRadius: 8,
+    fontSize: 26,
     fontWeight: '700',
-    letterSpacing: 10,
+    letterSpacing: 8,
     textAlign: 'center',
     paddingVertical: 14,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   resendButton: {
     alignSelf: 'center',
     marginTop: 10,
   },
   resendText: {
-    color: '#10B981',
+    color: '#7367F0',
     fontSize: 13,
     fontWeight: '600',
   },
   primaryButton: {
-    backgroundColor: '#10B981',
-    paddingVertical: 15,
-    borderRadius: 14,
+    backgroundColor: '#7367F0',
+    paddingVertical: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    shadowColor: '#10B981',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
     elevation: 3,
   },
   primaryButtonDisabled: {
@@ -295,8 +292,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
-
 });

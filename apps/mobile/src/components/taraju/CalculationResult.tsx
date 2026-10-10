@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors } from '../../theme';
 
 export interface CalculationResultProps {
   mode: 'amount_to_weight' | 'weight_to_price';
@@ -20,8 +22,13 @@ export const CalculationResult: React.FC<CalculationResultProps> = ({
     <View style={styles.card}>
       <View style={styles.badgeRow}>
         <View style={styles.modeBadge}>
+          {isAmountToWeight ? (
+            <MaterialCommunityIcons name="scale-balance" size={13} color="#FFFFFF" style={{ marginRight: 4 }} />
+          ) : (
+            <Feather name="credit-card" size={12} color="#FFFFFF" style={{ marginRight: 4 }} />
+          )}
           <Text style={styles.modeBadgeText}>
-            {isAmountToWeight ? '⚖️ EXACT WEIGHT TO MEASURE' : '💰 TOTAL AMOUNT TO CHARGE'}
+            {isAmountToWeight ? 'EXACT WEIGHT TO MEASURE' : 'TOTAL AMOUNT TO CHARGE'}
           </Text>
         </View>
         <Text style={styles.rateText}>Rate: ₹{rate}/kg</Text>
@@ -44,15 +51,15 @@ export const CalculationResult: React.FC<CalculationResultProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#065F46',
-    borderRadius: 22,
+    backgroundColor: colors.primary, // MasterX signature Royal Purple #7367F0
+    borderRadius: 18,
     padding: 20,
     marginVertical: 14,
-    shadowColor: '#065F46',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 6,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -61,19 +68,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   modeBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 8,
   },
   modeBadgeText: {
-    color: '#A7F3D0',
+    color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   rateText: {
-    color: '#D1FAE5',
+    color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 13,
     fontWeight: '700',
   },
@@ -88,14 +97,14 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   summaryBar: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.16)',
     borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 14,
     alignItems: 'center',
   },
   summaryText: {
-    color: '#ECFDF5',
+    color: '#EDEBFD',
     fontSize: 13,
     fontWeight: '600',
     textAlign: 'center',

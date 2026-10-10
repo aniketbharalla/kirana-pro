@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Supplier } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreSuppliers, saveStoreSupplier } from '../../lib/storeService';
+import { Building2, Plus, X, Search, Phone, Save } from 'lucide-react';
 
 export default function SuppliersPage() {
   const { storeId } = useAuth();
@@ -88,7 +89,7 @@ export default function SuppliersPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.badge}>🏢 VENDOR DIRECTORY</span>
+            <span style={styles.badge}>VENDOR DIRECTORY</span>
             <span style={styles.countBadge}>{suppliers.length} Vendors</span>
           </div>
           <h1 style={styles.title}>Wholesalers & Mandi Distributors</h1>
@@ -98,7 +99,7 @@ export default function SuppliersPage() {
         </div>
 
         <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
-          ➕ Add New Supplier
+          <Plus size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Add New Supplier
         </button>
       </div>
 
@@ -116,25 +117,32 @@ export default function SuppliersPage() {
               <div style={styles.bannerAmount}>₹{totalBalance.toFixed(2)}</div>
             </div>
             <div style={styles.searchBox}>
-              <input
-                style={styles.searchInput}
-                placeholder="Search wholesaler name or phone..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <div style={{ position: 'relative' }}>
+                <Search size={15} color="#6F6B7D" style={{ position: 'absolute', left: 12, top: 12 }} />
+                <input
+                  style={{ ...styles.searchInput, paddingLeft: '34px' }}
+                  placeholder="Search wholesaler name or phone..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
           {/* Table or Empty State */}
           {suppliers.length === 0 ? (
             <div style={styles.emptyCard}>
-              <div style={styles.emptyIcon}>🏢</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                <div style={{ width: 56, height: 56, borderRadius: '12px', backgroundColor: '#EDEBFD', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Building2 size={28} color="#7367F0" />
+                </div>
+              </div>
               <h3 style={styles.emptyTitle}>No Suppliers Added Yet</h3>
               <p style={styles.emptySubtitle}>
                 Add your wholesale mandi distributors and company sales reps to track pending ledger dues and inward billing history.
               </p>
               <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
-                ➕ Add First Wholesaler
+                <Plus size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Add First Wholesaler
               </button>
             </div>
           ) : (
@@ -164,7 +172,10 @@ export default function SuppliersPage() {
                         <td style={{ ...styles.td, fontWeight: '700', color: '#0F172A' }}>
                           {s.name}
                         </td>
-                        <td style={styles.td}>📞 {s.phone}</td>
+                        <td style={styles.td}>
+                          <Phone size={13} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle', color: '#6F6B7D' }} />
+                          {s.phone}
+                        </td>
                         <td style={{ ...styles.td, fontFamily: 'monospace' }}>
                           {s.gstin || '—'}
                         </td>
@@ -197,9 +208,11 @@ export default function SuppliersPage() {
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>➕ Add Wholesaler / Distributor</h2>
+              <h2 style={styles.modalTitle}>
+                <Building2 size={18} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> Add Wholesaler / Distributor
+              </h2>
               <button style={styles.closeBtn} onClick={() => setShowAddModal(false)}>
-                ✕
+                <X size={18} />
               </button>
             </div>
 
@@ -275,7 +288,8 @@ export default function SuppliersPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} style={styles.btnPrimary}>
-                  {saving ? 'Saving...' : '💾 Save Vendor'}
+                  <Save size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} />
+                  {saving ? 'Saving...' : 'Save Vendor'}
                 </button>
               </div>
             </form>
@@ -339,21 +353,21 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
   },
   btnPrimary: {
-    backgroundColor: '#0284C7',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '8px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(2, 132, 199, 0.2)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
   btnSecondary: {
     backgroundColor: '#FFFFFF',
-    color: '#334155',
-    border: '1.5px solid #E2E8F0',
-    borderRadius: '10px',
+    color: '#2F2B3D',
+    border: '1px solid #DBDADE',
+    borderRadius: '8px',
     padding: '10px 16px',
     fontSize: '13px',
     fontWeight: 600,
@@ -363,43 +377,44 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#0284C7',
+    border: '3px solid #EDEBFD',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#6F6B7D',
     margin: 0,
   },
   banner: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
+    border: '1px solid #DBDADE',
+    borderRadius: '12px',
     padding: '20px 24px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '16px',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   bannerLabel: {
     fontSize: '12px',
     fontWeight: 700,
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   bannerAmount: {
     fontSize: '26px',
     fontWeight: 800,
-    color: '#EF4444',
+    color: '#EA5455',
   },
   searchBox: {
     width: '320px',
@@ -407,16 +422,18 @@ const styles: Record<string, React.CSSProperties> = {
   searchInput: {
     width: '100%',
     padding: '10px 14px',
-    borderRadius: '10px',
-    border: '1.5px solid #CBD5E1',
+    borderRadius: '8px',
+    border: '1px solid #DBDADE',
     fontSize: '13px',
+    color: '#2F2B3D',
     outline: 'none',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
+    border: '1px solid #DBDADE',
+    borderRadius: '12px',
     overflow: 'hidden',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   table: {
     width: '100%',

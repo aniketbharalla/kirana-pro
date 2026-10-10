@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Invoice, Product } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreInvoices, subscribeStoreProducts } from '../../lib/storeService';
+import { TrendingUp, Banknote, QrCode, BookOpen, BarChart3, Lightbulb } from 'lucide-react';
 
 export default function AnalyticsPage() {
   const { store, storeId } = useAuth();
@@ -152,7 +153,7 @@ export default function AnalyticsPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.analyticsBadge}>📈 BUSINESS INTELLIGENCE</span>
+            <span style={styles.analyticsBadge}><TrendingUp size={13} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> BUSINESS INTELLIGENCE</span>
             <span style={styles.storeBadge}>{store?.name || 'My Kirana'}</span>
           </div>
           <h1 style={styles.title}>Dukaan Profit & Sales Analytics</h1>
@@ -206,17 +207,17 @@ export default function AnalyticsPage() {
               <span style={styles.kpiSub}>Wholesale goods cost</span>
             </div>
 
-            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #10B981' }}>
+            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #28C76F' }}>
               <span style={styles.kpiLabel}>NET GROSS PROFIT</span>
-              <span style={{ ...styles.kpiVal, color: '#047857' }}>
+              <span style={{ ...styles.kpiVal, color: '#28C76F' }}>
                 ₹{metrics.grossProfit.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </span>
               <span style={styles.kpiSub}>Revenue minus COGS</span>
             </div>
 
-            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #3B82F6' }}>
+            <div style={{ ...styles.kpiCard, borderLeft: '4px solid #7367F0' }}>
               <span style={styles.kpiLabel}>GROSS MARGIN %</span>
-              <span style={{ ...styles.kpiVal, color: '#1D4ED8' }}>
+              <span style={{ ...styles.kpiVal, color: '#7367F0' }}>
                 {metrics.marginPercent.toFixed(1)}%
               </span>
               <span style={styles.kpiSub}>Target: 15% - 20% healthy</span>
@@ -237,16 +238,16 @@ export default function AnalyticsPage() {
                 <div>
                   <h2 style={styles.chartTitle}>7-Day Sales & Net Profit Velocity</h2>
                   <span style={styles.chartSub}>
-                    Green bar = Total Revenue • Purple bar = Gross Profit
+                    Purple bar = Total Revenue • Green bar = Gross Profit
                   </span>
                 </div>
                 <div style={styles.legendRow}>
                   <div style={styles.legendItem}>
-                    <span style={{ ...styles.legendDot, backgroundColor: '#10B981' }} />
+                    <span style={{ ...styles.legendDot, backgroundColor: '#7367F0' }} />
                     <span>Revenue</span>
                   </div>
                   <div style={styles.legendItem}>
-                    <span style={{ ...styles.legendDot, backgroundColor: '#8B5CF6' }} />
+                    <span style={{ ...styles.legendDot, backgroundColor: '#28C76F' }} />
                     <span>Profit</span>
                   </div>
                 </div>
@@ -294,7 +295,9 @@ export default function AnalyticsPage() {
                 {/* Cash */}
                 <div style={styles.meterItem}>
                   <div style={styles.meterInfo}>
-                    <span style={styles.meterLabel}>💵 Cash (नकद)</span>
+                    <span style={styles.meterLabel}>
+                      <Banknote size={15} color="#28C76F" style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Cash (नकद)
+                    </span>
                     <span style={styles.meterVal}>
                       ₹{metrics.cashSales.toFixed(0)} (
                       {metrics.revenue > 0
@@ -307,7 +310,7 @@ export default function AnalyticsPage() {
                     <div
                       style={{
                         ...styles.meterFill,
-                        backgroundColor: '#10B981',
+                        backgroundColor: '#28C76F',
                         width: `${
                           metrics.revenue > 0 ? (metrics.cashSales / metrics.revenue) * 100 : 0
                         }%`,
@@ -319,7 +322,9 @@ export default function AnalyticsPage() {
                 {/* UPI */}
                 <div style={styles.meterItem}>
                   <div style={styles.meterInfo}>
-                    <span style={styles.meterLabel}>📲 UPI QR (डिजिटल)</span>
+                    <span style={styles.meterLabel}>
+                      <QrCode size={15} color="#7367F0" style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> UPI QR (डिजिटल)
+                    </span>
                     <span style={styles.meterVal}>
                       ₹{metrics.upiSales.toFixed(0)} (
                       {metrics.revenue > 0
@@ -332,7 +337,7 @@ export default function AnalyticsPage() {
                     <div
                       style={{
                         ...styles.meterFill,
-                        backgroundColor: '#3B82F6',
+                        backgroundColor: '#7367F0',
                         width: `${
                           metrics.revenue > 0 ? (metrics.upiSales / metrics.revenue) * 100 : 0
                         }%`,
@@ -344,7 +349,9 @@ export default function AnalyticsPage() {
                 {/* Khata */}
                 <div style={styles.meterItem}>
                   <div style={styles.meterInfo}>
-                    <span style={styles.meterLabel}>📒 Khata (उधार)</span>
+                    <span style={styles.meterLabel}>
+                      <BookOpen size={15} color="#FF9F43" style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Khata (उधार)
+                    </span>
                     <span style={styles.meterVal}>
                       ₹{metrics.creditSales.toFixed(0)} (
                       {metrics.revenue > 0
@@ -368,7 +375,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div style={styles.khataInsightBox}>
-                <span style={styles.insightIcon}>💡</span>
+                <Lightbulb size={20} color="#FF9F43" style={{ flexShrink: 0, marginTop: 2 }} />
                 <p style={styles.insightText}>
                   <strong>Khata Tip:</strong> Regular credit customers boost lifetime loyalty. Track
                   due accounts in Khata tab for zero defaults.
@@ -657,13 +664,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   barRev: {
     width: '18px',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     borderRadius: '4px 4px 0 0',
     transition: 'height 0.3s ease',
   },
   barProfit: {
     width: '18px',
-    backgroundColor: '#8B5CF6',
+    backgroundColor: '#28C76F',
     borderRadius: '4px 4px 0 0',
     transition: 'height 0.3s ease',
   },

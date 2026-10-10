@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StaffMember, CounterSession } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreStaff, saveStoreStaff } from '../../lib/storeService';
+import { Users, Clock, Plus, UserPlus, X, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export default function StaffPage() {
   const { storeId, user, store } = useAuth();
@@ -93,7 +94,10 @@ export default function StaffPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.staffBadge}>🧑‍💼 COUNTER AUDIT & PERMISSIONS</span>
+            <span style={styles.staffBadge}>
+              <ShieldCheck size={12} style={{ marginRight: 4, display: 'inline', verticalAlign: 'middle' }} />
+              COUNTER AUDIT & PERMISSIONS
+            </span>
             <span style={styles.storeBadge}>{store?.name || 'Store'} Staff</span>
           </div>
           <h1 style={styles.title}>Staff & Cashier Counter Shift Register</h1>
@@ -109,18 +113,18 @@ export default function StaffPage() {
               style={{ ...styles.tabBtn, ...(viewTab === 'directory' ? styles.tabBtnActive : {}) }}
               onClick={() => setViewTab('directory')}
             >
-              👥 Staff Directory ({staff.length})
+              <Users size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Staff Directory ({staff.length})
             </button>
             <button
               style={{ ...styles.tabBtn, ...(viewTab === 'shifts' ? styles.tabBtnActive : {}) }}
               onClick={() => setViewTab('shifts')}
             >
-              🏁 Counter Shifts Log ({shifts.length})
+              <Clock size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Counter Shifts Log ({shifts.length})
             </button>
           </div>
 
           <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
-            ➕ Add Staff Member
+            <Plus size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Add Staff Member
           </button>
         </div>
       </div>
@@ -175,11 +179,15 @@ export default function StaffPage() {
 
               {shifts.length === 0 ? (
                 <div style={styles.emptyState}>
-                  <div style={{ fontSize: '36px', marginBottom: '8px' }}>🏁</div>
-                  <h4 style={{ margin: '0 0 4px 0', color: '#0F172A', fontSize: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                    <div style={{ width: 56, height: 56, borderRadius: '12px', backgroundColor: '#EDEBFD', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Clock size={28} color="#7367F0" />
+                    </div>
+                  </div>
+                  <h4 style={{ margin: '0 0 4px 0', color: '#2F2B3D', fontSize: '16px', fontWeight: 700 }}>
                     No Counter Shifts Recorded Yet
                   </h4>
-                  <p style={{ margin: 0, color: '#64748B', fontSize: '13px' }}>
+                  <p style={{ margin: 0, color: '#6F6B7D', fontSize: '13px' }}>
                     When cashiers open counters and close their registers from the mobile POS, all shifts will appear here.
                   </p>
                 </div>
@@ -217,11 +225,11 @@ export default function StaffPage() {
                               <span
                                 style={{
                                   ...styles.statusBadge,
-                                  backgroundColor: !s.isClosed ? '#DCFCE7' : '#F1F5F9',
-                                  color: !s.isClosed ? '#15803D' : '#475569',
+                                  backgroundColor: !s.isClosed ? 'rgba(40, 199, 111, 0.12)' : '#F1F5F9',
+                                  color: !s.isClosed ? '#28C76F' : '#6F6B7D',
                                 }}
                               >
-                                {!s.isClosed ? '🟢 Active' : '✓ Closed'}
+                                {!s.isClosed ? 'Active' : 'Closed'}
                               </span>
                             </td>
                             <td style={styles.td}>₹{s.openingCash.toLocaleString('en-IN')}</td>
@@ -239,7 +247,7 @@ export default function StaffPage() {
                               {!s.isClosed ? (
                                 <span style={{ color: '#94A3B8' }}>Pending Close</span>
                               ) : variance === 0 ? (
-                                <span style={styles.matchedBadge}>✓ Matched (₹0)</span>
+                                <span style={styles.matchedBadge}>Matched (₹0)</span>
                               ) : variance < 0 ? (
                                 <span style={styles.shortageBadge}>
                                   Shortage -₹{Math.abs(variance)}
@@ -296,11 +304,19 @@ export default function StaffPage() {
                         <td style={styles.td}>
                           <span
                             style={{
-                              color: m.isActive ? '#15803D' : '#94A3B8',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '3px 8px',
+                              borderRadius: '6px',
+                              fontSize: '12px',
                               fontWeight: 700,
+                              backgroundColor: m.isActive ? '#DCFCE7' : '#F1F5F9',
+                              color: m.isActive ? '#15803D' : '#64748B',
                             }}
                           >
-                            {m.isActive ? '🟢 Active' : '⚪ Inactive'}
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: m.isActive ? '#15803D' : '#94A3B8' }} />
+                            {m.isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
                         <td style={styles.td}>
@@ -321,9 +337,11 @@ export default function StaffPage() {
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>➕ Add Store Staff Member</h2>
+              <h2 style={styles.modalTitle}>
+                <UserPlus size={18} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> Add Store Staff Member
+              </h2>
               <button style={styles.closeBtn} onClick={() => setShowAddModal(false)}>
-                ✕
+                <X size={18} />
               </button>
             </div>
 
@@ -388,7 +406,8 @@ export default function StaffPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} style={styles.btnPrimary}>
-                  {saving ? 'Saving...' : '💾 Add Staff'}
+                  <UserPlus size={15} style={{ marginRight: 6 }} />
+                  {saving ? 'Saving...' : 'Add Staff'}
                 </button>
               </div>
             </form>
@@ -423,10 +442,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   staffBadge: {
     fontSize: '11px',
-    fontWeight: 800,
+    fontWeight: 700,
     letterSpacing: '0.5px',
-    color: '#0891B2',
-    backgroundColor: '#ECFEFF',
+    color: '#7367F0',
+    backgroundColor: '#EDEBFD',
     padding: '3px 8px',
     borderRadius: '6px',
   },
@@ -481,21 +500,21 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
   },
   btnPrimary: {
-    backgroundColor: '#0891B2',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '8px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(8, 145, 178, 0.2)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
   btnSecondary: {
     backgroundColor: '#FFFFFF',
-    color: '#334155',
-    border: '1.5px solid #E2E8F0',
-    borderRadius: '10px',
+    color: '#2F2B3D',
+    border: '1px solid #DBDADE',
+    borderRadius: '8px',
     padding: '10px 16px',
     fontSize: '13px',
     fontWeight: 600,
@@ -505,21 +524,21 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#0891B2',
+    border: '3px solid #EDEBFD',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#6F6B7D',
     margin: 0,
   },
   kpiGrid: {
@@ -529,35 +548,36 @@ const styles: Record<string, React.CSSProperties> = {
   },
   kpiCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
+    border: '1px solid #DBDADE',
+    borderRadius: '12px',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   kpiLabel: {
     fontSize: '11px',
     fontWeight: 800,
-    color: '#64748B',
+    color: '#6F6B7D',
     letterSpacing: '0.5px',
     marginBottom: '8px',
   },
   kpiVal: {
     fontSize: '26px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#2F2B3D',
     marginBottom: '4px',
   },
   kpiSub: {
     fontSize: '12px',
-    color: '#94A3B8',
+    color: '#A8AAAE',
   },
   tableCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
+    border: '1px solid #DBDADE',
+    borderRadius: '12px',
     padding: '24px',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   tableHeaderRow: {
     marginBottom: '18px',

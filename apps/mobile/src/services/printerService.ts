@@ -139,7 +139,7 @@ export const printTestReceipt = async (
               <p>Width: ${settings.width}</p>
               <p>Connection: ${settings.connection}</p>
               <p>Time: ${new Date().toLocaleTimeString()}</p>
-              <p>Kirana Pro Hardware Ready ✓</p>
+              <p>Kirana Pro Hardware Ready [OK]</p>
             </body>
           </html>
         `);

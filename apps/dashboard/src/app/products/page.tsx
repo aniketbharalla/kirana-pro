@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ProductsTable } from '../../components/ProductsTable';
 import { Product, PRODUCT_CATEGORIES } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import {
   subscribeStoreProducts,
   saveStoreProduct,
@@ -11,9 +12,11 @@ import {
   autoDiscoverAndMigrateProducts,
   seedStarterProducts,
 } from '../../lib/storeService';
+import { Package, RefreshCw, Download, Upload, Plus, Sparkles, X, FileText, FolderOpen, Save, Check } from 'lucide-react';
 
 export default function ProductsPage() {
   const { storeId } = useAuth();
+  const toast = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [discovering, setDiscoveredState] = useState(false);
@@ -71,12 +74,12 @@ export default function ProductsPage() {
       const found = await autoDiscoverAndMigrateProducts(storeId);
       if (found.length > 0) {
         setProducts(found);
-        alert(`✓ Successfully discovered and linked ${found.length} products to your store!`);
+        toast.success('Catalog Discovered', `Linked ${found.length} products to your store successfully.`);
       } else {
-        alert('No existing products found in alternate sessions. You can add products manually or load the starter catalog below.');
+        toast.error('No Products Found', 'No existing products found in alternate sessions. You can add items or load standard staples.');
       }
     } catch (err: any) {
-      alert(`Discovery note: ${err.message}`);
+      toast.error('Discovery Failed', err.message || 'Error auto-discovering catalog.');
     } finally {
       setDiscoveredState(false);
     }
@@ -89,9 +92,9 @@ export default function ProductsPage() {
     try {
       const seeded = await seedStarterProducts(storeId);
       setProducts(seeded);
-      alert(`✓ Added ${seeded.length} top Indian grocery staples to your store catalog!`);
+      toast.success('Staples Catalog Loaded', `Added ${seeded.length} top Indian grocery staples to your inventory.`);
     } catch (err: any) {
-      alert(`Failed to seed staples: ${err.message}`);
+      toast.error('Seeding Failed', err.message || 'Could not load starter staples.');
     } finally {
       setSaving(false);
     }
@@ -100,7 +103,7 @@ export default function ProductsPage() {
   // Export all products as CSV
   const handleExportCsv = () => {
     if (products.length === 0) {
-      alert('No products in catalog to export.');
+      toast.error('Catalog Empty', 'No products in inventory to export as CSV.');
       return;
     }
     const headers = [
@@ -341,8 +344,9 @@ export default function ProductsPage() {
         minStockAlert: '5',
         isLoose: false,
       });
+      toast.success('Product Saved', `Item "${product.name}" saved successfully to catalog.`);
     } catch (err: any) {
-      alert(`Failed to save product: ${err.message}`);
+      toast.error('Save Failed', err.message || 'Could not save product details.');
     } finally {
       setSaving(false);
     }
@@ -353,8 +357,9 @@ export default function ProductsPage() {
     if (!storeId) return;
     try {
       await deleteStoreProduct(storeId, id);
+      toast.success('Product Removed', 'Item removed from catalog.');
     } catch (err: any) {
-      alert(`Failed to delete product: ${err.message}`);
+      toast.error('Delete Failed', err.message || 'Could not remove product.');
     }
   };
 
@@ -364,7 +369,9 @@ export default function ProductsPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.badge}>📦 CATALOG & MASTER DATA</span>
+            <span style={styles.badge}>
+              <Package size={12} style={{ marginRight: 4 }} /> CATALOG & MASTER DATA
+            </span>
             <span style={styles.countBadge}>{products.length} Products</span>
           </div>
           <h1 style={styles.title}>Products & Catalog Management</h1>
@@ -381,16 +388,17 @@ export default function ProductsPage() {
             disabled={discovering}
             title="Scan for products added in previous demo/cashier sessions or alternate stores and link them to your store"
           >
-            {discovering ? '🔄 Scanning...' : '🔄 Discover Added Products'}
+            <RefreshCw size={14} style={{ marginRight: 6 }} />
+            {discovering ? 'Scanning...' : 'Discover Added Products'}
           </button>
           <button style={styles.btnSecondary} onClick={handleExportCsv}>
-            📤 Export CSV
+            <Download size={14} style={{ marginRight: 6 }} /> Export CSV
           </button>
           <button style={styles.btnSecondary} onClick={() => setShowImportModal(true)}>
-            📥 Bulk Import CSV
+            <Upload size={14} style={{ marginRight: 6 }} /> Bulk Import CSV
           </button>
           <button style={styles.btnPrimary} onClick={() => setShowAddModal(true)}>
-            ➕ Add Product
+            <Plus size={15} style={{ marginRight: 6 }} /> Add Product
           </button>
         </div>
       </div>
@@ -403,31 +411,34 @@ export default function ProductsPage() {
         </div>
       ) : products.length === 0 ? (
         <div style={styles.emptyCard}>
-          <div style={styles.emptyIcon}>📦</div>
+          <div style={styles.emptyIcon}>
+            <Package size={48} color="#A8AAAE" />
+          </div>
           <h3 style={styles.emptyTitle}>No Products In Your Store Catalog</h3>
           <p style={styles.emptySubtitle}>
             Your catalog is currently empty. If you previously added products in demo/cashier mode or another store, click <strong>Discover Added Products</strong> to auto-link them now, or start by loading the starter grocery essentials.
           </p>
           <div style={styles.emptyActions}>
             <button
-              style={{ ...styles.btnPrimary, backgroundColor: '#0071E3' }}
+              style={{ ...styles.btnPrimary, backgroundColor: '#7367F0' }}
               onClick={handleDiscoverExisting}
               disabled={discovering}
             >
-              {discovering ? '🔄 Scanning Stores...' : '🔄 Discover / Recover Added Products'}
+              <RefreshCw size={14} style={{ marginRight: 6 }} />
+              {discovering ? 'Scanning Stores...' : 'Discover / Recover Added Products'}
             </button>
             <button
-              style={{ ...styles.btnSecondary, backgroundColor: '#ECFDF5', borderColor: '#10B981', color: '#065F46', fontWeight: 700 }}
+              style={{ ...styles.btnSecondary, backgroundColor: '#EDEBFD', borderColor: '#7367F0', color: '#7367F0', fontWeight: 700 }}
               onClick={handleSeedStaples}
               disabled={saving}
             >
-              ✨ Load 12 Indian Kirana Staples (Atta, Dal, Oil, Salt...)
+              <Sparkles size={14} style={{ marginRight: 6 }} /> Load 12 Indian Kirana Staples (Atta, Dal, Oil, Salt...)
             </button>
             <button style={styles.btnSecondary} onClick={() => setShowAddModal(true)}>
-              ➕ Add Single Product
+              <Plus size={14} style={{ marginRight: 6 }} /> Add Single Product
             </button>
             <button style={styles.btnSecondary} onClick={() => setShowImportModal(true)}>
-              📥 Upload Inventory CSV
+              <Upload size={14} style={{ marginRight: 6 }} /> Upload Inventory CSV
             </button>
           </div>
         </div>
@@ -440,9 +451,11 @@ export default function ProductsPage() {
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>➕ Add New Product</h2>
+              <h2 style={styles.modalTitle}>
+                <Plus size={18} style={{ marginRight: 6 }} /> Add New Product
+              </h2>
               <button style={styles.closeBtn} onClick={() => setShowAddModal(false)}>
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -587,7 +600,8 @@ export default function ProductsPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={saving} style={styles.btnPrimary}>
-                  {saving ? 'Saving...' : '💾 Save Product'}
+                  <Save size={15} />
+                  <span>{saving ? 'Saving...' : 'Save Product'}</span>
                 </button>
               </div>
             </form>
@@ -600,9 +614,11 @@ export default function ProductsPage() {
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>📥 Bulk Import Inventory via CSV</h2>
+              <h2 style={styles.modalTitle}>
+                <Upload size={18} style={{ marginRight: 8, display: 'inline', verticalAlign: 'middle' }} /> Bulk Import Inventory via CSV
+              </h2>
               <button style={styles.closeBtn} onClick={() => setShowImportModal(false)}>
-                ✕
+                <X size={18} />
               </button>
             </div>
 
@@ -612,13 +628,13 @@ export default function ProductsPage() {
                 Vyapar, or download our clean starter template below.
               </p>
               <button style={styles.btnDownloadTemplate} onClick={handleDownloadTemplate}>
-                📄 Download Sample CSV Template
+                <FileText size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Download Sample CSV Template
               </button>
             </div>
 
             <div style={styles.uploadArea}>
               <label style={styles.uploadLabel}>
-                <span style={styles.uploadIcon}>📂</span>
+                <span style={styles.uploadIcon}><FolderOpen size={36} color="#7367F0" /></span>
                 <span style={styles.uploadTitle}>Choose CSV file to upload</span>
                 <input
                   type="file"
@@ -731,44 +747,50 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: 'wrap',
   },
   btnPrimary: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
-    borderRadius: '11px',
-    padding: '10px 18px',
+    borderRadius: '8px',
+    padding: '9px 18px',
     fontSize: '13px',
-    fontWeight: 700,
+    fontWeight: 600,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    transition: 'all 0.15s ease',
+  },
+  btnSecondary: {
+    backgroundColor: 'rgba(115, 103, 240, 0.08)',
+    color: '#7367F0',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(115, 103, 240, 0.2)',
+    borderRadius: '8px',
+    padding: '9px 16px',
+    fontSize: '13px',
+    fontWeight: 600,
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
-  },
-  btnSecondary: {
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    color: '#555558',
-    border: 'none',
-    borderRadius: '11px',
-    padding: '10px 16px',
-    fontSize: '13px',
-    fontWeight: 600,
-    cursor: 'pointer',
   },
   loadingState: {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
-    boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.04)',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.08)',
   },
   spinner: {
     width: '32px',
     height: '32px',
     borderWidth: '3px',
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderTopColor: '#10B981',
+    borderColor: 'rgba(115, 103, 240, 0.15)',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
@@ -825,14 +847,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '24px',
-    padding: '28px',
+    borderRadius: '12px',
+    padding: '24px',
     width: '92%',
     maxWidth: '680px',
     maxHeight: '90vh',
     overflowY: 'auto',
-    boxShadow: '0 20px 48px -8px rgba(0, 0, 0, 0.2)',
-    border: '1px solid rgba(0, 0, 0, 0.08)',
+    boxShadow: '0 16px 36px rgba(47, 43, 61, 0.16)',
+    border: '1px solid #DBDADE',
   },
   modalHeader: {
     display: 'flex',
@@ -841,18 +863,18 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '20px',
   },
   modalTitle: {
-    fontSize: '19px',
-    fontWeight: 800,
-    color: '#1D1D1F',
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#2F2B3D',
     margin: 0,
-    letterSpacing: '-0.02em',
+    letterSpacing: '-0.01em',
   },
   closeBtn: {
     background: 'none',
     border: 'none',
     fontSize: '18px',
     cursor: 'pointer',
-    color: '#86868B',
+    color: '#82868B',
   },
   form: {
     display: 'flex',
@@ -872,14 +894,14 @@ const styles: Record<string, React.CSSProperties> = {
   label: {
     fontSize: '12px',
     fontWeight: 600,
-    color: '#475569',
+    color: '#6F6B7D',
   },
   input: {
-    border: '1px solid rgba(0, 0, 0, 0.1)',
-    borderRadius: '10px',
+    border: '1px solid #DBDADE',
+    borderRadius: '6px',
     padding: '9px 12px',
     fontSize: '13px',
-    color: '#1D1D1F',
+    color: '#2F2B3D',
     outline: 'none',
   },
   importInfo: {
@@ -887,26 +909,26 @@ const styles: Record<string, React.CSSProperties> = {
   },
   importDesc: {
     fontSize: '13px',
-    color: '#636366',
+    color: '#6F6B7D',
     lineHeight: 1.5,
     marginBottom: '10px',
   },
   btnDownloadTemplate: {
-    backgroundColor: '#FAFAFB',
-    border: '1px solid rgba(0, 0, 0, 0.08)',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
     borderRadius: '8px',
     padding: '8px 14px',
     fontSize: '12px',
     fontWeight: 600,
-    color: '#0071E3',
+    color: '#7367F0',
     cursor: 'pointer',
   },
   uploadArea: {
-    border: '2px dashed rgba(0, 113, 227, 0.3)',
-    borderRadius: '16px',
+    border: '2px dashed rgba(115, 103, 240, 0.35)',
+    borderRadius: '8px',
     padding: '30px 16px',
     textAlign: 'center',
-    backgroundColor: 'rgba(0, 113, 227, 0.04)',
+    backgroundColor: 'rgba(115, 103, 240, 0.04)',
     cursor: 'pointer',
     marginBottom: '16px',
   },
@@ -923,7 +945,7 @@ const styles: Record<string, React.CSSProperties> = {
   uploadTitle: {
     fontSize: '13px',
     fontWeight: 700,
-    color: '#0071E3',
+    color: '#7367F0',
   },
   statusBox: {
     backgroundColor: '#FAFAFB',

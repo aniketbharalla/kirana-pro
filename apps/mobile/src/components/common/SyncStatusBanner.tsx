@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { subscribeToSyncStatus, processOfflineQueue } from '../../services/offlineSync';
-import { colors } from '../../theme';
 
 export const SyncStatusBanner: React.FC = () => {
   const [pendingCount, setPendingCount] = useState(0);
@@ -30,12 +30,12 @@ export const SyncStatusBanner: React.FC = () => {
       const result = await processOfflineQueue();
       setLastSyncResult(
         result.failedCount > 0
-          ? `⚠️ ${result.successCount} synced, ${result.failedCount} failed`
-          : `✅ ${result.successCount} synced successfully`
+          ? `${result.successCount} synced, ${result.failedCount} failed`
+          : `${result.successCount} synced successfully`
       );
       setTimeout(() => setLastSyncResult(null), 3000);
     } catch {
-      setLastSyncResult('❌ Sync failed – will retry');
+      setLastSyncResult('Sync failed – will retry');
     } finally {
       setIsSyncing(false);
     }
@@ -51,7 +51,12 @@ export const SyncStatusBanner: React.FC = () => {
       style={[styles.banner, isSynced ? styles.bannerSynced : styles.bannerPending]}
     >
       <View style={styles.left}>
-        <Text style={styles.dot}>{isSynced ? '🟢' : '🟡'}</Text>
+        <Feather
+          name={isSynced ? 'check-circle' : 'refresh-cw'}
+          size={14}
+          color={isSynced ? '#28C76F' : '#FF9F43'}
+          style={{ marginRight: 8 }}
+        />
         <Text style={styles.label} numberOfLines={1}>
           {lastSyncResult
             ? lastSyncResult
@@ -80,43 +85,40 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     marginHorizontal: 16,
     marginVertical: 6,
-    borderRadius: 12,
+    borderRadius: 8,
   },
   bannerSynced: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#E8FADF',
     borderWidth: 1,
-    borderColor: '#86EFAC',
+    borderColor: '#28C76F',
   },
   bannerPending: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FFF0E1',
     borderWidth: 1,
-    borderColor: '#FCD34D',
+    borderColor: '#FF9F43',
   },
   left: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  dot: {
-    fontSize: 14,
-    marginRight: 8,
-  },
   label: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#374151',
+    color: '#4B465C',
     flex: 1,
   },
   syncBtn: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#7367F0',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 6,
     marginLeft: 8,
   },
   syncBtnText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
   },
 });
+

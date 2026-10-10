@@ -5,6 +5,7 @@ import { StockLog } from '../../components/StockLog';
 import { StockMovement, Product } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreMovements, subscribeStoreProducts } from '../../lib/storeService';
+import { ClipboardList, Package } from 'lucide-react';
 
 export default function StockLogPage() {
   const { storeId } = useAuth();
@@ -40,7 +41,7 @@ export default function StockLogPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.badge}>📋 AUDIT TRAIL</span>
+            <span style={styles.badge}><ClipboardList size={13} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> AUDIT TRAIL</span>
             <span style={styles.countBadge}>{movements.length} Entries</span>
           </div>
           <h2 style={styles.title}>Stock Movement Ledger</h2>
@@ -57,7 +58,11 @@ export default function StockLogPage() {
         </div>
       ) : movements.length === 0 ? (
         <div style={styles.emptyCard}>
-          <div style={styles.emptyIcon}>📦</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <div style={{ width: 56, height: 56, borderRadius: '12px', backgroundColor: '#EDEBFD', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Package size={28} color="#7367F0" />
+            </div>
+          </div>
           <h3 style={styles.emptyTitle}>No Stock Movements Recorded Yet</h3>
           <p style={styles.emptySubtitle}>
             When sales are billed at the counter or inward supplier deliveries are received, all stock fluctuations will appear here.
@@ -120,27 +125,27 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '60px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
   },
   spinner: {
     width: '32px',
     height: '32px',
-    border: '3px solid #E2E8F0',
-    borderTopColor: '#0D9488',
+    border: '3px solid #EDEBFD',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 12px',
     animation: 'spin 0.8s linear infinite',
   },
   loadingText: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#6F6B7D',
     margin: 0,
   },
   emptyCard: {
     backgroundColor: '#FFFFFF',
-    border: '1px dashed #CBD5E1',
-    borderRadius: '16px',
+    border: '1px dashed #DBDADE',
+    borderRadius: '12px',
     padding: '60px 24px',
     textAlign: 'center',
   },
@@ -151,12 +156,12 @@ const styles: Record<string, React.CSSProperties> = {
   emptyTitle: {
     fontSize: '18px',
     fontWeight: 700,
-    color: '#0F172A',
+    color: '#2F2B3D',
     margin: '0 0 6px 0',
   },
   emptySubtitle: {
     fontSize: '14px',
-    color: '#64748B',
+    color: '#6F6B7D',
     maxWidth: '460px',
     margin: '0 auto',
   },

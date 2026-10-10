@@ -238,12 +238,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const isAuthenticated = !!user || !!activeStaff;
     if (!isAuthenticated && pathname !== '/login') {
       router.replace('/login');
-    } else if (isAuthenticated && pathname === '/login') {
-      if (activeStaff && !user) {
-        router.replace('/bills');
-      } else {
-        router.replace('/');
-      }
     }
   }, [user, activeStaff, loading, pathname, router]);
 

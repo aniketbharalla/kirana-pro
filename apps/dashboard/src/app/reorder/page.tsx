@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Product } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreProducts } from '../../lib/storeService';
+import { AlertTriangle, CheckCircle2, Share2, Check, Sparkles } from 'lucide-react';
 
 export default function SmartReorderPage() {
   const { store, storeId } = useAuth();
@@ -55,7 +56,7 @@ export default function SmartReorderPage() {
     }
     const storeName = store?.name || 'My Kirana Store';
     const lines = [
-      `*🛒 PURCHASE ORDER (खरीद ऑर्डर)*`,
+      `*PURCHASE ORDER (खरीद ऑर्डर)*`,
       `*Store:* ${storeName}`,
       `*Date:* ${new Date().toLocaleDateString('en-IN')}`,
       `--------------------------------`,
@@ -65,7 +66,7 @@ export default function SmartReorderPage() {
       ),
       `--------------------------------`,
       `*Est. Total Value:* ₹${totalBudgetNeeded.toLocaleString('en-IN')}`,
-      `Please confirm stock dispatch date. धन्यवाद! 🙏`,
+      `Please confirm stock dispatch date. धन्यवाद!`,
     ];
 
     const fullText = lines.join('\n');
@@ -82,7 +83,15 @@ export default function SmartReorderPage() {
           <div style={styles.badgeRow}>
             <span style={styles.reorderBadge}>INVENTORY FORECASTING</span>
             <span style={outOfStockCount > 0 ? styles.criticalBadge : styles.healthyBadge}>
-              {outOfStockCount > 0 ? `⚠️ ${outOfStockCount} Out of Stock` : '✓ Stock Healthy'}
+              {outOfStockCount > 0 ? (
+                <>
+                  <AlertTriangle size={12} style={{ marginRight: 4 }} /> {outOfStockCount} Out of Stock
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={12} style={{ marginRight: 4 }} /> Stock Healthy
+                </>
+              )}
             </span>
           </div>
           <h1 style={styles.title}>Smart Reorder & Procurement</h1>
@@ -94,7 +103,15 @@ export default function SmartReorderPage() {
         {/* Action Button */}
         <div style={styles.headerActions}>
           <button style={styles.btnPrimary} onClick={handleCopyWhatsAppPo}>
-            {copied ? '✓ PO Copied to Clipboard!' : '📲 Copy WhatsApp PO for Mandi'}
+            {copied ? (
+              <>
+                <Check size={16} style={{ marginRight: 6 }} /> PO Copied to Clipboard!
+              </>
+            ) : (
+              <>
+                <Share2 size={16} style={{ marginRight: 6 }} /> Copy WhatsApp PO for Mandi
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -124,7 +141,7 @@ export default function SmartReorderPage() {
 
             <div style={styles.kpiCard}>
               <span style={styles.kpiLabel}>ESTIMATED REORDER BUDGET</span>
-              <span style={{ ...styles.kpiVal, color: '#10B981' }}>
+              <span style={{ ...styles.kpiVal, color: '#28C76F' }}>
                 ₹{totalBudgetNeeded.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </span>
               <span style={styles.kpiSub}>Wholesale distributor replenishment cost</span>
@@ -181,11 +198,13 @@ export default function SmartReorderPage() {
 
             {filteredItems.length === 0 ? (
               <div style={styles.emptyState}>
-                <div style={{ fontSize: '42px', marginBottom: '12px' }}>✨</div>
-                <h4 style={{ margin: '0 0 6px 0', color: '#1D1D1F', fontSize: '17px', fontWeight: 700 }}>
+                <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+                  <Sparkles size={40} color="#7367F0" />
+                </div>
+                <h4 style={{ margin: '0 0 6px 0', color: '#2F2B3D', fontSize: '17px', fontWeight: 700 }}>
                   All Inventory Levels Are Healthy
                 </h4>
-                <p style={{ margin: 0, color: '#86868B', fontSize: '13px' }}>
+                <p style={{ margin: 0, color: '#6F6B7D', fontSize: '13px' }}>
                   No items require replenishment for this filter criteria.
                 </p>
               </div>
@@ -227,7 +246,7 @@ export default function SmartReorderPage() {
                         <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>
                           {item.minStockAlert} {item.unit}
                         </td>
-                        <td style={{ ...styles.td, fontWeight: 700, color: '#10B981', fontVariantNumeric: 'tabular-nums' }}>
+                        <td style={{ ...styles.td, fontWeight: 700, color: '#28C76F', fontVariantNumeric: 'tabular-nums' }}>
                           +{item.suggestedQty} {item.unit}
                         </td>
                         <td style={{ ...styles.td, fontVariantNumeric: 'tabular-nums' }}>₹{item.purchasePrice}</td>
@@ -280,37 +299,44 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '11px',
     fontWeight: 700,
     letterSpacing: '0.04em',
-    color: '#FF9500',
-    backgroundColor: 'rgba(255, 149, 0, 0.12)',
+    color: '#7367F0',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.28)',
     padding: '4px 10px',
     borderRadius: '9999px',
   },
   criticalBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#FF3B30',
-    backgroundColor: 'rgba(255, 59, 48, 0.12)',
+    color: '#EA5455',
+    backgroundColor: '#FCE4E4',
+    border: '1px solid rgba(234, 84, 85, 0.25)',
     padding: '4px 10px',
     borderRadius: '9999px',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   healthyBadge: {
     fontSize: '11px',
     fontWeight: 700,
-    color: '#10B981',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    color: '#28C76F',
+    backgroundColor: '#DDF6E8',
+    border: '1px solid rgba(40, 199, 111, 0.24)',
     padding: '4px 10px',
     borderRadius: '9999px',
+    display: 'inline-flex',
+    alignItems: 'center',
   },
   title: {
     fontSize: '28px',
     fontWeight: 800,
-    color: '#1D1D1F',
+    color: '#2F2B3D',
     margin: 0,
-    letterSpacing: '-0.03em',
+    letterSpacing: '-0.02em',
   },
   subtitle: {
     fontSize: '14px',
-    color: '#86868B',
+    color: '#6F6B7D',
     marginTop: '6px',
     margin: 0,
     letterSpacing: '-0.01em',
@@ -320,35 +346,37 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '12px',
   },
   btnPrimary: {
-    backgroundColor: '#1D1D1F',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     borderWidth: 0,
     borderStyle: 'none',
-    borderRadius: '9999px',
+    borderRadius: '12px',
     padding: '12px 22px',
     fontSize: '13px',
     fontWeight: 700,
     cursor: 'pointer',
-    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.12)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
     transition: 'all 0.15s ease',
   },
   loadingState: {
     padding: '80px 20px',
     textAlign: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
+    borderRadius: '16px',
     borderWidth: 1,
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.06)',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)',
+    borderColor: '#DBDADE',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.06)',
   },
   spinner: {
     width: '32px',
     height: '32px',
     borderWidth: 3,
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-    borderTopColor: '#10B981',
+    borderColor: '#DBDADE',
+    borderTopColor: '#7367F0',
     borderRadius: '50%',
     margin: '0 auto 14px',
     animation: 'spin 0.8s linear infinite',

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { CustomerKhata } from '@kirana-pro/shared';
+import { Search, ArrowRight, Phone, MapPin, X, Check } from 'lucide-react';
 
 export const KhataTable: React.FC<{ customers: CustomerKhata[] }> = ({ customers }) => {
   const [search, setSearch] = useState('');
@@ -30,7 +31,7 @@ export const KhataTable: React.FC<{ customers: CustomerKhata[] }> = ({ customers
       {/* Search and Filter */}
       <div style={styles.controlsBar}>
         <div style={styles.searchWrapper}>
-          <span style={styles.searchIcon}>🔍</span>
+          <Search size={16} color="#6F6B7D" style={{ marginRight: 8 }} />
           <input
             type="text"
             placeholder="Search customer by name, mobile, or address..."
@@ -47,7 +48,13 @@ export const KhataTable: React.FC<{ customers: CustomerKhata[] }> = ({ customers
             ...(filterDueOnly ? styles.filterBtnActive : {}),
           }}
         >
-          {filterDueOnly ? '✓ Pending Due Only' : 'All Customers'}
+          {filterDueOnly ? (
+            <>
+              <Check size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Pending Due Only
+            </>
+          ) : (
+            'All Customers'
+          )}
         </button>
       </div>
 
@@ -126,7 +133,7 @@ export const KhataTable: React.FC<{ customers: CustomerKhata[] }> = ({ customers
                       onClick={() => setActiveCustomer(cust)}
                       style={styles.actionBtn}
                     >
-                      View Ledger ➔
+                      View Ledger <ArrowRight size={13} style={{ marginLeft: 4 }} />
                     </button>
                   </td>
                 </tr>
@@ -144,15 +151,21 @@ export const KhataTable: React.FC<{ customers: CustomerKhata[] }> = ({ customers
               <div>
                 <h3 style={styles.modalTitle}>{activeCustomer.name}</h3>
                 <div style={styles.modalSub}>
-                  📞 +91 {activeCustomer.phoneNumber}
-                  {activeCustomer.address ? ` • 📍 ${activeCustomer.address}` : ''}
+                  <Phone size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} /> +91 {activeCustomer.phoneNumber}
+                  {activeCustomer.address ? (
+                    <>
+                      {' • '}
+                      <MapPin size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                      {activeCustomer.address}
+                    </>
+                  ) : ''}
                 </div>
               </div>
               <button
                 style={styles.closeBtn}
                 onClick={() => setActiveCustomer(null)}
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -333,9 +346,9 @@ const styles: Record<string, React.CSSProperties> = {
   avatar: {
     width: '32px',
     height: '32px',
-    borderRadius: '9px',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    color: '#047857',
+    borderRadius: '8px',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -481,7 +494,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#86868B',
   },
   closeDrawerBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
     borderRadius: '12px',
@@ -490,6 +503,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     cursor: 'pointer',
     marginTop: '8px',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
 };

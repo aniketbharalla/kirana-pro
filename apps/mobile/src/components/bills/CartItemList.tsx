@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { InvoiceItem } from '@kirana-pro/shared';
+import { colors } from '../../theme';
 
 export interface CartItemListProps {
   items: InvoiceItem[];
@@ -18,7 +20,9 @@ export const CartItemList: React.FC<CartItemListProps> = ({
   if (items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>🛒</Text>
+        <View style={styles.emptyIconCircle}>
+          <Feather name="shopping-bag" size={32} color={colors.primary} />
+        </View>
         <Text style={styles.emptyTitle}>Cart is empty</Text>
         <Text style={styles.emptySubtitle}>
           Scan a barcode, select from quick items below, or use the Taraju calculator!
@@ -38,7 +42,8 @@ export const CartItemList: React.FC<CartItemListProps> = ({
               </Text>
               {item.isLoose && (
                 <View style={styles.looseBadge}>
-                  <Text style={styles.looseBadgeText}>⚖️ Loose</Text>
+                  <MaterialCommunityIcons name="scale-balance" size={10} color={colors.primary} style={{ marginRight: 2 }} />
+                  <Text style={styles.looseBadgeText}>Loose</Text>
                 </View>
               )}
             </View>
@@ -63,7 +68,7 @@ export const CartItemList: React.FC<CartItemListProps> = ({
                 onPress={() => onDecrement(item.productId, item.quantity)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.stepperMinus}>−</Text>
+                <Feather name="minus" size={14} color={colors.danger} />
               </TouchableOpacity>
 
               <Text style={styles.qtyText}>
@@ -76,7 +81,7 @@ export const CartItemList: React.FC<CartItemListProps> = ({
                 onPress={() => onIncrement(item.productId, item.quantity)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.stepperPlus}>+</Text>
+                <Feather name="plus" size={14} color={colors.primary} />
               </TouchableOpacity>
             </View>
 
@@ -86,7 +91,7 @@ export const CartItemList: React.FC<CartItemListProps> = ({
                 onPress={() => onRemove(item.productId)}
                 style={styles.deleteBtn}
               >
-                <Text style={styles.deleteText}>🗑️</Text>
+                <Feather name="trash-2" size={15} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
           </View>
@@ -102,30 +107,35 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   emptyContainer: {
-    padding: 36,
+    padding: 32,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 16,
     marginHorizontal: 16,
     marginVertical: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     borderStyle: 'dashed',
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 10,
+  emptyIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   emptyTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.text,
     marginBottom: 4,
   },
   emptySubtitle: {
     fontSize: 13,
-    color: '#64748B',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -134,14 +144,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     padding: 14,
-    borderRadius: 16,
+    borderRadius: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
-    shadowRadius: 6,
+    shadowRadius: 4,
     elevation: 1,
   },
   itemInfo: {
@@ -156,11 +166,13 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.text,
     flexShrink: 1,
   },
   looseBadge: {
-    backgroundColor: '#EEF2FF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primaryLight,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -168,16 +180,16 @@ const styles = StyleSheet.create({
   looseBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#4F46E5',
+    color: colors.primary,
   },
   itemHindi: {
     fontSize: 12,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   itemRate: {
     fontSize: 12,
-    color: '#10B981',
+    color: colors.primary,
     fontWeight: '600',
     marginTop: 4,
   },
@@ -187,59 +199,46 @@ const styles = StyleSheet.create({
   stepperContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 10,
+    backgroundColor: '#F3F2F7',
+    borderRadius: 8,
     padding: 3,
   },
   stepperBtn: {
-    width: 28,
-    height: 28,
+    width: 26,
+    height: 26,
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 2,
     elevation: 1,
-  },
-  stepperMinus: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#EF4444',
-  },
-  stepperPlus: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#10B981',
   },
   qtyText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0F172A',
+    color: colors.text,
     paddingHorizontal: 8,
   },
   unitSuffix: {
     fontSize: 11,
     fontWeight: '500',
-    color: '#64748B',
+    color: colors.textSecondary,
   },
   totalRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     marginTop: 6,
   },
   itemTotal: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: colors.text,
   },
   deleteBtn: {
-    padding: 2,
-  },
-  deleteText: {
-    fontSize: 13,
+    padding: 3,
   },
 });

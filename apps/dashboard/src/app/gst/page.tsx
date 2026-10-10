@@ -10,6 +10,7 @@ import {
 } from '@kirana-pro/shared';
 import { useAuth } from '../../context/AuthContext';
 import { subscribeStoreInvoices } from '../../lib/storeService';
+import { Landmark, Download, FileSpreadsheet, Building2, ShoppingBag, FileText, Code2 } from 'lucide-react';
 
 export default function GSTCenterPage() {
   const { store, storeId } = useAuth();
@@ -98,7 +99,7 @@ export default function GSTCenterPage() {
       <div style={styles.header}>
         <div>
           <div style={styles.badgeRow}>
-            <span style={styles.taxBadge}>🏛️ GST COMPLIANCE & RETURNS</span>
+            <span style={styles.taxBadge}><Landmark size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> GST COMPLIANCE & RETURNS</span>
             <span style={styles.gstinBadge}>GSTIN: {storeGstin}</span>
           </div>
           <h1 style={styles.title}>GST Center & GSTR-1 Return Filing</h1>
@@ -131,10 +132,10 @@ export default function GSTCenterPage() {
           </div>
 
           <button style={styles.btnSecondary} onClick={handleDownloadCsv}>
-            📊 Export CA Sheet (.CSV)
+            <FileSpreadsheet size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Export CA Sheet (.CSV)
           </button>
           <button style={styles.btnPrimary} onClick={handleDownloadJson}>
-            📥 Download GSTR-1 (.JSON)
+            <Download size={15} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> Download GSTR-1 (.JSON)
           </button>
         </div>
       </div>
@@ -153,9 +154,9 @@ export default function GSTCenterPage() {
           <span style={styles.kpiSub}>Net of discounts</span>
         </div>
 
-        <div style={{ ...styles.kpiCard, borderLeft: '4px solid #10B981' }}>
+        <div style={{ ...styles.kpiCard, borderLeft: '4px solid #28C76F' }}>
           <span style={styles.kpiLabel}>TOTAL GST COLLECTED</span>
-          <span style={{ ...styles.kpiVal, color: '#047857' }}>
+          <span style={{ ...styles.kpiVal, color: '#28C76F' }}>
             ₹{gstSummary.totalTax.toLocaleString('en-IN')}
           </span>
           <span style={styles.kpiSub}>Output Tax Liability</span>
@@ -182,25 +183,25 @@ export default function GSTCenterPage() {
           style={{ ...styles.tabBtn, ...(activeTab === 'b2b' ? styles.tabBtnActive : {}) }}
           onClick={() => setActiveTab('b2b')}
         >
-          🏛️ B2B Invoices ({b2bInvoices.length})
+          <Building2 size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> B2B Invoices ({b2bInvoices.length})
         </button>
         <button
           style={{ ...styles.tabBtn, ...(activeTab === 'b2c' ? styles.tabBtnActive : {}) }}
           onClick={() => setActiveTab('b2c')}
         >
-          🛒 B2C Small Summary ({gstSummary.b2cCount})
+          <ShoppingBag size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> B2C Small Summary ({gstSummary.b2cCount})
         </button>
         <button
           style={{ ...styles.tabBtn, ...(activeTab === 'hsn' ? styles.tabBtnActive : {}) }}
           onClick={() => setActiveTab('hsn')}
         >
-          📋 HSN Summary ({gstSummary.hsnSummary.length} Codes)
+          <FileText size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> HSN Summary ({gstSummary.hsnSummary.length} Codes)
         </button>
         <button
           style={{ ...styles.tabBtn, ...(activeTab === 'json' ? styles.tabBtnActive : {}) }}
           onClick={() => setActiveTab('json')}
         >
-          💻 GSTR-1 JSON Schema Preview
+          <Code2 size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} /> GSTR-1 JSON Schema Preview
         </button>
       </div>
 
@@ -348,7 +349,8 @@ export default function GSTCenterPage() {
               </span>
             </div>
             <button style={styles.btnPrimary} onClick={handleDownloadJson}>
-              📥 Download This JSON
+              <Download size={14} style={{ marginRight: 6, display: 'inline', verticalAlign: 'middle' }} />
+              Download This JSON
             </button>
           </div>
 
@@ -441,24 +443,24 @@ const styles: Record<string, React.CSSProperties> = {
   },
   btnSecondary: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #CBD5E1',
-    borderRadius: '10px',
+    border: '1px solid #DBDADE',
+    borderRadius: '8px',
     padding: '10px 16px',
     fontSize: '13px',
     fontWeight: 700,
-    color: '#334155',
+    color: '#2F2B3D',
     cursor: 'pointer',
   },
   btnPrimary: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '8px',
     padding: '10px 18px',
     fontSize: '13px',
     fontWeight: 800,
     color: '#FFFFFF',
     cursor: 'pointer',
-    boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
   },
   kpiGrid: {
     display: 'grid',
@@ -467,33 +469,34 @@ const styles: Record<string, React.CSSProperties> = {
   },
   kpiCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '14px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
     padding: '18px',
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   kpiLabel: {
     fontSize: '11px',
     fontWeight: 800,
-    color: '#64748B',
+    color: '#6F6B7D',
     letterSpacing: '0.5px',
   },
   kpiVal: {
     fontSize: '22px',
     fontWeight: 800,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   kpiSub: {
     fontSize: '11px',
-    color: '#94A3B8',
+    color: '#A8AAAE',
     marginTop: '2px',
   },
   tabContainer: {
     display: 'flex',
     gap: '8px',
-    borderBottom: '1px solid #E2E8F0',
+    borderBottom: '1px solid #DBDADE',
     paddingBottom: '8px',
   },
   tabBtn: {
@@ -503,19 +506,20 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '8px',
     fontSize: '13px',
     fontWeight: 700,
-    color: '#64748B',
+    color: '#6F6B7D',
     cursor: 'pointer',
   },
   tabBtnActive: {
-    backgroundColor: '#ECFDF5',
-    color: '#065F46',
+    backgroundColor: '#EDEBFD',
+    color: '#7367F0',
     fontWeight: 800,
   },
   tableCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '16px',
-    border: '1px solid #E2E8F0',
+    borderRadius: '12px',
+    border: '1px solid #DBDADE',
     overflow: 'hidden',
+    boxShadow: '0 2px 4px rgba(165, 163, 174, 0.1)',
   },
   tableHeaderRow: {
     padding: '20px',

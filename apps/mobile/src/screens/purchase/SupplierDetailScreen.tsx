@@ -12,8 +12,10 @@ import {
 } from 'react-native';
 import { useSupplierStore } from '../../store/supplierStore';
 import { useAuthStore } from '../../store/authStore';
-import { colors } from '../../theme';
 import { Supplier, SupplierTransaction } from '@kirana-pro/shared';
+import { Feather } from '@expo/vector-icons';
+import { ToastBanner } from '../../components/common/ToastBanner';
+import { colors } from '../../theme';
 
 export const SupplierDetailScreen = ({ route, navigation }: any) => {
   const { supplierId } = route.params || {};
@@ -83,7 +85,11 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
               isPayment ? styles.txnIconPayment : styles.txnIconInvoice,
             ]}
           >
-            <Text style={styles.txnIconText}>{isPayment ? '💳' : '🧾'}</Text>
+            <Feather
+              name={isPayment ? 'credit-card' : 'file-text'}
+              size={15}
+              color={isPayment ? '#28C76F' : '#7367F0'}
+            />
           </View>
           <View>
             <Text style={styles.txnTitle}>
@@ -118,8 +124,13 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
     <View style={styles.container}>
       {/* Toast Notification */}
       {paymentSuccessToast ? (
-        <View style={styles.toast}>
-          <Text style={styles.toastText}>✅ {paymentSuccessToast}</Text>
+        <View style={{ marginHorizontal: 16, marginTop: 12 }}>
+          <ToastBanner
+            type="success"
+            title="Payment Recorded"
+            message={paymentSuccessToast}
+            onClose={() => setPaymentSuccessToast(null)}
+          />
         </View>
       ) : null}
 
@@ -132,7 +143,10 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
             </View>
             <View style={styles.vendorInfo}>
               <Text style={styles.vendorName}>{supplier.name}</Text>
-              <Text style={styles.vendorPhone}>📞 {supplier.phone}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather name="phone" size={11} color="#6F6B7D" />
+                <Text style={styles.vendorPhone}>{supplier.phone}</Text>
+              </View>
               {supplier.gstin ? (
                 <Text style={styles.vendorGstin}>GST: {supplier.gstin}</Text>
               ) : null}
@@ -140,7 +154,10 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
           </View>
 
           {supplier.address ? (
-            <Text style={styles.vendorAddress}>📍 {supplier.address}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+              <Feather name="map-pin" size={11} color="#6F6B7D" />
+              <Text style={styles.vendorAddress}>{supplier.address}</Text>
+            </View>
           ) : null}
         </View>
 
@@ -183,11 +200,17 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
                 setIsPaymentModalVisible(true);
               }}
             >
-              <Text style={styles.payNowBtnText}>💳 Record Payment to Vendor</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <Feather name="credit-card" size={14} color="#FFFFFF" />
+                <Text style={styles.payNowBtnText}>Record Payment to Vendor</Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.whatsAppBtn} onPress={handleShareWhatsApp}>
-              <Text style={styles.whatsAppBtnText}>💬 WhatsApp</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <Feather name="message-circle" size={14} color="#FFFFFF" />
+                <Text style={styles.whatsAppBtnText}>WhatsApp</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -197,12 +220,14 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
           style={styles.scanBillBar}
           onPress={() => navigation.navigate('ScanInvoice', { supplier })}
         >
-          <Text style={styles.scanBillBarIcon}>📷</Text>
+          <View style={{ marginRight: 12 }}>
+            <Feather name="camera" size={20} color="#7367F0" />
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.scanBillBarTitle}>Scan & Inward New Bill</Text>
             <Text style={styles.scanBillBarSub}>Upload Parle/distributor invoice photo for OCR</Text>
           </View>
-          <Text style={styles.scanBillBarArrow}>➔</Text>
+          <Feather name="arrow-right" size={16} color="#7367F0" />
         </TouchableOpacity>
 
         {/* History Tabs */}
@@ -240,7 +265,7 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
         {activeTab === 'transactions' ? (
           transactions.length === 0 ? (
             <View style={styles.emptyFeed}>
-              <Text style={styles.emptyFeedIcon}>📖</Text>
+              <Feather name="book-open" size={32} color="#A8AAAE" style={{ marginBottom: 8 }} />
               <Text style={styles.emptyFeedText}>No transactions recorded yet.</Text>
               <Text style={styles.emptyFeedSub}>
                 Inward a bill or record a payment to start tracking vendor ledger history.
@@ -256,7 +281,7 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
           )
         ) : purchases.length === 0 ? (
           <View style={styles.emptyFeed}>
-            <Text style={styles.emptyFeedIcon}>🧾</Text>
+            <Feather name="file-text" size={32} color="#A8AAAE" style={{ marginBottom: 8 }} />
             <Text style={styles.emptyFeedText}>No invoices uploaded yet.</Text>
           </View>
         ) : (
@@ -291,7 +316,7 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Record Payment to {supplier.name}</Text>
               <TouchableOpacity onPress={() => setIsPaymentModalVisible(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Feather name="x" size={18} color="#82868B" />
               </TouchableOpacity>
             </View>
 
@@ -318,7 +343,7 @@ export const SupplierDetailScreen = ({ route, navigation }: any) => {
                       payMode === mode && styles.modeBtnTextActive,
                     ]}
                   >
-                    {mode === 'UPI' ? '⚡ UPI' : mode === 'Cash' ? '💵 Cash' : mode === 'Bank' ? '🏦 Bank' : '📝 Cheque'}
+                    {mode}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -541,31 +566,22 @@ const styles = StyleSheet.create({
   scanBillBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFF6FF',
-    borderRadius: 14,
+    backgroundColor: '#EDEBFD',
+    borderRadius: 8,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: 'rgba(115, 103, 240, 0.25)',
     marginBottom: 16,
-  },
-  scanBillBarIcon: {
-    fontSize: 24,
-    marginRight: 12,
   },
   scanBillBarTitle: {
     fontSize: 14,
-    fontWeight: '800',
-    color: '#1E40AF',
+    fontWeight: '700',
+    color: '#7367F0',
   },
   scanBillBarSub: {
     fontSize: 11,
-    color: '#3B82F6',
+    color: '#5E50EE',
     marginTop: 2,
-  },
-  scanBillBarArrow: {
-    fontSize: 16,
-    color: '#1E40AF',
-    fontWeight: '800',
   },
   tabBar: {
     flexDirection: 'row',

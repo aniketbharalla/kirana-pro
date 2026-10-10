@@ -1,5 +1,4 @@
 import React from 'react';
-import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { BillsNavigator } from './BillsNavigator';
@@ -9,6 +8,7 @@ import { TarajuScreen } from '../screens/taraju/TarajuScreen';
 import { PurchaseNavigator } from './PurchaseNavigator';
 import { MarketingScreen } from '../screens/marketing/MarketingScreen';
 import { colors } from '../theme';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -33,11 +33,11 @@ export const MainTabNavigator: React.FC<{
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarInactiveTintColor: '#A8AAAE',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopColor: 'rgba(60, 60, 67, 0.12)',
-          borderTopWidth: 0.5,
+          borderTopColor: '#DBDADE',
+          borderTopWidth: 1,
           height: 68,
           paddingBottom: 10,
           paddingTop: 8,
@@ -59,8 +59,8 @@ export const MainTabNavigator: React.FC<{
         component={HomeScreen}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🏠</Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="home" size={20} color={color} />
           ),
         }}
       />
@@ -74,8 +74,8 @@ export const MainTabNavigator: React.FC<{
         })}
         options={{
           tabBarLabel: 'Products',
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>📦</Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="package" size={20} color={color} />
           ),
         }}
       />
@@ -84,8 +84,8 @@ export const MainTabNavigator: React.FC<{
         component={TarajuComponent || TarajuScreen}
         options={{
           tabBarLabel: 'Taraju',
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.6 }}>⚖️</Text>
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="scale-balance" size={22} color={color} />
           ),
         }}
       />
@@ -94,8 +94,8 @@ export const MainTabNavigator: React.FC<{
         component={BillsNavigator}
         options={{
           tabBarLabel: 'Bills',
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🧾</Text>
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="receipt" size={21} color={color} />
           ),
         }}
       />
@@ -104,8 +104,8 @@ export const MainTabNavigator: React.FC<{
         component={PurchaseComponent || PurchaseNavigator}
         options={{
           tabBarLabel: 'Wholesale',
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🚚</Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="truck" size={20} color={color} />
           ),
         }}
       />
@@ -114,8 +114,8 @@ export const MainTabNavigator: React.FC<{
         component={MarketingScreen}
         options={{
           tabBarLabel: 'Marketing',
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>📲</Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="share-2" size={20} color={color} />
           ),
         }}
       />
@@ -124,8 +124,8 @@ export const MainTabNavigator: React.FC<{
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Dukaan',
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.6 }}>🏪</Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="shopping-bag" size={20} color={color} />
           ),
         }}
       />

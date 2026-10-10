@@ -16,6 +16,7 @@ import { useAuthStore } from '../../store/authStore';
 import { recordStockMovement } from '../../services/stock';
 import { StockMovementReason } from '@kirana-pro/shared';
 import { colors } from '../../theme';
+import { Feather } from '@expo/vector-icons';
 
 export const StockInScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -56,7 +57,7 @@ export const StockInScreen: React.FC = () => {
       });
 
       Alert.alert(
-        'Stock Updated! ✓',
+        'Stock Updated',
         `Added +${qty} ${product.unit} to ${product.name}. Current stock is now ${
           product.currentStock + qty
         } ${product.unit}.`
@@ -119,15 +120,23 @@ export const StockInScreen: React.FC = () => {
                 style={[styles.reasonPill, reason === r && styles.reasonPillActive]}
                 onPress={() => setReason(r)}
               >
-                <Text
-                  style={[styles.reasonText, reason === r && styles.reasonTextActive]}
-                >
-                  {r === 'purchase'
-                    ? '📦 Supplier Restock'
-                    : r === 'return'
-                    ? '↩️ Customer Return'
-                    : '✏️ Stock Correction'}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Feather
+                    name={r === 'purchase' ? 'truck' : r === 'return' ? 'corner-up-left' : 'edit-2'}
+                    size={14}
+                    color={reason === r ? '#7367F0' : '#6F6B7D'}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text
+                    style={[styles.reasonText, reason === r && styles.reasonTextActive]}
+                  >
+                    {r === 'purchase'
+                      ? 'Supplier Restock'
+                      : r === 'return'
+                      ? 'Customer Return'
+                      : 'Stock Correction'}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -154,9 +163,12 @@ export const StockInScreen: React.FC = () => {
           {loading ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.submitBtnText}>
-              ✓ Inward +{quantity || 0} {product?.unit}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <Feather name="check" size={16} color="#FFFFFF" />
+              <Text style={styles.submitBtnText}>
+                Inward +{quantity || 0} {product?.unit}
+              </Text>
+            </View>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -195,20 +207,20 @@ const styles = StyleSheet.create({
   },
   stockStatus: {
     fontSize: 13,
-    color: '#10B981',
+    color: '#28C76F',
     fontWeight: '600',
     marginTop: 4,
   },
   qtyInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     paddingVertical: 14,
     paddingHorizontal: 16,
     fontSize: 28,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#2F2B3D',
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -234,24 +246,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   reasonPill: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
   },
   reasonPillActive: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
+    backgroundColor: '#EDEBFD',
+    borderColor: '#7367F0',
   },
   reasonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#475569',
+    color: '#6F6B7D',
   },
   reasonTextActive: {
-    color: '#065F46',
+    color: '#7367F0',
     fontWeight: '700',
   },
   noteInput: {
@@ -265,21 +277,21 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   submitBtn: {
-    backgroundColor: '#10B981',
-    paddingVertical: 16,
-    borderRadius: 14,
+    backgroundColor: '#7367F0',
+    paddingVertical: 14,
+    borderRadius: 8,
     alignItems: 'center',
-    shadowColor: '#10B981',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
     elevation: 3,
     marginTop: 10,
   },
   submitBtnText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '700',
   },
   disabledBtn: {
     opacity: 0.6,

@@ -15,13 +15,14 @@ import { useAuthStore } from '../../store/authStore';
 import { createStore } from '../../services/store';
 import { StoreType } from '@kirana-pro/shared';
 import { colors } from '../../theme';
+import { Feather } from '@expo/vector-icons';
 
-const STORE_TYPES: { label: string; value: StoreType; emoji: string }[] = [
-  { label: 'Kirana / Grocery', value: 'kirana', emoji: '🏪' },
-  { label: 'General Store', value: 'general', emoji: '🛍️' },
-  { label: 'Dairy / Milk', value: 'dairy', emoji: '🥛' },
-  { label: 'Medical / Chemist', value: 'medical', emoji: '💊' },
-  { label: 'Other Business', value: 'other', emoji: '🏬' },
+const STORE_TYPES: { label: string; value: StoreType; icon: keyof typeof Feather.glyphMap }[] = [
+  { label: 'Kirana / Grocery', value: 'kirana', icon: 'shopping-bag' },
+  { label: 'General Store', value: 'general', icon: 'archive' },
+  { label: 'Dairy / Milk', value: 'dairy', icon: 'coffee' },
+  { label: 'Medical / Chemist', value: 'medical', icon: 'plus-circle' },
+  { label: 'Other Business', value: 'other', icon: 'briefcase' },
 ];
 
 export const StoreSetupScreen: React.FC = () => {
@@ -142,7 +143,10 @@ export const StoreSetupScreen: React.FC = () => {
               <Text style={styles.stepBadgeText}>Step {step} of 5</Text>
             </View>
             <TouchableOpacity onPress={handleQuickFill} style={styles.quickFillBtn}>
-              <Text style={styles.quickFillText}>⚡ Quick Fill</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather name="zap" size={13} color="#7367F0" />
+                <Text style={styles.quickFillText}>Quick Fill</Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -153,7 +157,8 @@ export const StoreSetupScreen: React.FC = () => {
 
           {errorMsg ? (
             <View style={styles.errorBox}>
-              <Text style={styles.errorText}>⚠️ {errorMsg}</Text>
+              <Feather name="alert-circle" size={14} color="#EA5455" style={{ marginRight: 6 }} />
+              <Text style={styles.errorText}>{errorMsg}</Text>
             </View>
           ) : null}
 
@@ -194,7 +199,9 @@ export const StoreSetupScreen: React.FC = () => {
                       style={[styles.typeCard, selected && styles.typeCardSelected]}
                       onPress={() => setType(t.value)}
                     >
-                      <Text style={styles.typeEmoji}>{t.emoji}</Text>
+                      <View style={{ marginBottom: 8 }}>
+                        <Feather name={t.icon} size={26} color={selected ? '#7367F0' : '#6F6B7D'} />
+                      </View>
                       <Text style={[styles.typeLabel, selected && styles.typeLabelSelected]}>
                         {t.label}
                       </Text>
@@ -289,7 +296,7 @@ export const StoreSetupScreen: React.FC = () => {
           {/* Step 5: Review */}
           {step === 5 && (
             <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>Ready to launch your Dukaan! 🎉</Text>
+              <Text style={styles.stepTitle}>Ready to launch your Dukaan!</Text>
               <Text style={styles.stepSub}>Review your details below before launching:</Text>
 
               <View style={styles.summaryCard}>
@@ -343,7 +350,10 @@ export const StoreSetupScreen: React.FC = () => {
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.createButtonText}>🚀 Launch Dukaan</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <Feather name="check" size={16} color="#FFFFFF" />
+                    <Text style={styles.createButtonText}>Launch Dukaan</Text>
+                  </View>
                 )}
               </TouchableOpacity>
             )}
@@ -392,7 +402,7 @@ const styles = StyleSheet.create({
   quickFillText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#10B981',
+    color: '#7367F0',
   },
   progressTrack: {
     height: 6,
@@ -403,20 +413,23 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
   },
   errorBox: {
-    backgroundColor: '#FEF2F2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FCE4E4',
     borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 12,
-    padding: 12,
+    borderColor: '#EA5455',
+    borderRadius: 8,
+    padding: 10,
     marginBottom: 16,
   },
   errorText: {
-    color: '#DC2626',
+    color: '#EA5455',
     fontSize: 13,
     fontWeight: '600',
+    flex: 1,
   },
   stepContent: {
     marginBottom: 28,
@@ -472,21 +485,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   typeCardSelected: {
-    borderColor: '#10B981',
-    backgroundColor: '#ECFDF5',
-  },
-  typeEmoji: {
-    fontSize: 32,
-    marginBottom: 8,
+    borderColor: '#7367F0',
+    backgroundColor: '#EDEBFD',
   },
   typeLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#475569',
+    color: '#6F6B7D',
     textAlign: 'center',
   },
   typeLabelSelected: {
-    color: '#065F46',
+    color: '#7367F0',
     fontWeight: '700',
   },
   summaryCard: {
@@ -533,9 +542,14 @@ const styles = StyleSheet.create({
   nextButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#10B981',
+    borderRadius: 8,
+    backgroundColor: '#7367F0',
     alignItems: 'center',
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 3,
   },
   nextButtonText: {
     color: '#FFFFFF',
@@ -545,19 +559,19 @@ const styles = StyleSheet.create({
   createButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#059669',
+    borderRadius: 8,
+    backgroundColor: '#7367F0',
     alignItems: 'center',
-    shadowColor: '#059669',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
     elevation: 3,
   },
   createButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
+    fontSize: 15,
+    fontWeight: '700',
   },
   disabledBtn: {
     opacity: 0.6,

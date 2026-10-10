@@ -21,6 +21,8 @@ import { useAuthStore } from '../../store/authStore';
 import { fetchProductByBarcode, ScannedProductMetadata } from '../../services/openFoodFacts';
 import { addProduct } from '../../services/product';
 import { Product } from '@kirana-pro/shared';
+import { Feather } from '@expo/vector-icons';
+import { ToastBanner } from '../common/ToastBanner';
 
 export interface POSBarcodeScannerModalProps {
   visible: boolean;
@@ -178,7 +180,7 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
     const existing = findByBarcode(clean);
     if (existing) {
       addItem(existing, 1);
-      setLastAddedToast(`✅ Added 1x "${existing.name}" (₹${existing.sellingPrice}) to Bill!`);
+      setLastAddedToast(`Added 1x "${existing.name}" (₹${existing.sellingPrice}) to Bill`);
 
       // Resume camera after 1.8 seconds for continuous barcode gun scanning
       setTimeout(() => {
@@ -249,7 +251,7 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
 
       // Add directly to cart
       addItem(newProduct, 1);
-      setLastAddedToast(`✅ Added 1x "${newProduct.name}" (₹${newProduct.sellingPrice}) to Bill!`);
+      setLastAddedToast(`Added 1x "${newProduct.name}" (₹${newProduct.sellingPrice}) to Bill`);
       setUnrecognizedCode(null);
 
       // Resume scanning
@@ -280,7 +282,7 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
         updatedAt: new Date().toISOString(),
       };
       addItem(fallbackProd, 1);
-      setLastAddedToast(`✅ Added 1x "${fallbackProd.name}" (₹${fallbackProd.sellingPrice}) to Bill!`);
+      setLastAddedToast(`Added 1x "${fallbackProd.name}" (₹${fallbackProd.sellingPrice}) to Bill`);
       setUnrecognizedCode(null);
       setIsScanningPaused(false);
     } finally {
@@ -332,28 +334,37 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
         {/* Top Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>⚡ POS Barcode Scanner</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Feather name="maximize" size={16} color="#7367F0" />
+              <Text style={styles.headerTitle}>POS Barcode Scanner</Text>
+            </View>
             <Text style={styles.headerSub}>
               Point camera at product barcode to add to bill
             </Text>
           </View>
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Text style={styles.closeBtnText}>✕ Done</Text>
+            <Text style={styles.closeBtnText}>Done</Text>
           </TouchableOpacity>
         </View>
 
         {/* Live Cart Counter Banner */}
         <View style={styles.cartSummaryBanner}>
+          <Feather name="shopping-bag" size={14} color="#7367F0" style={{ marginRight: 6 }} />
           <Text style={styles.cartSummaryText}>
-            🛒 Current Bill: <Text style={{ fontWeight: '800' }}>{items.length} items</Text> •{' '}
-            <Text style={{ fontWeight: '800', color: '#059669' }}>₹{totals.grandTotal.toFixed(2)}</Text>
+            Current Bill: <Text style={{ fontWeight: '800' }}>{items.length} items</Text> •{' '}
+            <Text style={{ fontWeight: '800', color: '#28C76F' }}>₹{totals.grandTotal.toFixed(2)}</Text>
           </Text>
         </View>
 
         {/* Success Added Toast Banner */}
         {lastAddedToast && (
-          <View style={styles.successToast}>
-            <Text style={styles.successToastText}>{lastAddedToast}</Text>
+          <View style={{ marginHorizontal: 20, marginBottom: 12 }}>
+            <ToastBanner
+              type="success"
+              title="Added to Bill"
+              message={lastAddedToast}
+              onClose={() => setLastAddedToast(null)}
+            />
           </View>
         )}
 
@@ -403,20 +414,22 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
                 <View style={styles.cornerBR} />
                 <View style={styles.redLaserLine} />
                 <View style={styles.targetBadge}>
-                  <Text style={styles.targetBadgeText}>🎯 Keep Barcode Inside Box (बारकोड यहाँ रखें)</Text>
+                  <Feather name="crosshair" size={13} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.targetBadgeText}>Keep Barcode Inside Box (बारकोड यहाँ रखें)</Text>
                 </View>
               </View>
 
               {/* Stop Camera Button */}
               <TouchableOpacity style={styles.stopCameraBtn} onPress={handleStopCamera}>
-                <Text style={styles.stopCameraBtnText}>✕ Close Camera</Text>
+                <Feather name="x" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
+                <Text style={styles.stopCameraBtnText}>Close Camera</Text>
               </TouchableOpacity>
             </View>
           ) : (
             /* Standby Card with Click to Start CTA */
             <View style={styles.standbyCard}>
               <View style={styles.standbyIconBadge}>
-                <Text style={styles.standbyIcon}>📷</Text>
+                <Feather name="camera" size={28} color="#7367F0" />
               </View>
               <Text style={styles.standbyTitle}>Camera Barcode Scanner</Text>
               <Text style={styles.standbyDesc}>
@@ -425,16 +438,19 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
 
               {cameraError ? (
                 <View style={styles.cameraErrorBanner}>
-                  <Text style={styles.cameraErrorText}>⚠️ {cameraError}</Text>
+                  <Feather name="alert-circle" size={14} color="#EA5455" style={{ marginRight: 6 }} />
+                  <Text style={styles.cameraErrorText}>{cameraError}</Text>
                 </View>
               ) : null}
 
               <TouchableOpacity style={styles.startScanCTA} onPress={handleStartCamera}>
-                <Text style={styles.startScanCTAText}>📸 Click to Start Camera Scanner</Text>
+                <Feather name="camera" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
+                <Text style={styles.startScanCTAText}>Start Camera Scanner</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.galleryCTA} onPress={handlePickBarcodeImage}>
-                <Text style={styles.galleryCTAText}>🖼️ Or Pick Photo from Gallery</Text>
+                <Feather name="image" size={16} color="#6F6B7D" style={{ marginRight: 8 }} />
+                <Text style={styles.galleryCTAText}>Pick Photo from Gallery</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -467,7 +483,8 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
                 }
               }}
             >
-              <Text style={styles.addCodeBtnText}>⚡ Add to Bill</Text>
+              <Feather name="plus" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />
+              <Text style={styles.addCodeBtnText}>Add to Bill</Text>
             </TouchableOpacity>
           </View>
 
@@ -475,10 +492,10 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
           <Text style={styles.demoLabel}>Quick FMCG Demos (Click to Scan):</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.demoScroll}>
             {[
-              { name: '🍜 Maggi 70g', code: '8901058852331' },
-              { name: '🧂 Tata Salt 1kg', code: '8901030000002' },
-              { name: '🌾 Atta 5kg', code: '8901030000001' },
-              { name: '🌻 Fortune Oil 1L', code: '8906007281014' },
+              { name: 'Maggi 70g', code: '8901058852331' },
+              { name: 'Tata Salt 1kg', code: '8901030000002' },
+              { name: 'Atta 5kg', code: '8901030000001' },
+              { name: 'Fortune Oil 1L', code: '8906007281014' },
             ].map((chip) => (
               <TouchableOpacity
                 key={chip.code}
@@ -493,8 +510,9 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
           {/* Done Button */}
           <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
             <Text style={styles.doneBtnText}>
-              Done / Return to Bill (Total: ₹{totals.grandTotal.toFixed(2)}) ➔
+              Return to Bill (Total: ₹{totals.grandTotal.toFixed(2)})
             </Text>
+            <Feather name="arrow-right" size={16} color="#FFFFFF" style={{ marginLeft: 8 }} />
           </TouchableOpacity>
         </View>
 
@@ -513,7 +531,7 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
                   <Text style={styles.quickAddSub}>Barcode: {unrecognizedCode}</Text>
                 </View>
                 <TouchableOpacity onPress={() => setUnrecognizedCode(null)}>
-                  <Text style={{ fontSize: 18, color: '#94A3B8' }}>✕</Text>
+                  <Feather name="x" size={20} color="#6F6B7D" />
                 </TouchableOpacity>
               </View>
 
@@ -556,7 +574,10 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
                 {isSavingNewProduct ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.saveAndAddBtnText}>Save & Add to Bill ➔</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.saveAndAddBtnText}>Save & Add to Bill</Text>
+                    <Feather name="arrow-right" size={16} color="#FFFFFF" />
+                  </View>
                 )}
               </TouchableOpacity>
             </View>
@@ -570,76 +591,86 @@ export const POSBarcodeScannerModal: React.FC<POSBarcodeScannerModalProps> = ({
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 50 : 16,
     paddingBottom: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8F0',
+    borderBottomColor: '#DBDADE',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   headerSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   closeBtn: {
-    backgroundColor: '#0F172A',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 14,
+    backgroundColor: '#F1F0F5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
   },
   closeBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: '#6F6B7D',
+    fontWeight: '600',
     fontSize: 13,
   },
   cartSummaryBanner: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#DDF6E8',
     paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#A7F3D0',
+    borderBottomColor: 'rgba(40, 199, 111, 0.25)',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   cartSummaryText: {
     fontSize: 13,
-    color: '#065F46',
+    color: '#28C76F',
     fontWeight: '600',
   },
   successToast: {
-    backgroundColor: '#059669',
+    backgroundColor: '#7367F0',
     marginHorizontal: 16,
     marginTop: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   successToastText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 13,
     textAlign: 'center',
   },
   scannerWrapper: {
     flex: 1,
     margin: 16,
-    borderRadius: 20,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   activeCameraContainer: {
     flex: 1,
     backgroundColor: '#000000',
-    borderRadius: 20,
+    borderRadius: 12,
     overflow: 'hidden',
     position: 'relative',
     justifyContent: 'center',
@@ -648,35 +679,32 @@ const styles = StyleSheet.create({
   standbyCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#E2E8F0',
+    borderWidth: 1.5,
+    borderColor: '#DBDADE',
     borderStyle: 'dashed',
   },
   standbyIconBadge: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#ECFDF5',
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    backgroundColor: '#EDEBFD',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
   },
-  standbyIcon: {
-    fontSize: 32,
-  },
   standbyTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#2F2B3D',
     textAlign: 'center',
   },
   standbyDesc: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#6F6B7D',
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 18,
@@ -684,67 +712,76 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   startScanCTA: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 14,
+    borderRadius: 8,
     width: '100%',
     maxWidth: 300,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#10B981',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
     marginBottom: 10,
   },
   startScanCTAText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 15,
+    fontWeight: '700',
+    fontSize: 14,
   },
   galleryCTA: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: 8,
     width: '100%',
     maxWidth: 300,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
   },
   galleryCTAText: {
-    color: '#334155',
-    fontWeight: '700',
+    color: '#6F6B7D',
+    fontWeight: '600',
     fontSize: 13,
   },
   stopCameraBtn: {
     position: 'absolute',
     top: 14,
     right: 14,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: 'rgba(47, 43, 61, 0.85)',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
     zIndex: 30,
   },
   stopCameraBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   cameraErrorBanner: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
+    backgroundColor: '#FCE4E4',
+    borderColor: 'rgba(234, 84, 85, 0.25)',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 10,
     marginBottom: 14,
     width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cameraErrorText: {
-    color: '#DC2626',
+    color: '#EA5455',
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
@@ -771,7 +808,7 @@ const styles = StyleSheet.create({
     height: 28,
     borderTopWidth: 4,
     borderLeftWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderTopLeftRadius: 10,
   },
   cornerTR: {
@@ -782,7 +819,7 @@ const styles = StyleSheet.create({
     height: 28,
     borderTopWidth: 4,
     borderRightWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderTopRightRadius: 10,
   },
   cornerBL: {
@@ -793,7 +830,7 @@ const styles = StyleSheet.create({
     height: 28,
     borderBottomWidth: 4,
     borderLeftWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderBottomLeftRadius: 10,
   },
   cornerBR: {
@@ -804,15 +841,15 @@ const styles = StyleSheet.create({
     height: 28,
     borderBottomWidth: 4,
     borderRightWidth: 4,
-    borderColor: '#10B981',
+    borderColor: '#7367F0',
     borderBottomRightRadius: 10,
   },
   redLaserLine: {
     width: '90%',
     height: 3,
-    backgroundColor: '#EF4444',
+    backgroundColor: '#7367F0',
     borderRadius: 2,
-    shadowColor: '#EF4444',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 8,
@@ -821,17 +858,19 @@ const styles = StyleSheet.create({
   targetBadge: {
     position: 'absolute',
     bottom: -38,
-    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    backgroundColor: 'rgba(47, 43, 61, 0.88)',
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   targetBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
     textAlign: 'center',
   },
   searchingBadge: {
@@ -840,14 +879,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    shadowColor: '#000',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
     elevation: 4,
   },
   searchingText: {
@@ -857,17 +896,17 @@ const styles = StyleSheet.create({
   },
   bottomSection: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 20,
     borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
+    borderTopColor: '#DBDADE',
   },
   sectionLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#475569',
+    color: '#6F6B7D',
     marginBottom: 6,
   },
   inputRow: {
@@ -876,19 +915,20 @@ const styles = StyleSheet.create({
   },
   manualInput: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#DBDADE',
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   addCodeBtn: {
-    backgroundColor: '#10B981',
-    borderRadius: 12,
+    backgroundColor: '#7367F0',
+    borderRadius: 8,
     paddingHorizontal: 16,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -900,7 +940,7 @@ const styles = StyleSheet.create({
   demoLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#94A3B8',
+    color: '#A8AAAE',
     marginTop: 12,
     marginBottom: 6,
     textTransform: 'uppercase',
@@ -910,40 +950,54 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   demoChip: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 12,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
   },
   demoChipText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#334155',
+    color: '#2F2B3D',
   },
   doneBtn: {
-    backgroundColor: '#0F172A',
-    borderRadius: 14,
-    paddingVertical: 14,
+    backgroundColor: '#7367F0',
+    borderRadius: 8,
+    paddingVertical: 13,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 14,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   doneBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 14,
   },
   quickAddOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    backgroundColor: 'rgba(47, 43, 61, 0.6)',
     justifyContent: 'center',
     padding: 20,
   },
   quickAddContent: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 20,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
+    shadowColor: '#2F2B3D',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
   },
   quickAddHeader: {
     flexDirection: 'row',
@@ -952,41 +1006,47 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   quickAddTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   quickAddSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   inputLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#334155',
+    color: '#6F6B7D',
     marginBottom: 4,
   },
   textInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 10,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 14,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   saveAndAddBtn: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 16,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   saveAndAddBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 14,
   },
 });

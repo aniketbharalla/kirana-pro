@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Product, PRODUCT_CATEGORIES } from '@kirana-pro/shared';
+import { Search, Scale, Barcode, Trash2 } from 'lucide-react';
 
 export interface ProductsTableProps {
   products: Product[];
@@ -34,7 +35,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
       {/* MasterX Filter & Search Toolbar */}
       <div style={styles.filterBar}>
         <div style={styles.searchBox}>
-          <span style={styles.searchIcon}>🔍</span>
+          <Search size={16} color="#A8AAAE" style={{ marginRight: '8px' }} />
           <input
             style={styles.searchInput}
             type="text"
@@ -85,21 +86,18 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
                 const isOutOfStock = item.currentStock === 0;
                 const isLowStock = !isOutOfStock && item.currentStock <= item.minStockAlert;
 
-                let stockBg = '#ECFDF5';
-                let stockColor = '#047857';
-                let stockBorder = '1px solid rgba(16, 185, 129, 0.2)';
+                let stockBg = '#DDF6E8';
+                let stockColor = '#28C76F';
                 let stockLabel = `${item.currentStock} ${item.unit}`;
 
                 if (isOutOfStock) {
-                  stockBg = '#FEF2F2';
-                  stockColor = '#B91C1C';
-                  stockBorder = '1px solid rgba(239, 68, 68, 0.2)';
-                  stockLabel = `0 ${item.unit} (Out of Stock)`;
+                  stockBg = '#FCE4E4';
+                  stockColor = '#EA5455';
+                  stockLabel = `0 ${item.unit} (Out)`;
                 } else if (isLowStock) {
-                  stockBg = '#FFFBEB';
-                  stockColor = '#B45309';
-                  stockBorder = '1px solid rgba(245, 158, 11, 0.25)';
-                  stockLabel = `${item.currentStock} ${item.unit} (Low Stock)`;
+                  stockBg = '#FFF1E3';
+                  stockColor = '#FF9F43';
+                  stockLabel = `${item.currentStock} ${item.unit} (Low)`;
                 }
 
                 return (
@@ -111,7 +109,10 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
                           <div style={styles.hindiName}>{item.nameHindi}</div>
                         )}
                         {item.isLoose && (
-                          <span style={styles.looseBadge}>⚖️ Loose (Taraju)</span>
+                          <span style={styles.looseBadge}>
+                            <Scale size={11} color="#7367F0" />
+                            <span>Loose (Taraju)</span>
+                          </span>
                         )}
                       </div>
                     </td>
@@ -120,7 +121,10 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
                     </td>
                     <td style={styles.td}>
                       {item.barcode ? (
-                        <span style={styles.barcodeText}>📷 {item.barcode}</span>
+                        <span style={styles.barcodeText}>
+                          <Barcode size={13} color="#6F6B7D" />
+                          <span>{item.barcode}</span>
+                        </span>
                       ) : (
                         <span style={styles.mutedText}>Manual</span>
                       )}
@@ -136,10 +140,9 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
                           ...styles.stockBadge,
                           backgroundColor: stockBg,
                           color: stockColor,
-                          border: stockBorder,
                         }}
                       >
-                        {stockLabel}
+                        ● {stockLabel}
                       </span>
                     </td>
                     <td style={styles.tdGst}>{item.gstRate}%</td>
@@ -154,7 +157,7 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
                           style={styles.deleteBtn}
                           title="Delete Product"
                         >
-                          🗑️
+                          <Trash2 size={14} color="#EA5455" />
                         </button>
                       </td>
                     )}
@@ -172,15 +175,15 @@ export const ProductsTable: React.FC<ProductsTableProps> = ({ products, onDelete
 const styles: Record<string, React.CSSProperties> = {
   container: {
     backgroundColor: '#FFFFFF',
-    border: '1px solid #E2E8F0',
-    borderRadius: '16px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+    border: '1px solid #DBDADE',
+    borderRadius: '12px',
+    boxShadow: '0 2px 6px rgba(47, 43, 61, 0.05)',
     overflow: 'hidden',
     fontFamily: 'var(--font-body)',
   },
   filterBar: {
-    padding: '16px 20px',
-    borderBottom: '1px solid #E2E8F0',
+    padding: '14px 18px',
+    borderBottom: '1px solid #DBDADE',
     backgroundColor: '#FFFFFF',
     display: 'flex',
     gap: '12px',
@@ -190,16 +193,12 @@ const styles: Record<string, React.CSSProperties> = {
   searchBox: {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #E2E8F0',
-    borderRadius: '12px',
-    padding: '8px 14px',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    borderRadius: '8px',
+    padding: '7px 12px',
     flex: 1,
     minWidth: '240px',
-  },
-  searchIcon: {
-    marginRight: '8px',
-    fontSize: '14px',
   },
   searchInput: {
     border: 'none',
@@ -208,16 +207,16 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     fontSize: '13px',
     fontWeight: 500,
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   select: {
-    backgroundColor: '#F8FAFC',
-    border: '1px solid #E2E8F0',
-    borderRadius: '12px',
-    padding: '8px 14px',
+    backgroundColor: '#F8F7FA',
+    border: '1px solid #DBDADE',
+    borderRadius: '8px',
+    padding: '7px 12px',
     fontSize: '13px',
-    fontWeight: 600,
-    color: '#334155',
+    fontWeight: 500,
+    color: '#4B465C',
     outline: 'none',
     cursor: 'pointer',
   },
@@ -230,28 +229,28 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'left',
   },
   thRow: {
-    backgroundColor: '#F8FAFC',
-    borderBottom: '1px solid #E2E8F0',
+    backgroundColor: '#F8F7FA',
+    borderBottom: '1px solid #DBDADE',
   },
   th: {
-    padding: '12px 20px',
+    padding: '12px 18px',
     fontSize: '11px',
-    fontWeight: 800,
-    color: '#64748B',
+    fontWeight: 700,
+    color: '#6F6B7D',
     letterSpacing: '0.05em',
     textTransform: 'uppercase',
   },
   tr: {
-    borderBottom: '1px solid #F1F5F9',
+    borderBottom: '1px solid #F1F0F5',
     transition: 'background-color 0.12s ease',
   },
   td: {
-    padding: '14px 20px',
+    padding: '12px 18px',
     fontSize: '13px',
-    color: '#334155',
+    color: '#4B465C',
   },
   tdName: {
-    padding: '14px 20px',
+    padding: '12px 18px',
   },
   nameBlock: {
     display: 'flex',
@@ -260,93 +259,100 @@ const styles: Record<string, React.CSSProperties> = {
   },
   mainName: {
     fontSize: '14px',
-    fontWeight: 700,
-    color: '#0F172A',
+    fontWeight: 600,
+    color: '#2F2B3D',
     letterSpacing: '-0.01em',
   },
   hindiName: {
     fontSize: '12px',
-    color: '#64748B',
+    color: '#A8AAAE',
   },
   looseBadge: {
-    display: 'inline-block',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
     fontSize: '10px',
     fontWeight: 700,
-    color: '#4F46E5',
-    backgroundColor: '#EEF2FF',
-    border: '1px solid rgba(79, 70, 229, 0.2)',
-    padding: '2px 8px',
-    borderRadius: '6px',
-    marginTop: '4px',
+    color: '#7367F0',
+    backgroundColor: '#EDEBFD',
+    border: '1px solid rgba(115, 103, 240, 0.2)',
+    padding: '2px 7px',
+    borderRadius: '4px',
+    marginTop: '3px',
     width: 'fit-content',
   },
   catBadge: {
-    backgroundColor: '#F1F5F9',
-    color: '#475569',
-    padding: '4px 9px',
-    borderRadius: '8px',
+    backgroundColor: '#F1F0F5',
+    color: '#6F6B7D',
+    padding: '3px 8px',
+    borderRadius: '6px',
     fontSize: '12px',
-    fontWeight: 600,
+    fontWeight: 500,
   },
   barcodeText: {
     fontSize: '12px',
-    color: '#475569',
+    color: '#6F6B7D',
     fontFamily: 'monospace',
-    backgroundColor: '#F8FAFC',
-    padding: '2px 6px',
-    borderRadius: '6px',
-    border: '1px solid #E2E8F0',
+    backgroundColor: '#F8F7FA',
+    padding: '3px 6px',
+    borderRadius: '4px',
+    border: '1px solid #DBDADE',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
   },
   mutedText: {
     fontSize: '12px',
-    color: '#94A3B8',
+    color: '#A8AAAE',
   },
   tdPrice: {
-    padding: '14px 20px',
+    padding: '12px 18px',
     fontSize: '14px',
-    fontWeight: 800,
-    color: '#0F172A',
+    fontWeight: 700,
+    color: '#2F2B3D',
     fontVariantNumeric: 'tabular-nums',
   },
   tdPurchasePrice: {
-    padding: '14px 20px',
+    padding: '12px 18px',
     fontSize: '13px',
-    fontWeight: 600,
-    color: '#64748B',
+    fontWeight: 500,
+    color: '#6F6B7D',
     fontVariantNumeric: 'tabular-nums',
   },
   tdGst: {
-    padding: '14px 20px',
+    padding: '12px 18px',
     fontSize: '13px',
-    fontWeight: 700,
-    color: '#4F46E5',
+    fontWeight: 600,
+    color: '#7367F0',
   },
   unitText: {
     fontSize: '12px',
     fontWeight: 500,
-    color: '#64748B',
+    color: '#A8AAAE',
   },
   stockBadge: {
-    padding: '4px 10px',
-    borderRadius: '999px',
-    fontSize: '12px',
+    padding: '3px 8px',
+    borderRadius: '6px',
+    fontSize: '11px',
     fontWeight: 700,
     display: 'inline-block',
     fontVariantNumeric: 'tabular-nums',
   },
   emptyTd: {
-    padding: '44px 20px',
+    padding: '40px 18px',
     textAlign: 'center',
-    color: '#64748B',
+    color: '#A8AAAE',
     fontSize: '13px',
   },
   deleteBtn: {
-    background: '#FEF2F2',
-    border: '1px solid #FECACA',
+    background: '#FCE4E4',
+    border: '1px solid rgba(234, 84, 85, 0.25)',
     cursor: 'pointer',
-    fontSize: '14px',
-    padding: '6px 10px',
-    borderRadius: '8px',
+    padding: '5px 8px',
+    borderRadius: '6px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     transition: 'all 0.12s ease',
   },
 };

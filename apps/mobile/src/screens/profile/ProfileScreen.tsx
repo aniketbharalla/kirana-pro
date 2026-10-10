@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal, ActivityIndicator } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/authStore';
 import { DailyGallaScreen } from '../galla/DailyGallaScreen';
 import { GSTReportScreen } from '../gst/GSTReportScreen';
@@ -47,18 +48,18 @@ export const ProfileScreen: React.FC = () => {
       if (result.success) {
         if (result.syncedCount === 0) {
           Alert.alert(
-            'All Synced! 🟢',
+            'All Synced',
             'All products, bills, and stock records are up-to-date with the cloud.'
           );
         } else {
           Alert.alert(
-            'Cloud Sync Successful! ☁️',
+            'Cloud Sync Successful',
             `Uploaded to cloud:\n• ${result.details.products} Products\n• ${result.details.invoices} Bills\n• ${result.details.stockMoves} Stock Movements`
           );
         }
       } else {
         Alert.alert(
-          'Sync Notice ⚠️',
+          'Sync Notice',
           result.error || 'Could not sync to cloud. Data is safely stored locally on your device.'
         );
       }
@@ -79,9 +80,7 @@ export const ProfileScreen: React.FC = () => {
         {/* User Card */}
         <View style={styles.userCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user?.displayName ? user.displayName.charAt(0).toUpperCase() : '🏪'}
-            </Text>
+            <Feather name="user" size={24} color="#7367F0" />
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.displayName || 'Store Owner'}</Text>
@@ -94,10 +93,12 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Free Tier Info Banner */}
         <View style={styles.freeBanner}>
-          <Text style={styles.bannerEmoji}>🎉</Text>
+          <View style={styles.bannerIconBox}>
+            <Feather name="award" size={20} color="#7367F0" />
+          </View>
           <View style={styles.bannerContent}>
-            <Text style={styles.bannerTitle}>Kirana Pro Free Tier</Text>
-            <Text style={styles.bannerSub}>100% Free Forever • Zero Subscription</Text>
+            <Text style={styles.bannerTitle}>Kirana Pro Enterprise Tier</Text>
+            <Text style={styles.bannerSub}>Active License • Local-First Offline & Cloud Sync</Text>
           </View>
         </View>
 
@@ -105,7 +106,10 @@ export const ProfileScreen: React.FC = () => {
         <View style={styles.syncCard}>
           <View style={styles.syncHeaderRow}>
             <View>
-              <Text style={styles.syncCardTitle}>☁️ Cloud Sync (क्लाउड सिंक)</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather name="cloud" size={16} color="#7367F0" />
+                <Text style={styles.syncCardTitle}>Cloud Sync (क्लाउड सिंक)</Text>
+              </View>
               <Text style={styles.syncCardSub}>
                 Data is saved locally first. Tap below to upload to cloud.
               </Text>
@@ -116,6 +120,12 @@ export const ProfileScreen: React.FC = () => {
                 pendingSummary.total > 0 ? styles.syncBadgePending : styles.syncBadgeSuccess,
               ]}
             >
+              <Feather
+                name={pendingSummary.total > 0 ? "alert-circle" : "check-circle"}
+                size={12}
+                color={pendingSummary.total > 0 ? "#FF9F43" : "#28C76F"}
+                style={{ marginRight: 4 }}
+              />
               <Text
                 style={[
                   styles.syncBadgeText,
@@ -125,8 +135,8 @@ export const ProfileScreen: React.FC = () => {
                 ]}
               >
                 {pendingSummary.total > 0
-                  ? `🟡 ${pendingSummary.total} Local Items`
-                  : '🟢 All Synced'}
+                  ? `${pendingSummary.total} Local Items`
+                  : 'All Synced'}
               </Text>
             </View>
           </View>
@@ -140,8 +150,9 @@ export const ProfileScreen: React.FC = () => {
             </View>
           ) : (
             <View style={styles.syncedBox}>
+              <Feather name="check" size={14} color="#28C76F" style={{ marginRight: 6 }} />
               <Text style={styles.syncedText}>
-                ✓ Dukaan data is safely synced with the cloud.
+                Dukaan data is safely synced with the cloud.
               </Text>
             </View>
           )}
@@ -155,7 +166,10 @@ export const ProfileScreen: React.FC = () => {
             {syncing ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <Text style={styles.syncButtonText}>☁️ Sync with Cloud (क्लाउड से सिंक करें)</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Feather name="upload-cloud" size={16} color="#FFFFFF" />
+                <Text style={styles.syncButtonText}>Sync with Cloud (क्लाउड से सिंक करें)</Text>
+              </View>
             )}
           </TouchableOpacity>
         </View>
@@ -174,25 +188,25 @@ export const ProfileScreen: React.FC = () => {
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Taraju Calculator</Text>
-            <Text style={[styles.infoValue, { color: colors.primary }]}>Active</Text>
+            <Text style={styles.infoLabel}>Taraju Scale Calculator</Text>
+            <Text style={[styles.infoValue, { color: '#7367F0' }]}>Active</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Barcode Lookup</Text>
-            <Text style={[styles.infoValue, { color: colors.primary }]}>Open Food Facts Free API</Text>
+            <Text style={[styles.infoValue, { color: '#7367F0' }]}>Open Food Facts API</Text>
           </View>
         </View>
 
         {/* Store Tools & Galla */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>Dukaan Tools & Galla</Text>
+          <Text style={styles.sectionHeader}>Dukaan Tools & Management</Text>
           <TouchableOpacity
             style={styles.gallaTile}
             onPress={() => setShowGallaModal(true)}
           >
             <View style={styles.gallaIconBg}>
-              <Text style={{ fontSize: 24 }}>💰</Text>
+              <Feather name="dollar-sign" size={20} color="#7367F0" />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.gallaTileTitle}>Daily Galla (दैनिक गल्ला)</Text>
@@ -200,7 +214,7 @@ export const ProfileScreen: React.FC = () => {
                 Morning cash opening & night drawer closing settlement
               </Text>
             </View>
-            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#6F6B7D" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -210,8 +224,8 @@ export const ProfileScreen: React.FC = () => {
             style={styles.gallaTile}
             onPress={() => setShowGSTModal(true)}
           >
-            <View style={[styles.gallaIconBg, { backgroundColor: '#FEF3C7' }]}>
-              <Text style={{ fontSize: 24 }}>🏛️</Text>
+            <View style={[styles.gallaIconBg, { backgroundColor: '#EDEBFD' }]}>
+              <Feather name="file-text" size={20} color="#7367F0" />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.gallaTileTitle}>GST Reports & GSTR-1 (जीएसटी रिपोर्ट)</Text>
@@ -219,7 +233,7 @@ export const ProfileScreen: React.FC = () => {
                 GSTR-1 JSON return export, HSN summary & CA accountant reports
               </Text>
             </View>
-            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#6F6B7D" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -229,8 +243,8 @@ export const ProfileScreen: React.FC = () => {
             style={styles.gallaTile}
             onPress={() => setShowCounterModal(true)}
           >
-            <View style={[styles.gallaIconBg, { backgroundColor: '#DCFCE7' }]}>
-              <Text style={{ fontSize: 24 }}>🏁</Text>
+            <View style={[styles.gallaIconBg, { backgroundColor: '#EDEBFD' }]}>
+              <Feather name="clock" size={20} color="#7367F0" />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.gallaTileTitle}>Counter Shifts & Register (काउंटर व शिफ्ट)</Text>
@@ -238,7 +252,7 @@ export const ProfileScreen: React.FC = () => {
                 Opening drawer float, cashier sales tally & shift handover
               </Text>
             </View>
-            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#6F6B7D" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -248,8 +262,8 @@ export const ProfileScreen: React.FC = () => {
             style={styles.gallaTile}
             onPress={() => setShowStaffModal(true)}
           >
-            <View style={[styles.gallaIconBg, { backgroundColor: '#EFF6FF' }]}>
-              <Text style={{ fontSize: 24 }}>🧑‍💼</Text>
+            <View style={[styles.gallaIconBg, { backgroundColor: '#EDEBFD' }]}>
+              <Feather name="users" size={20} color="#7367F0" />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.gallaTileTitle}>Staff & Cashier PINs (स्टाफ व पिन)</Text>
@@ -257,7 +271,7 @@ export const ProfileScreen: React.FC = () => {
                 4-digit login PINs, staff directory & role permissions
               </Text>
             </View>
-            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#6F6B7D" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -267,8 +281,8 @@ export const ProfileScreen: React.FC = () => {
             style={styles.gallaTile}
             onPress={() => setShowHardwareModal(true)}
           >
-            <View style={[styles.gallaIconBg, { backgroundColor: '#F3E8FF' }]}>
-              <Text style={{ fontSize: 24 }}>🖨️</Text>
+            <View style={[styles.gallaIconBg, { backgroundColor: '#EDEBFD' }]}>
+              <Feather name="printer" size={20} color="#7367F0" />
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.gallaTileTitle}>Hardware & Printers (हार्डवेयर व तराजू)</Text>
@@ -276,7 +290,7 @@ export const ProfileScreen: React.FC = () => {
                 58mm/80mm thermal receipt printer, drawer kick & digital scale
               </Text>
             </View>
-            <Text style={{ fontSize: 18, color: colors.primary }}>➔</Text>
+            <Feather name="chevron-right" size={18} color="#6F6B7D" />
           </TouchableOpacity>
         </View>
 
@@ -289,7 +303,8 @@ export const ProfileScreen: React.FC = () => {
                 style={styles.modalCloseBtn}
                 onPress={() => setShowGallaModal(false)}
               >
-                <Text style={styles.modalCloseText}>✕ Close</Text>
+                <Feather name="x" size={16} color="#6F6B7D" />
+                <Text style={styles.modalCloseText}>Close</Text>
               </TouchableOpacity>
             </View>
             <DailyGallaScreen />
@@ -305,7 +320,8 @@ export const ProfileScreen: React.FC = () => {
                 style={styles.modalCloseBtn}
                 onPress={() => setShowGSTModal(false)}
               >
-                <Text style={styles.modalCloseText}>✕ Close</Text>
+                <Feather name="x" size={16} color="#6F6B7D" />
+                <Text style={styles.modalCloseText}>Close</Text>
               </TouchableOpacity>
             </View>
             <GSTReportScreen />
@@ -321,7 +337,8 @@ export const ProfileScreen: React.FC = () => {
                 style={styles.modalCloseBtn}
                 onPress={() => setShowCounterModal(false)}
               >
-                <Text style={styles.modalCloseText}>✕ Close</Text>
+                <Feather name="x" size={16} color="#6F6B7D" />
+                <Text style={styles.modalCloseText}>Close</Text>
               </TouchableOpacity>
             </View>
             <CounterShiftScreen />
@@ -337,7 +354,8 @@ export const ProfileScreen: React.FC = () => {
                 style={styles.modalCloseBtn}
                 onPress={() => setShowStaffModal(false)}
               >
-                <Text style={styles.modalCloseText}>✕ Close</Text>
+                <Feather name="x" size={16} color="#6F6B7D" />
+                <Text style={styles.modalCloseText}>Close</Text>
               </TouchableOpacity>
             </View>
             <StaffManagementScreen />
@@ -353,7 +371,8 @@ export const ProfileScreen: React.FC = () => {
                 style={styles.modalCloseBtn}
                 onPress={() => setShowHardwareModal(false)}
               >
-                <Text style={styles.modalCloseText}>✕ Close</Text>
+                <Feather name="x" size={16} color="#6F6B7D" />
+                <Text style={styles.modalCloseText}>Close</Text>
               </TouchableOpacity>
             </View>
             <PrinterSettingsScreen />
@@ -362,7 +381,7 @@ export const ProfileScreen: React.FC = () => {
 
         {/* App Version Info */}
         <View style={styles.appInfo}>
-          <Text style={styles.versionText}>Kirana Pro v3.0.0 (Phase 3)</Text>
+          <Text style={styles.versionText}>Kirana Pro Enterprise v3.0.0</Text>
           <Text style={styles.copyrightText}>Designed for Indian Kirana Dukaan Owners</Text>
         </View>
 
@@ -372,7 +391,8 @@ export const ProfileScreen: React.FC = () => {
           activeOpacity={0.85}
           onPress={handleSignOut}
         >
-          <Text style={styles.signOutText}>🚪 Sign Out of Dukaan</Text>
+          <Feather name="log-out" size={16} color="#EA5455" style={{ marginRight: 8 }} />
+          <Text style={styles.signOutText}>Sign Out of Dukaan</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -382,75 +402,78 @@ export const ProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   scroll: {
-    padding: 20,
+    padding: 16,
   },
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 16,
+    borderColor: '#DBDADE',
+    marginBottom: 14,
+    shadowColor: '#2F2B3D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: '#ECFDF5',
+    width: 52,
+    height: 52,
+    borderRadius: 10,
+    backgroundColor: '#EDEBFD',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 14,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  avatarText: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#059669',
   },
   userInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   userPhone: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   badge: {
     alignSelf: 'flex-start',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EDEBFD',
     borderRadius: 6,
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     marginTop: 6,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#475569',
+    color: '#7367F0',
   },
   freeBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-    marginBottom: 16,
+    borderColor: '#DBDADE',
+    marginBottom: 14,
   },
-  bannerEmoji: {
-    fontSize: 24,
+  bannerIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 8,
+    backgroundColor: '#EDEBFD',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
   bannerContent: {
@@ -459,45 +482,52 @@ const styles = StyleSheet.create({
   bannerTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#065F46',
+    color: '#2F2B3D',
   },
   bannerSub: {
     fontSize: 12,
-    color: '#047857',
+    color: '#6F6B7D',
     marginTop: 2,
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 20,
+    borderColor: '#DBDADE',
+    marginBottom: 16,
+    shadowColor: '#2F2B3D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   sectionHeader: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 12,
+    color: '#2F2B3D',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 14,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   infoLabel: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#6F6B7D',
   },
   infoValue: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#0F172A',
+    color: '#2F2B3D',
   },
   divider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F1F0F5',
   },
   appInfo: {
     alignItems: 'center',
@@ -506,56 +536,58 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: '#A8AAAE',
   },
   copyrightText: {
     fontSize: 11,
-    color: '#CBD5E1',
+    color: '#A8AAAE',
     marginTop: 2,
   },
   signOutButton: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: '#FCE4E4',
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 10,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: 'rgba(234, 84, 85, 0.25)',
     marginTop: 8,
     marginBottom: 30,
   },
   signOutText: {
-    color: '#DC2626',
-    fontSize: 15,
+    color: '#EA5455',
+    fontSize: 14,
     fontWeight: '700',
   },
   gallaTile: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   gallaIconBg: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#FEF3C7',
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: '#EDEBFD',
     alignItems: 'center',
     justifyContent: 'center',
   },
   gallaTileTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: colors.text,
+    color: '#2F2B3D',
   },
   gallaTileSubtitle: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: '#6F6B7D',
     marginTop: 2,
   },
   modalOverlay: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#DBDADE',
     padding: 16,
     marginBottom: 16,
   },
@@ -566,35 +598,38 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+    borderBottomColor: '#F1F0F5',
   },
   modalTitle: {
     fontSize: 16,
-    fontWeight: '800',
-    color: colors.text,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   modalCloseBtn: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#F1F0F5',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   modalCloseText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: colors.textSecondary,
+    fontWeight: '600',
+    color: '#6F6B7D',
   },
   syncCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    borderColor: '#DBDADE',
+    marginBottom: 16,
+    shadowColor: '#2F2B3D',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 3,
+    shadowRadius: 6,
     elevation: 2,
   },
   syncHeaderRow: {
@@ -604,85 +639,89 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   syncCardTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#2F2B3D',
   },
   syncCardSub: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6F6B7D',
     marginTop: 2,
     maxWidth: 210,
   },
   syncBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
   syncBadgePending: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FFF1E3',
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: 'rgba(255, 159, 67, 0.3)',
   },
   syncBadgeSuccess: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#DDF6E8',
     borderWidth: 1,
-    borderColor: '#BBF7D0',
+    borderColor: 'rgba(40, 199, 111, 0.3)',
   },
   syncBadgeText: {
     fontSize: 11,
     fontWeight: '700',
   },
   syncBadgeTextPending: {
-    color: '#B45309',
+    color: '#FF9F43',
   },
   syncBadgeTextSuccess: {
-    color: '#15803D',
+    color: '#28C76F',
   },
   breakdownBox: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FFF1E3',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: 'rgba(255, 159, 67, 0.25)',
     marginBottom: 14,
   },
   breakdownText: {
     fontSize: 12,
-    color: '#92400E',
+    color: '#FF9F43',
     fontWeight: '600',
   },
   syncedBox: {
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#DDF6E8',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#DCFCE7',
+    borderColor: 'rgba(40, 199, 111, 0.25)',
     marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   syncedText: {
     fontSize: 12,
-    color: '#166534',
+    color: '#28C76F',
     fontWeight: '600',
   },
   syncButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 14,
+    backgroundColor: '#7367F0',
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 4,
   },
   syncButtonDisabled: {
     opacity: 0.6,
   },
   syncButtonText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

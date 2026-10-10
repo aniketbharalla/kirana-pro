@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Invoice } from '@kirana-pro/shared';
+import { Search, Printer, X, ArrowRight, Receipt } from 'lucide-react';
 
 export const BillsTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
   const [search, setSearch] = useState('');
@@ -30,7 +31,7 @@ export const BillsTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
       {/* Controls Bar */}
       <div style={styles.controlsBar}>
         <div style={styles.searchWrapper}>
-          <span style={styles.searchIcon}>🔍</span>
+          <Search size={16} color="#6F6B7D" style={{ marginRight: 8 }} />
           <input
             type="text"
             placeholder="Search by invoice number or customer name..."
@@ -39,6 +40,7 @@ export const BillsTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
             style={styles.searchInput}
           />
         </div>
+
 
         <div style={styles.filterPills}>
           {['all', 'cash', 'upi', 'credit'].map((mode) => (
@@ -64,7 +66,7 @@ export const BillsTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
         </div>
         <div style={styles.kpiCard}>
           <span style={styles.kpiLabel}>TOTAL BILLED AMOUNT</span>
-          <span style={{ ...styles.kpiVal, color: '#10B981' }}>
+          <span style={{ ...styles.kpiVal, color: '#28C76F' }}>
             ₹{totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </span>
         </div>
@@ -150,7 +152,7 @@ export const BillsTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
                       onClick={() => setSelectedInvoice(inv)}
                       style={styles.viewBtn}
                     >
-                      View Receipt ➔
+                      View Receipt <ArrowRight size={13} style={{ marginLeft: 4 }} />
                     </button>
                   </td>
                 </tr>
@@ -170,7 +172,7 @@ export const BillsTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
                 style={styles.closeBtn}
                 onClick={() => setSelectedInvoice(null)}
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -228,12 +230,12 @@ export const BillsTable: React.FC<{ invoices: Invoice[] }> = ({ invoices }) => {
                 Paid via {selectedInvoice.paymentMode.toUpperCase()}
               </div>
               <div style={styles.receiptDivider}>--------------------------------</div>
-              <div style={styles.receiptFooter}>धन्यवाद! फिर पधारें 🙏</div>
+              <div style={styles.receiptFooter}>धन्यवाद! फिर पधारें! Thank You!</div>
             </div>
 
             <div style={styles.modalActions}>
               <button style={styles.printBtn} onClick={handlePrint}>
-                🖨️ Print Receipt
+                <Printer size={15} style={{ marginRight: 6 }} /> Print Receipt
               </button>
               <button
                 style={styles.dismissBtn}
@@ -559,7 +561,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   printBtn: {
     flex: 1,
-    backgroundColor: '#10B981',
+    backgroundColor: '#7367F0',
     color: '#FFFFFF',
     border: 'none',
     borderRadius: '12px',
@@ -567,12 +569,15 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 700,
     fontSize: '13px',
     cursor: 'pointer',
-    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+    boxShadow: '0 4px 14px rgba(115, 103, 240, 0.38)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dismissBtn: {
-    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    color: '#555558',
-    border: 'none',
+    backgroundColor: '#F8F7FA',
+    color: '#6F6B7D',
+    border: '1px solid #DBDADE',
     borderRadius: '12px',
     padding: '12px 18px',
     fontWeight: 700,

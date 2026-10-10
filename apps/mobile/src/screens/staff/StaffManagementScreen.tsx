@@ -13,6 +13,7 @@ import {
 import { useStaffStore } from '../../store/staffStore';
 import { StaffMember, StaffRole } from '@kirana-pro/shared';
 import { colors } from '../../theme';
+import { Feather } from '@expo/vector-icons';
 
 export const StaffManagementScreen: React.FC<{ navigation?: any }> = ({ navigation }) => {
   const { staffList, activeStaff, addStaff, updateStaff, setActiveStaff } = useStaffStore();
@@ -44,7 +45,7 @@ export const StaffManagementScreen: React.FC<{ navigation?: any }> = ({ navigati
       isActive: true,
     });
 
-    Alert.alert('Staff Added! 🎉', `Added ${name} as ${role}. PIN: ${pin}`);
+    Alert.alert('Staff Added', `Added ${name} as ${role}. PIN: ${pin}`);
     setShowAddModal(false);
     setName('');
     setPhone('');
@@ -85,9 +86,11 @@ export const StaffManagementScreen: React.FC<{ navigation?: any }> = ({ navigati
             return (
               <View key={member.id} style={styles.staffItem}>
                 <View style={styles.avatar}>
-                  <Text style={{ fontSize: 20 }}>
-                    {member.role === 'owner' ? '👑' : member.role === 'manager' ? '💼' : '🧑‍💼'}
-                  </Text>
+                  <Feather
+                    name={member.role === 'owner' ? 'shield' : member.role === 'manager' ? 'briefcase' : 'user'}
+                    size={18}
+                    color="#7367F0"
+                  />
                 </View>
 
                 <View style={{ flex: 1, marginLeft: 12 }}>
@@ -102,7 +105,12 @@ export const StaffManagementScreen: React.FC<{ navigation?: any }> = ({ navigati
                   <Text style={styles.memberSub}>
                     {member.role.toUpperCase()} • Counter {member.counterAssigned || 1} • PIN: **** ({member.pin})
                   </Text>
-                  {member.phone && <Text style={styles.phoneText}>📞 {member.phone}</Text>}
+                  {member.phone && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                      <Feather name="phone" size={11} color="#6F6B7D" />
+                      <Text style={styles.phoneText}>{member.phone}</Text>
+                    </View>
+                  )}
                 </View>
 
                 <View style={styles.actionsRow}>
@@ -145,15 +153,15 @@ export const StaffManagementScreen: React.FC<{ navigation?: any }> = ({ navigati
         <View style={styles.rolesCard}>
           <Text style={styles.rolesHeader}>Role Permissions Guide</Text>
           <View style={styles.roleRow}>
-            <Text style={styles.roleName}>👑 Owner:</Text>
+            <Text style={styles.roleName}>Owner:</Text>
             <Text style={styles.roleDesc}>Full access to sales, purchase costs, reports, tax & staff</Text>
           </View>
           <View style={styles.roleRow}>
-            <Text style={styles.roleName}>💼 Manager:</Text>
+            <Text style={styles.roleName}>Manager:</Text>
             <Text style={styles.roleDesc}>Can bill, edit inventory, manage stock & view sales reports</Text>
           </View>
           <View style={styles.roleRow}>
-            <Text style={styles.roleName}>🧑‍💼 Cashier:</Text>
+            <Text style={styles.roleName}>Cashier:</Text>
             <Text style={styles.roleDesc}>High-speed barcode scanning & billing only; cost prices hidden</Text>
           </View>
         </View>
@@ -245,7 +253,10 @@ export const StaffManagementScreen: React.FC<{ navigation?: any }> = ({ navigati
                   style={[styles.btn, styles.saveBtn]}
                   onPress={handleAddStaff}
                 >
-                  <Text style={styles.saveBtnText}>Save Staff ➔</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <Feather name="check" size={14} color="#FFFFFF" />
+                    <Text style={styles.saveBtnText}>Save Staff</Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -311,8 +322,8 @@ const styles = StyleSheet.create({
   avatar: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+    backgroundColor: '#EDEBFD',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -322,7 +333,7 @@ const styles = StyleSheet.create({
     color: '#0F172A',
   },
   currentBadge: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#DDF6E8',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -330,7 +341,7 @@ const styles = StyleSheet.create({
   currentBadgeText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#15803D',
+    color: '#28C76F',
   },
   memberSub: {
     fontSize: 12,

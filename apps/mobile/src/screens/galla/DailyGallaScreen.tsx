@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useGallaStore } from '../../store/gallaStore';
 import { useAuthStore } from '../../store/authStore';
 import { saveGallaSession } from '../../services/galla';
@@ -64,15 +65,17 @@ export const DailyGallaScreen = ({ navigation }: any) => {
         ? `Surplus: ₹${diff.toFixed(2)} extra in drawer.`
         : `Shortage: ₹${Math.abs(diff).toFixed(2)} less in drawer.`;
 
-    Alert.alert('Day-End Galla Closed 🔒', diffMsg);
+    Alert.alert('Day-End Galla Closed', diffMsg);
   };
 
   if (!currentSession || currentSession.status === 'CLOSED') {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.openGallaCard}>
-          <Text style={styles.cardIcon}>💰</Text>
-          <Text style={styles.cardTitle}>Daily Galla (दैनिक गल्ला)</Text>
+          <View style={styles.cardIconCircle}>
+            <Feather name="inbox" size={36} color={colors.primary} />
+          </View>
+          <Text style={styles.cardTitle}>Daily Galla (Day Cash Drawer)</Text>
           <Text style={styles.cardDesc}>
             Start your day by recording the opening cash kept in the drawer for change (chutta).
           </Text>
@@ -87,8 +90,13 @@ export const DailyGallaScreen = ({ navigation }: any) => {
             placeholderTextColor={colors.textMuted}
           />
 
-          <TouchableOpacity style={styles.openBtn} onPress={handleOpenGalla}>
-            <Text style={styles.openBtnText}>Open Morning Galla ☀️</Text>
+          <TouchableOpacity
+            style={styles.openBtn}
+            activeOpacity={0.88}
+            onPress={handleOpenGalla}
+          >
+            <Feather name="sun" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+            <Text style={styles.openBtnText}>Open Morning Galla</Text>
           </TouchableOpacity>
         </View>
 
@@ -162,11 +170,12 @@ export const DailyGallaScreen = ({ navigation }: any) => {
 
       {/* Petty Expense Section */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>Add Cash Drawer Expense (खर्च)</Text>
+        <Text style={styles.sectionTitle}>Add Cash Drawer Expense (Kharch)</Text>
         <View style={styles.expenseRow}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
             placeholder="Amount (₹)"
+            placeholderTextColor={colors.textMuted}
             keyboardType="numeric"
             value={expenseInput}
             onChangeText={setExpenseInput}
@@ -174,6 +183,7 @@ export const DailyGallaScreen = ({ navigation }: any) => {
           <TextInput
             style={[styles.input, { flex: 2, marginBottom: 0 }]}
             placeholder="Note (Chai, Cleaning...)"
+            placeholderTextColor={colors.textMuted}
             value={expenseNote}
             onChangeText={setExpenseNote}
           />
@@ -185,7 +195,7 @@ export const DailyGallaScreen = ({ navigation }: any) => {
 
       {/* Day-End Settlement Card */}
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>Night Drawer Closing (गल्ला मिलाना)</Text>
+        <Text style={styles.sectionTitle}>Night Drawer Closing (Galla Milan)</Text>
         <Text style={styles.sectionDesc}>
           Count the physical currency notes and coins in your drawer and enter below.
         </Text>
@@ -195,6 +205,7 @@ export const DailyGallaScreen = ({ navigation }: any) => {
           style={styles.input}
           keyboardType="numeric"
           placeholder="e.g. 3850"
+          placeholderTextColor={colors.textMuted}
           value={actualCashInput}
           onChangeText={setActualCashInput}
         />
@@ -208,10 +219,10 @@ export const DailyGallaScreen = ({ navigation }: any) => {
           >
             <Text style={styles.diffBannerText}>
               {diffPreview === 0
-                ? '✓ 100% Perfect Match (₹0.00 difference)'
+                ? 'Perfect Match (₹0.00 difference)'
                 : diffPreview > 0
-                ? `▲ Surplus: ₹${diffPreview.toFixed(2)} extra in drawer`
-                : `▼ Shortage: ₹${Math.abs(diffPreview).toFixed(2)} less in drawer`}
+                ? `Surplus: ₹${diffPreview.toFixed(2)} extra in drawer`
+                : `Shortage: ₹${Math.abs(diffPreview).toFixed(2)} less in drawer`}
             </Text>
           </View>
         ) : null}
@@ -219,12 +230,18 @@ export const DailyGallaScreen = ({ navigation }: any) => {
         <TextInput
           style={[styles.input, { marginTop: 8 }]}
           placeholder="Closing notes / Remarks (optional)"
+          placeholderTextColor={colors.textMuted}
           value={closeNote}
           onChangeText={setCloseNote}
         />
 
-        <TouchableOpacity style={styles.closeBtn} onPress={handleCloseGalla}>
-          <Text style={styles.closeBtnText}>Close & Lock Day's Galla 🌙</Text>
+        <TouchableOpacity
+          style={styles.closeBtn}
+          activeOpacity={0.88}
+          onPress={handleCloseGalla}
+        >
+          <Feather name="lock" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+          <Text style={styles.closeBtnText}>Close & Lock Day's Galla</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -237,23 +254,28 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    padding: 20,
+    padding: 16,
   },
   openGallaCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 14,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
   },
-  cardIcon: {
-    fontSize: 48,
-    marginBottom: 8,
+  cardIconCircle: {
+    width: 68,
+    height: 68,
+    borderRadius: 20,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 18,
+    fontWeight: '700',
     color: colors.text,
   },
   cardDesc: {
@@ -266,88 +288,100 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     alignSelf: 'flex-start',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: colors.text,
     marginBottom: 6,
   },
   input: {
     width: '100%',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 10,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
+    paddingVertical: 10,
+    fontSize: 14,
     color: colors.text,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   openBtn: {
     width: '100%',
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
+    flexDirection: 'row',
+    backgroundColor: colors.primary, // MasterX Royal Purple
+    paddingVertical: 13,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   openBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 15,
   },
   lastClosedCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 20,
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 16,
     borderWidth: 1,
     borderColor: colors.border,
   },
   lastClosedTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: colors.text,
     marginBottom: 6,
   },
   lastClosedRow: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textSecondary,
     marginTop: 2,
   },
   activeBanner: {
-    backgroundColor: '#0F172A',
-    borderRadius: 18,
-    padding: 20,
-    marginBottom: 16,
+    backgroundColor: '#2F2B3D',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
   activeDate: {
-    color: '#94A3B8',
-    fontSize: 12,
+    color: colors.textMuted,
+    fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   expectedLabel: {
-    color: '#E2E8F0',
-    fontSize: 13,
-    marginTop: 8,
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 12,
+    marginTop: 6,
   },
   expectedAmount: {
-    color: '#F59E0B',
-    fontSize: 32,
-    fontWeight: '900',
+    color: colors.systemOrange,
+    fontSize: 28,
+    fontWeight: '800',
     marginTop: 4,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   gridItem: {
     flex: 1,
     minWidth: '45%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 12,
     borderWidth: 1,
     borderColor: colors.border,
@@ -357,28 +391,28 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   gridVal: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
     color: colors.text,
     marginTop: 4,
   },
   surplusText: {
-    color: colors.primaryDark,
+    color: colors.systemGreen,
   },
   shortageText: {
     color: colors.danger,
   },
   sectionCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: colors.border,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
     color: colors.text,
   },
   sectionDesc: {
@@ -394,42 +428,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addExpenseBtn: {
-    backgroundColor: colors.text,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   addExpenseBtnText: {
     color: '#FFFFFF',
     fontWeight: '700',
+    fontSize: 13,
   },
   diffBanner: {
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 10,
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   diffShortage: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(234, 84, 85, 0.1)',
   },
   diffSurplus: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: 'rgba(40, 199, 111, 0.1)',
   },
   diffBannerText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     textAlign: 'center',
     color: colors.text,
   },
   closeBtn: {
-    backgroundColor: '#0F172A',
-    paddingVertical: 14,
-    borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary, // MasterX Royal Purple
+    paddingVertical: 13,
+    borderRadius: 10,
     marginTop: 6,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   closeBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 15,
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

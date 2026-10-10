@@ -11,10 +11,12 @@ import {
   StatusBar,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { CustomerKhata, formatWhatsAppUdharReminder } from '@kirana-pro/shared';
-import { RecordPaymentModal } from '../../components/khata/RecordPaymentModal';
 import { useStoreStore } from '../../store/storeStore';
 import { useKhataStore } from '../../store/khataStore';
+import { RecordPaymentModal } from '../../components/khata/RecordPaymentModal';
+import { colors } from '../../theme';
 
 export const CustomerDetailScreen: React.FC = () => {
   const route = useRoute<any>();
@@ -26,6 +28,10 @@ export const CustomerDetailScreen: React.FC = () => {
   const [customer, setCustomer] = useState<CustomerKhata>(initialCustomer);
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
 
+  const storeName = store?.name || 'Kirana Pro Dukaan';
+  const upiId = '9876543210@paytm'; // Default / store UPI
+  const storePhone = '9876543210';
+
   if (!customer) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -36,33 +42,31 @@ export const CustomerDetailScreen: React.FC = () => {
     );
   }
 
-  const storeName = store?.name || 'Kirana Pro Dukaan';
-  const storeUpi = (store as any)?.upiVpa || 'kirana.pro@upi';
-
   const handleSendReminder = async () => {
     if (customer.currentBalance <= 0) {
-      Alert.alert('No Due Balance', 'This customer currently has zero pending balance.');
+      Alert.alert('No Due Balance', `${customer.name} has no outstanding balance.`);
       return;
     }
 
-    const reminderText = formatWhatsAppUdharReminder(
+    const text = formatWhatsAppUdharReminder(
       customer.name,
       customer.currentBalance,
       storeName,
-      storeUpi
+      upiId
     );
-    const cleanPhone = customer.phoneNumber.replace(/\D/g, '');
-    const url = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(reminderText)}`;
+
+    const phone = customer.phoneNumber.replace(/\D/g, '');
+    const url = `https://wa.me/91${phone}?text=${encodeURIComponent(text)}`;
 
     try {
       const supported = await Linking.canOpenURL(url);
       if (supported) {
         await Linking.openURL(url);
       } else {
-        await Linking.openURL(`https://api.whatsapp.com/send?text=${encodeURIComponent(reminderText)}`);
+        await Linking.openURL(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`);
       }
     } catch (err: any) {
-      Alert.alert('Notice', 'Could not launch WhatsApp directly.');
+      Alert.alert('Notice', 'Could not open WhatsApp directly. Reminder text generated successfully.');
     }
   };
 
@@ -74,7 +78,7 @@ export const CustomerDetailScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Customer Header Profile Card */}
         <View style={styles.profileCard}>
@@ -82,8 +86,16 @@ export const CustomerDetailScreen: React.FC = () => {
             <Text style={styles.avatarText}>{customer.name.charAt(0).toUpperCase()}</Text>
           </View>
           <Text style={styles.customerName}>{customer.name}</Text>
-          <Text style={styles.customerPhone}>📞 +91 {customer.phoneNumber}</Text>
-          {customer.address && <Text style={styles.customerAddress}>📍 {customer.address}</Text>}
+          <View style={styles.contactRow}>
+            <Feather name="phone" size={13} color={colors.textSecondary} style={{ marginRight: 5 }} />
+            <Text style={styles.customerPhone}>+91 {customer.phoneNumber}</Text>
+          </View>
+          {customer.address ? (
+            <View style={[styles.contactRow, { marginTop: 2 }]}>
+              <Feather name="map-pin" size={13} color={colors.textSecondary} style={{ marginRight: 5 }} />
+              <Text style={styles.customerAddress}>{customer.address}</Text>
+            </View>
+          ) : null}
 
           {/* Balance Banner */}
           <View
@@ -98,7 +110,7 @@ export const CustomerDetailScreen: React.FC = () => {
                 customer.currentBalance > 0 ? styles.balanceLabelDue : styles.balanceLabelClear,
               ]}
             >
-              {customer.currentBalance > 0 ? 'PENDING UDHAR (बकाया)' : 'KHATA STATUS'}
+              {customer.currentBalance > 0 ? 'PENDING UDHAR (DUE)' : 'KHATA STATUS'}
             </Text>
             <Text
               style={[
@@ -118,8 +130,8 @@ export const CustomerDetailScreen: React.FC = () => {
             activeOpacity={0.88}
             onPress={() => setPaymentModalVisible(true)}
           >
-            <Text style={styles.btnIcon}>💵</Text>
-            <Text style={styles.payBtnText}>Record Payment Received (जमा)</Text>
+            <Feather name="credit-card" size={16} color="#FFFFFF" />
+            <Text style={styles.payBtnText}>Record Payment Received (Jama)</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -127,7 +139,7 @@ export const CustomerDetailScreen: React.FC = () => {
             activeOpacity={0.88}
             onPress={handleSendReminder}
           >
-            <Text style={styles.btnIcon}>💬</Text>
+            <Feather name="share-2" size={16} color="#FFFFFF" />
             <Text style={styles.whatsAppReminderText}>Send WhatsApp Due Reminder</Text>
           </TouchableOpacity>
         </View>
@@ -151,7 +163,7 @@ export const CustomerDetailScreen: React.FC = () => {
                   <Text style={styles.txTitle}>Udhar Purchases (Debit)</Text>
                   <Text style={styles.txDate}>Store bills on credit</Text>
                 </View>
-                <Text style={styles.txDebit}>+₹{customer.currentBalance}</Text>
+                <Text style={styles.txDebit}>+₹${customer.currentBalance}</Text>
               </View>
             )}
           </View>
@@ -171,19 +183,19 @@ export const CustomerDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
   },
   scroll: {
-    padding: 18,
+    padding: 16,
     paddingBottom: 40,
   },
   profileCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 20,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -192,74 +204,77 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#ECFDF5',
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
-    borderWidth: 1.5,
-    borderColor: '#A7F3D0',
+    borderWidth: 1,
+    borderColor: colors.primaryBorder,
   },
   avatarText: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: '#065F46',
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.primary,
   },
   customerName: {
     fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: colors.text,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
   },
   customerPhone: {
     fontSize: 13,
-    color: '#64748B',
-    marginTop: 4,
+    color: colors.textSecondary,
   },
   customerAddress: {
     fontSize: 12,
-    color: '#94A3B8',
-    marginTop: 2,
+    color: colors.textMuted,
   },
   balanceBanner: {
     width: '100%',
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 14,
     alignItems: 'center',
     marginTop: 16,
   },
   balanceBannerDue: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: 'rgba(234, 84, 85, 0.08)',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: 'rgba(234, 84, 85, 0.25)',
   },
   balanceBannerClear: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primaryLight,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: colors.primaryBorder,
   },
   balanceLabel: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
   balanceLabelDue: {
-    color: '#DC2626',
+    color: colors.danger,
   },
   balanceLabelClear: {
-    color: '#065F46',
+    color: colors.primary,
   },
   balanceValue: {
-    fontSize: 28,
-    fontWeight: '900',
+    fontSize: 26,
+    fontWeight: '800',
     marginTop: 2,
   },
   balanceValueDue: {
-    color: '#DC2626',
+    color: colors.danger,
   },
   balanceValueClear: {
-    color: '#059669',
+    color: colors.primary,
   },
   actionsContainer: {
     gap: 10,
@@ -269,20 +284,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#10B981',
+    backgroundColor: colors.primary, // MasterX Royal Purple
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 12,
     gap: 8,
-    shadowColor: '#10B981',
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   payBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '800',
+    fontWeight: '700',
   },
   whatsAppReminderBtn: {
     flexDirection: 'row',
@@ -290,7 +305,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#25D366',
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 12,
     gap: 8,
     shadowColor: '#25D366',
     shadowOffset: { width: 0, height: 3 },
@@ -303,25 +318,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  btnIcon: {
-    fontSize: 16,
-  },
   ledgerSection: {
     marginTop: 6,
   },
   sectionHeader: {
     fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
+    fontWeight: '700',
+    color: colors.textSecondary,
     letterSpacing: 0.5,
     marginBottom: 8,
   },
   statementCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: colors.border,
   },
   txRow: {
     flexDirection: 'row',
@@ -329,30 +341,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: colors.background,
   },
   txLeft: {
     flex: 1,
   },
   txTitle: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#0F172A',
+    fontWeight: '600',
+    color: colors.text,
   },
   txDate: {
     fontSize: 11,
-    color: '#64748B',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   txNeutral: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#64748B',
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
   txDebit: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#DC2626',
+    fontWeight: '700',
+    color: colors.danger,
   },
   errorBox: {
     flex: 1,
@@ -361,6 +373,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#64748B',
+    color: colors.textSecondary,
   },
 });

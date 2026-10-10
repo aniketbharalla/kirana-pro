@@ -22,6 +22,7 @@ import { useStoreStore } from '../../store/storeStore';
 import { StaffMember, Store, getFirestoreDb } from '@kirana-pro/shared';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { colors, typography } from '../../theme';
+import { Feather } from '@expo/vector-icons';
 
 export const StaffLoginScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -174,7 +175,7 @@ export const StaffLoginScreen: React.FC = () => {
 
     // Alert / Toast
     Alert.alert(
-      'Shift Activated 🎉',
+      'Shift Activated',
       `Welcome ${verifiedStaff.name}!\nCounter ${counterNumber} register opened with ₹${openingCashNum} cash.`
     );
   };
@@ -220,7 +221,8 @@ export const StaffLoginScreen: React.FC = () => {
 
               {errorMessage ? (
                 <View style={styles.errorBanner}>
-                  <Text style={styles.errorText}>⚠️ {errorMessage}</Text>
+                  <Feather name="alert-circle" size={14} color="#EA5455" style={{ marginRight: 6 }} />
+                  <Text style={styles.errorText}>{errorMessage}</Text>
                 </View>
               ) : null}
 
@@ -229,7 +231,7 @@ export const StaffLoginScreen: React.FC = () => {
                 <Text style={styles.inputLabel}>Staff Mobile Number</Text>
                 <View style={styles.phoneInputRow}>
                   <View style={styles.phonePrefix}>
-                    <Text style={styles.phonePrefixText}>🇮🇳 +91</Text>
+                    <Text style={styles.phonePrefixText}>+91</Text>
                   </View>
                   <TextInput
                     style={[styles.textInput, styles.phoneTextInput]}
@@ -271,7 +273,10 @@ export const StaffLoginScreen: React.FC = () => {
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>Verify Staff PIN →</Text>
+                  <View style={styles.btnRow}>
+                    <Text style={styles.primaryButtonText}>Verify Staff PIN</Text>
+                    <Feather name="arrow-right" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                  </View>
                 )}
               </TouchableOpacity>
             </View>
@@ -280,7 +285,8 @@ export const StaffLoginScreen: React.FC = () => {
             <View style={styles.formCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardBadgeSuccess}>
-                  <Text style={styles.cardBadgeSuccessText}>✓ VERIFIED</Text>
+                  <Feather name="check" size={11} color="#28C76F" style={{ marginRight: 4 }} />
+                  <Text style={styles.cardBadgeSuccessText}>VERIFIED</Text>
                 </View>
                 <Text style={styles.cardTitle}>Open Shift Register</Text>
                 <Text style={styles.cardSubtitle}>
@@ -291,9 +297,11 @@ export const StaffLoginScreen: React.FC = () => {
               {/* Verified Staff Profile Badge */}
               <View style={styles.profileBadgeCard}>
                 <View style={styles.profileAvatar}>
-                  <Text style={styles.profileAvatarText}>
-                    {verifiedStaff.role === 'owner' ? '👑' : '🧑‍💼'}
-                  </Text>
+                  <Feather
+                    name={verifiedStaff.role === 'owner' ? 'shield' : 'user'}
+                    size={20}
+                    color="#7367F0"
+                  />
                 </View>
                 <View style={styles.profileMeta}>
                   <Text style={styles.profileName}>{verifiedStaff.name}</Text>
@@ -375,9 +383,12 @@ export const StaffLoginScreen: React.FC = () => {
                 activeOpacity={0.85}
                 onPress={handleStartShiftAndOpenPOS}
               >
-                <Text style={styles.primaryButtonText}>
-                  🚀 Start Counter Shift & Open Billing POS
-                </Text>
+                <View style={styles.btnRow}>
+                  <Feather name="play" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.primaryButtonText}>
+                    Start Counter Shift & Open Billing POS
+                  </Text>
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -394,9 +405,13 @@ export const StaffLoginScreen: React.FC = () => {
 
           {/* Footer Security Note */}
           <View style={styles.footerNoteBox}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 4 }}>
+              <Feather name="shield" size={12} color="#8E8E93" />
+              <Text style={styles.footerNoteText}>Tamper-Proof Shift Audit</Text>
+            </View>
             <Text style={styles.footerNoteText}>
-              🔒 Kirana Pro Shift Register logs opening/closing cash, cashier bills,
-              and cash discrepancies with complete tamper-proof tracking.
+              Kirana Pro Shift Register logs opening/closing cash, cashier bills,
+              and cash discrepancies with complete audit tracking.
             </Text>
           </View>
         </ScrollView>
@@ -430,13 +445,13 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#10B981',
+    color: '#7367F0',
   },
   headerTitleBox: {},
   headerEyebrow: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#10B981',
+    color: '#7367F0',
     letterSpacing: 0.8,
   },
   headerTitle: {
@@ -447,7 +462,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   quickFillCard: {
-    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+    backgroundColor: 'rgba(115, 103, 240, 0.08)',
     borderRadius: 14,
     padding: 12,
     marginBottom: 16,
@@ -515,8 +530,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   cardBadgeSuccess: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: '#E8FADF',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -525,7 +542,7 @@ const styles = StyleSheet.create({
   cardBadgeSuccessText: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#10B981',
+    color: '#28C76F',
     letterSpacing: 0.6,
   },
   cardTitle: {
@@ -541,17 +558,23 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   errorBanner: {
-    backgroundColor: '#FEF2F2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FCE4E4',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 8,
     marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#FECACA',
   },
   errorText: {
-    color: '#DC2626',
+    color: '#EA5455',
     fontSize: 12,
     fontWeight: '600',
+    flex: 1,
+  },
+  btnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   inputGroup: {
     marginBottom: 16,
@@ -568,30 +591,30 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   textInput: {
-    backgroundColor: '#F2F2F7',
-    borderRadius: 12,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#1C1C1E',
+    color: '#2F2B3D',
     borderWidth: 1,
-    borderColor: 'rgba(60, 60, 67, 0.08)',
+    borderColor: '#DBDADE',
   },
   phoneInputRow: {
     flexDirection: 'row',
     gap: 8,
   },
   phonePrefix: {
-    backgroundColor: '#E5E5EA',
-    borderRadius: 12,
+    backgroundColor: '#EDEBFD',
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
   },
   phonePrefixText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1C1C1E',
+    color: '#7367F0',
   },
   phoneTextInput: {
     flex: 1,
@@ -605,37 +628,37 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   primaryButton: {
-    backgroundColor: '#10B981',
-    borderRadius: 14,
-    paddingVertical: 15,
+    backgroundColor: '#7367F0',
+    borderRadius: 8,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: '#10B981',
+    shadowColor: '#7367F0',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
     elevation: 3,
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
   profileBadgeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    backgroundColor: '#F8F7FA',
+    borderRadius: 8,
     padding: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#DBDADE',
   },
   profileAvatar: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#ECFDF5',
+    borderRadius: 8,
+    backgroundColor: '#EDEBFD',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -658,36 +681,38 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: '700',
-    color: '#10B981',
+    color: '#7367F0',
   },
   segmentedRow: {
     flexDirection: 'row',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F8F7FA',
     padding: 3,
-    borderRadius: 12,
+    borderRadius: 8,
     gap: 4,
+    borderWidth: 1,
+    borderColor: '#DBDADE',
   },
   segmentBtn: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 6,
   },
   segmentBtnActive: {
     backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowColor: '#2F2B3D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 1,
   },
   segmentText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#8E8E93',
+    color: '#6F6B7D',
   },
   segmentTextActive: {
-    color: '#10B981',
+    color: '#7367F0',
     fontWeight: '700',
   },
   cashInputRow: {
@@ -701,7 +726,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     fontSize: 18,
     fontWeight: '700',
-    color: '#10B981',
+    color: '#7367F0',
   },
   cashTextInput: {
     flex: 1,
@@ -715,24 +740,24 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   chipPill: {
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#F8F7FA',
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: '#DBDADE',
   },
   chipPillActive: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
+    backgroundColor: '#EDEBFD',
+    borderColor: '#7367F0',
   },
   chipText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#636366',
+    color: '#6F6B7D',
   },
   chipTextActive: {
-    color: '#065F46',
+    color: '#7367F0',
     fontWeight: '700',
   },
   textBtn: {

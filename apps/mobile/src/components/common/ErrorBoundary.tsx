@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 interface Props {
   children: ReactNode;
@@ -45,17 +46,20 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <View style={styles.card}>
-            <Text style={styles.emoji}>⚠️</Text>
+            <View style={styles.iconCircle}>
+              <Feather name="alert-triangle" size={32} color="#EA5455" />
+            </View>
             <Text style={styles.title}>Something went wrong</Text>
             <Text style={styles.message}>
               {this.state.error?.message || 'An unexpected error occurred in this view.'}
             </Text>
             <TouchableOpacity
               style={styles.retryButton}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
               onPress={this.handleReset}
             >
-              <Text style={styles.retryText}>🔄 Try Again</Text>
+              <Feather name="rotate-cw" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.retryText}>Try Again</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -72,50 +76,64 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F8F7FA',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 24,
     alignItems: 'center',
     maxWidth: 400,
     width: '100%',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
+    borderColor: '#DBDADE',
+    shadowColor: '#2F2B3D',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 3,
   },
-  emoji: {
-    fontSize: 44,
-    marginBottom: 12,
+  iconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FCE4E4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   title: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '700',
+    color: '#4B465C',
     marginBottom: 8,
     textAlign: 'center',
   },
   message: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#82808B',
     textAlign: 'center',
     lineHeight: 18,
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 24,
+    backgroundColor: '#7367F0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 8,
+    shadowColor: '#7367F0',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   retryText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });
+
